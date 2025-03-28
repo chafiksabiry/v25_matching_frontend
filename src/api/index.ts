@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Rep, Gig, Match, MatchingWeights } from '../types';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5011/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://38.242.208.242:5011/api';
 
 const api = axios.create({
   baseURL: API_URL,
