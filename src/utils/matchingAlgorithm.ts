@@ -1,10 +1,8 @@
-import { Rep, Gig, Match, MatchingWeights, Skill, Industry, Language, Availability } from '../types';
-import { parseISO, isWithinInterval, areIntervalsOverlapping, format } from 'date-fns';
 
 /**
  * Calculate the matching score between a rep and a gig
  */
-export function calculateMatchScore(rep: Rep, gig: Gig, weights) {
+export function calculateMatchScore() {
   // ... function body ...
 }
 
