@@ -13,7 +13,7 @@ const matchDetailsSchema = new mongoose.Schema({
     min: 0,
     max: 1
   },
-  industryScore: {
+  categoryScore: {
     type: Number,
     required: true,
     min: 0,

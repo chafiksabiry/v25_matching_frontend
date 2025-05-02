@@ -1,17 +1,82 @@
 export interface Rep {
   _id?: string;
-  name: string;
-  experience: number; // 1-10
-  skills: Skill[];
-  industries: Industry[];
-  languages: Language[];
-  availability: Availability[];
-  timezone: string;
-  conversionRate: number; // 0-1
-  reliability: number; // 1-10
-  rating: number; // 1-5
-  completedGigs: number;
-  region: string;
+  userId: string;
+  status: string;
+  completionSteps: {
+    basicInfo: boolean;
+    experience: boolean;
+    skills: boolean;
+    languages: boolean;
+    assessment: boolean;
+  };
+  availability: {
+    days: string[];
+    timeZones: string[];
+    flexibility: string[];
+    hours: {
+      start: string;
+      end: string;
+    };
+  };
+  personalInfo: {
+    name: string;
+    location: string;
+    email: string;
+    phone: string;
+    languages: Array<{
+      language: string;
+      proficiency: string;
+      _id: string;
+    }>;
+  };
+  professionalSummary: {
+    yearsOfExperience: string;
+    currentRole: string;
+    industries: string[];
+    keyExpertise: string[];
+    notableCompanies: string[];
+    profileDescription: string;
+  };
+  skills: {
+    technical: Array<{
+      skill: string;
+      level: number;
+      details: string;
+      _id: string;
+    }>;
+    professional: Array<{
+      skill: string;
+      level: number;
+      details: string;
+      _id: string;
+    }>;
+    soft: Array<{
+      skill: string;
+      level: number;
+      details: string;
+      _id: string;
+    }>;
+    contactCenter: Array<{
+      skill: string;
+      level: number;
+      details: string;
+      _id: string;
+    }>;
+  };
+  experience: Array<{
+    title: string;
+    company: string;
+    startDate: string | Date;
+    endDate: string | Date;
+    responsibilities: string[];
+    achievements: string[];
+    _id: string;
+  }>;
+  achievements: string[];
+  lastUpdated: Date;
+  createdAt: Date;
+  updatedAt: Date;
+  __v: number;
 }
 
 export interface Gig {
@@ -20,7 +85,7 @@ export interface Gig {
   companyName: string;
   title: string;
   description: string;
-  industry: Industry;
+  category: Industry;
   requiredSkills: Skill[];
   preferredLanguages: Language[];
   requiredExperience: number; // 1-10
@@ -39,22 +104,54 @@ export interface Gig {
 }
 
 export interface Match {
-  minimumScoreApplied: number;
-  _id?: string;
-  repId: string;
-  gigId: string;
+  _id: string;
   score: number;
-  matchDetails: {
-    experienceScore: number;
-    skillsScore: number;
-    industryScore: number;
-    languageScore: number;
-    availabilityScore: number;
-    timezoneScore: number;
-    performanceScore: number;
-    regionScore: number;
+  // Propriétés pour les matches de type rep
+  personalInfo?: {
+    name: string;
+    location: string;
+    languages: Array<{
+      language: string;
+      proficiency?: string;
+      _id?: string;
+      assessmentResults?: {
+        completeness?: {
+          score: number;
+          feedback: string;
+        };
+        fluency?: {
+          score: number;
+          feedback: string;
+        };
+        proficiency?: {
+          score: number;
+          feedback: string;
+        };
+        overall?: {
+          score: number;
+          strengths?: string;
+          areasForImprovement?: string;
+        };
+        completedAt?: string;
+      };
+    }>;
   };
+  professionalSummary?: {
+    currentRole: string;
+    yearsOfExperience: string;
+    industries?: string[];
+    keyExpertise?: string[];
+  };
+  // Propriétés pour les matches de type gig
+  title?: string;
+  category?: string;
+  requiredExperience?: number;
+  preferredLanguages?: string[];
+  // Propriétés communes
   status?: 'pending' | 'accepted' | 'rejected' | 'completed';
+  createdAt?: string;
+  updatedAt?: string;
+  __v?: number;
 }
 
 export type Skill = 

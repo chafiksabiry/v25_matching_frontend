@@ -91,7 +91,7 @@ export const findMatchesForGig = async (
   weights: MatchingWeights, 
   limit: number = 10
 ): Promise<Match[]> => {
-  const response = await api.post(`/matches/gig/${gigId}/matches`, { weights, limit });
+  const response = await api.post(`/matches/gig/${gigId}`, { weights, limit });
   return response.data;
 };
 
@@ -100,7 +100,7 @@ export const findGigsForRep = async (
   weights: MatchingWeights, 
   limit: number = 10
 ): Promise<Match[]> => {
-  const response = await api.post(`/matches/rep/${repId}/gigs`, { weights, limit });
+  const response = await api.post(`/matches/rep/${repId}`, { weights, limit });
   return response.data;
 };
 

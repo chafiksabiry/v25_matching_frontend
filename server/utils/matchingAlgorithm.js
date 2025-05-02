@@ -5,7 +5,7 @@ export function calculateMatchScore(rep, gig, weights) {
   // Calculate individual scores
   const experienceScore = calculateExperienceScore(rep.experience, gig.requiredExperience);
   const skillsScore = calculateSkillsScore(rep.skills, gig.requiredSkills);
-  const industryScore = calculateIndustryScore(rep.industries, gig.industry);
+  const categoryScore = calculateCategoryScore(rep.industries, gig.category);
   const languageScore = calculateLanguageScore(rep.languages, gig.preferredLanguages);
   const availabilityScore = calculateAvailabilityScore(rep.availability, gig.duration);
   const timezoneScore = calculateTimezoneScore(rep.timezone, gig.timezone);
@@ -15,7 +15,7 @@ export function calculateMatchScore(rep, gig, weights) {
   // Apply weights to individual scores
   const weightedExperienceScore = experienceScore * weights.experience;
   const weightedSkillsScore = skillsScore * weights.skills;
-  const weightedIndustryScore = industryScore * weights.industry;
+  const weightedCategoryScore = categoryScore * weights.industry;
   const weightedLanguageScore = languageScore * weights.language;
   const weightedAvailabilityScore = availabilityScore * weights.availability;
   const weightedTimezoneScore = timezoneScore * weights.timezone;
@@ -26,7 +26,7 @@ export function calculateMatchScore(rep, gig, weights) {
   const totalScore = 
     weightedExperienceScore + 
     weightedSkillsScore + 
-    weightedIndustryScore + 
+    weightedCategoryScore + 
     weightedLanguageScore + 
     weightedAvailabilityScore + 
     weightedTimezoneScore + 
@@ -40,7 +40,7 @@ export function calculateMatchScore(rep, gig, weights) {
     matchDetails: {
       experienceScore,
       skillsScore,
-      industryScore,
+      categoryScore,
       languageScore,
       availabilityScore,
       timezoneScore,
@@ -80,10 +80,12 @@ function calculateSkillsScore(repSkills, requiredSkills) {
 }
 
 /**
- * Calculate industry score based on rep's industry experience vs. gig's industry
+ * Calculate category score based on rep's industries and gig's category
  */
-function calculateIndustryScore(repIndustries, gigIndustry) {
-  return repIndustries.includes(gigIndustry) ? 1 : 0;
+function calculateCategoryScore(repIndustries, gigCategory) {
+  if (!repIndustries || !gigCategory) return 0;
+  if (!Array.isArray(repIndustries)) return 0;
+  return repIndustries.includes(gigCategory) ? 1 : 0;
 }
 
 /**

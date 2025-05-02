@@ -19,7 +19,7 @@ const gigSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  industry: {
+  category: {
     type: String,
     required: true,
     enum: [

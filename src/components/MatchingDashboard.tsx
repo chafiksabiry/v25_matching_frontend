@@ -27,39 +27,52 @@ const MatchingDashboard: React.FC = () => {
   const [showWeights, setShowWeights] = useState(false);
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const [itemsPerPage, setItemsPerPage] = useState(5);
   
+  const resultsTableRef = React.useRef<HTMLDivElement>(null);
+
+  const scrollToResults = () => {
+    if (resultsTableRef.current) {
+      resultsTableRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  const handleGigSelect = (gig: Gig) => {
+    setSelectedGig(gig);
+    setTimeout(scrollToResults, 100); // Petit délai pour laisser le temps aux résultats de se charger
+  };
+
+  const handleRepSelect = (rep: Rep) => {
+    setSelectedRep(rep);
+    setTimeout(scrollToResults, 100); // Petit délai pour laisser le temps aux résultats de se charger
+  };
+
   const paginatedReps = reps.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const paginatedGigs = gigs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
   const totalPages = Math.ceil(reps.length / itemsPerPage);
 
   // Fetch reps and gigs on component mount
   useEffect(() => {
     const fetchData = async () => {
+      setInitialLoading(true);
       try {
-        setLoading(true);
-        const [repsData, gigsData] = await Promise.allSettled([
+        console.log('Fetching data...');
+        const [repsData, gigsData] = await Promise.all([
           getReps(),
           getGigs()
         ]);
-        
-        // Handle cases where one request might fail but the other succeeds
-        if (repsData.status === 'fulfilled') {
-          setReps(repsData.value.data || []);
-        } else {
-          console.error('Failed to fetch reps:', repsData.reason);
-        }
-        
-        if (gigsData.status === 'fulfilled') {
-          setGigs(gigsData.value);
-        } else {
-          console.error('Failed to fetch gigs:', gigsData.reason);
-        }
+        console.log('Reps data:', repsData);
+        console.log('Gigs data:', gigsData);
+        setReps(repsData);
+        setGigs(gigsData);
       } catch (error) {
         console.error('Error fetching data:', error);
+        setError('Failed to fetch data. Please try again.');
       } finally {
-        setLoading(false);
+        setInitialLoading(false);
       }
     };
     
@@ -69,97 +82,39 @@ const MatchingDashboard: React.FC = () => {
   // Get matches based on current selection
   useEffect(() => {
     const getMatches = async () => {
-      console.log("Starting getMatches function");
-      console.log("Current activeTab:", activeTab);
-      console.log("Selected Gig:", selectedGig);
-      console.log("Selected Rep:", selectedRep);
-      console.log("Current weights:", weights);
-
-      if (loading) {
-        console.log("Loading is true, returning early");
-        return;
-      }
+      if (initialLoading) return;
       
       try {
-        setLoading(true);
+        console.log('Getting matches...', { activeTab, selectedGig, selectedRep });
         
+        let response;
         if (activeTab === 'gigs' && selectedGig) {
-          console.log('Processing gig matching...');
-          const transformedWeights = {
-            experienceWeight: weights.experience,
-            skillsWeight: weights.skills,
-            industryWeight: weights.industry,
-            languageWeight: weights.language,
-            availabilityWeight: weights.availability,
-            timezoneWeight: weights.timezone,
-            performanceWeight: weights.performance,
-            regionWeight: weights.region
-          };
-          console.log('Transformed Weights:', transformedWeights);
-          console.log('Calling API with gigId:', selectedGig._id);
-          const response = await findMatchesForGig(selectedGig._id!, {
-            experience: weights.experience,
-            skills: weights.skills,
-            industry: weights.industry,
-            language: weights.language,
-            availability: weights.availability,
-            timezone: weights.timezone,
-            performance: weights.performance,
-            region: weights.region
-          });
-          console.log('API Response:', response);
-          
-          if (!response.matches || response.matches.length === 0) {
-            const errorMessage = `Aucun match trouvé.`;
-            console.log('Setting error:', errorMessage);
-            setError(errorMessage);
-          } else {
-            console.log('Setting matches:', response.matches);
-            setMatches(response.matches);
-          }
+          console.log('Finding matches for gig:', selectedGig);
+          response = await findMatchesForGig(selectedGig._id, weights);
+          console.log('Response from findMatchesForGig:', response);
+          setMatches(response.matches || []);
         } else if (activeTab === 'reps' && selectedRep) {
-          console.log('Processing rep matching...');
-          const transformedWeights = {
-            experienceWeight: weights.experience,
-            skillsWeight: weights.skills,
-            industryWeight: weights.industry,
-            languageWeight: weights.language,
-            availabilityWeight: weights.availability,
-            timezoneWeight: weights.timezone,
-            performanceWeight: weights.performance,
-            regionWeight: weights.region
-          };
-          console.log('Transformed Weights:', transformedWeights);
-          console.log('Calling API with repId:', selectedRep._id);
-          const response = await findGigsForRep(selectedRep._id!, weights);
-          console.log('API Response:', response);
-          
-          if (!response.matches || response.matches.length === 0) {
-            const errorMessage = `Aucun match trouvé.`;
-            console.log('Setting error:', errorMessage);
-            setError(errorMessage);
-          } else {
-            console.log('Setting matches:', response.matches);
-            setMatches(response.matches);
-          }
+          console.log('Finding matches for rep:', selectedRep);
+          response = await findGigsForRep(selectedRep._id, weights);
+          console.log('Response from findGigsForRep:', response);
+          setMatches(response.matches || []);
         } else if (activeTab === 'optimal') {
-          const matchesData = await generateOptimalMatches(weights);
-          setMatches(matchesData);
+          setLoading(true);
+          console.log('Generating optimal matches');
+          response = await generateOptimalMatches(weights);
+          console.log('Response from generateOptimalMatches:', response);
+          setMatches(response.matches || []);
+          setLoading(false);
         } else {
           setMatches([]);
         }
-        
-        setError(null);
-      } catch (err) {
-        console.error('Error in getMatches:', err);
-        setError('Failed to fetch matches. Please try again later.');
-      } finally {
-        console.log('Setting loading to false');
-        setLoading(false);
+      } catch (error) {
+        console.error('Error getting matches:', error);
+        setError('Failed to get matches. Please try again.');
+        setMatches([]);
       }
     };
     
-    console.log('useEffect triggered with:', { activeTab, selectedGig, selectedRep, weights });
     getMatches();
   }, [activeTab, selectedGig, selectedRep, weights]);
   
@@ -209,12 +164,12 @@ const MatchingDashboard: React.FC = () => {
         )}
         
         {/* Loading Indicator */}
-        {loading && (
+        {initialLoading && (
           <div className="flex justify-center items-center py-8">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
           </div>
         )}
-        
+
         {/* Weights Configuration Panel */}
         {showWeights && (
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -235,11 +190,11 @@ const MatchingDashboard: React.FC = () => {
                       {key} ({Math.round(value * 100)}%)
                     </label>
                   </div>
-                  <input 
-                    type="range" 
-                    min="0" 
-                    max="1" 
-                    step="0.05" 
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.05"
                     value={value}
                     onChange={(e) => handleWeightChange(key as keyof MatchingWeights, parseFloat(e.target.value))}
                     className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
@@ -257,7 +212,11 @@ const MatchingDashboard: React.FC = () => {
         <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
           <div className="flex border-b">
             <button 
-              className={`flex-1 py-4 px-6 text-center font-medium ${activeTab === 'gigs' ? 'bg-indigo-50 text-indigo-700 border-b-2 border-indigo-700' : 'text-gray-600 hover:bg-gray-50'}`}
+              className={`flex-1 py-4 px-6 text-center font-medium ${
+                activeTab === 'gigs' 
+                ? 'bg-indigo-600 text-white' 
+                : 'text-gray-600 hover:text-indigo-600'
+              }`}
               onClick={() => setActiveTab('gigs')}
             >
               <div className="flex items-center justify-center space-x-2">
@@ -266,7 +225,11 @@ const MatchingDashboard: React.FC = () => {
               </div>
             </button>
             <button 
-              className={`flex-1 py-4 px-6 text-center font-medium ${activeTab === 'reps' ? 'bg-indigo-50 text-indigo-700 border-b-2 border-indigo-700' : 'text-gray-600 hover:bg-gray-50'}`}
+              className={`flex-1 py-4 px-6 text-center font-medium ${
+                activeTab === 'reps' 
+                ? 'bg-indigo-600 text-white' 
+                : 'text-gray-600 hover:text-indigo-600'
+              }`}
               onClick={() => setActiveTab('reps')}
             >
               <div className="flex items-center justify-center space-x-2">
@@ -275,7 +238,11 @@ const MatchingDashboard: React.FC = () => {
               </div>
             </button>
             <button 
-              className={`flex-1 py-4 px-6 text-center font-medium ${activeTab === 'optimal' ? 'bg-indigo-50 text-indigo-700 border-b-2 border-indigo-700' : 'text-gray-600 hover:bg-gray-50'}`}
+              className={`flex-1 py-4 px-6 text-center font-medium ${
+                activeTab === 'optimal' 
+                ? 'bg-indigo-600 text-white' 
+                : 'text-gray-600 hover:text-indigo-600'
+              }`}
               onClick={() => setActiveTab('optimal')}
             >
               <div className="flex items-center justify-center space-x-2">
@@ -291,25 +258,125 @@ const MatchingDashboard: React.FC = () => {
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
             <h2 className="text-xl font-semibold text-gray-800 mb-4">Select a Gig to Find Matching Reps</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {gigs.map(gig => (
+              {paginatedGigs.map(gig => (
                 <div 
                   key={gig._id}
-                  className={`border rounded-lg p-4 cursor-pointer transition ${selectedGig?._id === gig._id ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:border-indigo-300'}`}
-                  onClick={() => setSelectedGig(gig)}
+                  className={`border rounded-lg p-4 cursor-pointer ${
+                    selectedGig?._id === gig._id 
+                    ? 'border-2 border-indigo-600 bg-indigo-50 ring-2 ring-indigo-600 ring-opacity-50' 
+                    : 'border-gray-200 hover:border-indigo-600 hover:shadow-md'
+                  }`}
+                  onClick={() => handleGigSelect(gig)}
                 >
                   <div className="flex justify-between items-start">
-                    <h3 className="font-medium text-gray-800">{gig.title}</h3>
-                    <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">{gig.industry}</span>
+                    <h3 className={`font-medium ${selectedGig?._id === gig._id ? 'text-indigo-900' : 'text-gray-800'}`}>
+                      {gig.title}
+                    </h3>
+                    <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
+                      {gig.category}
+                    </span>
                   </div>
                   <p className="text-sm text-gray-500 mt-1">{gig.companyName}</p>
                   <div className="mt-3 text-xs text-gray-600">
                     <p>Required Experience: {gig.requiredExperience}+ years</p>
-                    <p>Expected Conversion: {gig.expectedConversionRate * 100}%</p>
-                    <p>Region: {gig.targetRegion}</p>
+                    <p>Expected Conversion: {gig.expectedConversionRate ? `${(gig.expectedConversionRate * 100).toFixed(1)}%` : 'N/A'}</p>
+                    <p>Region: {gig.targetRegion || 'Any'}</p>
                   </div>
                 </div>
               ))}
             </div>
+            {/* Pagination Controls */}
+            <div className="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
+              <div className="flex flex-1 justify-between sm:hidden">
+                <button
+                  onClick={() => setCurrentPage(page => Math.max(1, page - 1))}
+                  disabled={currentPage === 1}
+                  className={`relative inline-flex items-center rounded-md border border-gray-300 px-4 py-2 text-sm font-medium ${
+                    currentPage === 1
+                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                      : 'bg-white text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  Previous
+                </button>
+                <button
+                  onClick={() => setCurrentPage(page => Math.min(totalPages, page + 1))}
+                  disabled={currentPage === totalPages}
+                  className={`relative ml-3 inline-flex items-center rounded-md border border-gray-300 px-4 py-2 text-sm font-medium ${
+                    currentPage === totalPages
+                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                      : 'bg-white text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  Next
+                </button>
+              </div>
+              <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm text-gray-700">
+                    Showing <span className="font-medium">{((currentPage - 1) * itemsPerPage) + 1}</span> to{' '}
+                    <span className="font-medium">{Math.min(currentPage * itemsPerPage, activeTab === 'gigs' ? gigs.length : reps.length)}</span> of{' '}
+                    <span className="font-medium">{activeTab === 'gigs' ? gigs.length : reps.length}</span> results
+                  </p>
+                </div>
+                <div>
+                  <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                    <button
+                      onClick={() => setCurrentPage(page => Math.max(1, page - 1))}
+                      disabled={currentPage === 1}
+                      className={`relative inline-flex items-center rounded-l-md px-2 py-2 ${
+                        currentPage === 1
+                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                          : 'bg-white text-indigo-600 hover:bg-indigo-50'
+                      } border border-gray-300`}
+                    >
+                      <span className="sr-only">Previous</span>
+                      <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold ${
+                          currentPage === page
+                            ? 'z-10 bg-indigo-600 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
+                            : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:outline-offset-0'
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => setCurrentPage(page => Math.min(totalPages, page + 1))}
+                      disabled={currentPage === totalPages}
+                      className={`relative inline-flex items-center rounded-r-md px-2 py-2 ${
+                        currentPage === totalPages
+                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                          : 'bg-white text-indigo-600 hover:bg-indigo-50'
+                      } border border-gray-300`}
+                    >
+                      <span className="sr-only">Next</span>
+                      <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  </nav>
+                </div>
+              </div>
+            </div>
+            {/* Voir plus button */}
+            {/* {activeTab === 'gigs' && gigs.length > itemsPerPage && (
+              <div className="mt-4 flex justify-center">
+                <button
+                  onClick={() => setItemsPerPage(gigs.length)}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  Voir plus
+                </button>
+              </div>
+            )} */}
           </div>
         )}
 
@@ -320,77 +387,50 @@ const MatchingDashboard: React.FC = () => {
               {paginatedReps.map(rep => (
                 <div 
                   key={rep._id}
-                  className={`border rounded-lg p-4 cursor-pointer transition ${selectedRep?._id === rep._id ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:border-indigo-300'}`}
-                  onClick={() => setSelectedRep(rep)}
+                  className={`border rounded-lg p-4 cursor-pointer ${
+                    selectedRep?._id === rep._id 
+                    ? 'border-2 border-indigo-600 bg-indigo-50 ring-2 ring-indigo-600 ring-opacity-50' 
+                    : 'border-gray-200 hover:border-indigo-600 hover:shadow-md'
+                  }`}
+                  onClick={() => handleRepSelect(rep)}
                 >
                   <div className="flex justify-between items-start">
-                    <h3 className="font-medium text-gray-800">{rep.personalInfo.name}</h3>
+                    <h3 className={`font-medium ${selectedRep?._id === rep._id ? 'text-indigo-900' : 'text-gray-800'}`}>
+                      {rep.personalInfo?.name || 'No name specified'}
+                    </h3>
                     <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">
-                      {rep.status}
+                      {rep.professionalSummary?.yearsOfExperience || 'No experience specified'}
                     </span>
                   </div>
-                  <div className="mt-2 flex items-center justify-between">
-                    <div className="text-sm text-gray-600">
-                      {rep.professionalSummary.currentRole}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {new Date(rep.lastUpdated).toLocaleDateString()}
-                    </div>
-                  </div>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {rep.professionalSummary?.currentRole || 'No current role specified'}
+                  </p>
                   <div className="mt-3 text-xs text-gray-600">
-                    <div className="flex items-center space-x-2 mb-1">
-                      <span className="font-medium">Experience:</span>
-                      <span>{rep.professionalSummary.yearsOfExperience} years</span>
-                    </div>
-                    {rep.personalInfo.phone && (
-                      <div className="flex items-center space-x-2 mb-1">
-                        <span className="font-medium">Phone:</span>
-                        <span>{rep.personalInfo.phone}</span>
-                      </div>
-                    )}
-                    <div className="flex items-center space-x-2">
-                      <span className="font-medium">Region:</span>
-                      <span>{rep.region}</span>
-                    </div>
-                    <div className="flex items-center space-x-2 mt-1">
-                      <span className="font-medium">Rating:</span>
-                      <span>{rep.rating} / 5</span>
-                    </div>
+                    <p>Skills: {
+                      [
+                        ...(rep.skills?.technical || []).map(s => s.skill),
+                        ...(rep.skills?.professional || []).map(s => s.skill),
+                        ...(rep.skills?.soft || []).map(s => s.skill)
+                      ].join(', ') || 'No skills specified'
+                    }</p>
+                    <p>Industries: {rep.professionalSummary?.industries?.join(', ') || 'No industries specified'}</p>
+                    <p>Languages: {rep.personalInfo?.languages?.map(l => l.language).join(', ') || 'No languages specified'}</p>
+                    <p>Location: {rep.personalInfo?.location || 'No location specified'}</p>
                   </div>
                 </div>
               ))}
             </div>
-            
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="mt-6 flex justify-center space-x-2">
+            {/* Voir plus button */}
+            {/* {activeTab === 'reps' && reps.length > itemsPerPage && (
+              <div className="mt-4 flex justify-center">
                 <button
-                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1}
-                  className={`px-3 py-1 rounded ${
-                    currentPage === 1 
-                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                      : 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'
-                  }`}
+                  onClick={() => setItemsPerPage(reps.length)}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
-                  Previous
-                </button>
-                <span className="px-3 py-1 text-gray-600">
-                  Page {currentPage} of {totalPages}
-                </span>
-                <button
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                  disabled={currentPage === totalPages}
-                  className={`px-3 py-1 rounded ${
-                    currentPage === totalPages 
-                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                      : 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'
-                  }`}
-                >
-                  Next
+                  Voir plus
                 </button>
               </div>
-            )}
+            )} */}
           </div>
         )}
 
@@ -412,24 +452,24 @@ const MatchingDashboard: React.FC = () => {
                     switch (activeTab as TabType) {
                       case 'gigs':
                         promise = selectedGig 
-                          ? findMatchesForGig(selectedGig._id!, weights)
-                          : Promise.resolve({ data: [] });
+                          ? findMatchesForGig(selectedGig._id, weights)
+                          : Promise.resolve([]);
                         break;
                       case 'reps':
                         promise = selectedRep
-                          ? findGigsForRep(selectedRep._id!, weights)
-                          : Promise.resolve({ data: [] });
+                          ? findGigsForRep(selectedRep._id, weights)
+                          : Promise.resolve([]);
                         break;
                       case 'optimal':
                         promise = generateOptimalMatches(weights);
                         break;
                       default:
-                        promise = Promise.resolve({ data: [] });
+                        promise = Promise.resolve([]);
                     }
 
                     promise
-                      .then(response => {
-                        setMatches(response.matches || []);
+                      .then(matches => {
+                        setMatches(matches);
                       })
                       .finally(() => {
                         setLoading(false);
@@ -472,94 +512,163 @@ const MatchingDashboard: React.FC = () => {
 
         {/* Results Area */}
         {matches.length > 0 && !loading && (
-          <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            <div className="p-6 border-b">
-              <h2 className="text-xl font-semibold text-gray-800">
+          <div ref={resultsTableRef} className="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200">
+            <div className="p-6 border-b bg-gradient-to-r from-indigo-600 to-indigo-700">
+              <h2 className="text-xl font-semibold text-white">
                 {activeTab === 'gigs' 
                   ? `Top Matching Reps for "${selectedGig?.title}"`
-                  : activeTab === 'reps'
-                  ? `Best Gigs for ${selectedRep?.personalInfo.name}`
-                  : 'Optimal Rep-Gig Pairings'}
+                  : `Best Gigs for ${selectedRep?.personalInfo?.name}`}
               </h2>
-              <p className="text-gray-600 mt-1">
-                {matches.length} matches found, sorted by match score
+              <p className="text-indigo-100 mt-1">
+                {matches.length} matches found
               </p>
             </div>
             
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+                <thead className="bg-indigo-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rank</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      {activeTab === 'gigs' ? 'Rep' : 'Gig'}
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Match Score</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details</th>
+                    {activeTab === 'gigs' ? (
+                      <>
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">Name</th>
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">Location</th>
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">Current Role</th>
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">Skills</th>
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">Score</th>
+                      </>
+                    ) : (
+                      <>
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">Gig Title</th>
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">Category</th>
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">Required Experience</th>
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">Required Skills</th>
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">Score</th>
+                      </>
+                    )}
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {matches.map((match, index) => {
-                    const rep = getRepForMatch(match);
-                    const gig = getGigForMatch(match);
-                    return (
-                      <tr key={`${match.repId}-${match.gigId}`} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                          #{index + 1}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {activeTab === 'gigs' || activeTab === 'optimal' ? (
-                            <div>
-                              <div className="text-sm font-medium text-gray-900">{rep?.personalInfo.name}</div>
-                              <div className="text-sm text-gray-500">
-                                {rep?.professionalSummary.currentRole} • {rep?.region}
+                  {matches.map((match, index) => (
+                    <tr key={match._id} className={`hover:bg-indigo-50 transition-colors duration-150 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                      {activeTab === 'gigs' ? (
+                        <>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-semibold text-indigo-900">
+                              {match.personalInfo?.name}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-600">
+                              {match.personalInfo?.location}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-600">
+                              {match.professionalSummary?.currentRole}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-600">
+                              {match.professionalSummary?.keyExpertise?.join(', ')}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center space-x-4">
+                              <div className="flex-1">
+                                <div className="w-full bg-gray-100 rounded-full h-4 relative overflow-hidden">
+                                  <div 
+                                    className="absolute top-0 left-0 h-full bg-gradient-to-r from-indigo-500 to-indigo-600 transition-all duration-500 ease-out"
+                                    style={{ width: `${(match.score || 0) * 100}%` }}
+                                  >
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex items-center justify-center bg-indigo-100 rounded-lg px-3 py-1">
+                                <span className="text-base font-bold text-indigo-700">
+                                  {formatScore(match.score || 0)}
+                                </span>
                               </div>
                             </div>
-                          ) : (
-                            <div>
-                              <div className="text-sm font-medium text-gray-900">{gig?.title}</div>
-                              <div className="text-sm text-gray-500">{gig?.companyName} • {gig?.industry}</div>
+                          </td>
+                        </>
+                      ) : (
+                        <>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-semibold text-indigo-900">
+                              {match.title}
                             </div>
-                          )}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <div className="w-16 bg-gray-200 rounded-full h-2.5">
-                              <div 
-                                className="bg-indigo-600 h-2.5 rounded-full" 
-                                style={{ width: `${match.score * 100}%` }}
-                              ></div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-600">
+                              {match.category}
                             </div>
-                            <span className="ml-3 text-sm font-medium text-gray-900">
-                              {formatScore(match.score)}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          <div className="flex space-x-2">
-                            {match.matchDetails.skillsScore > 0.7 && (
-                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                                Skills Match
-                              </span>
-                            )}
-                            {match.matchDetails.industryScore > 0.7 && (
-                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                                Industry Fit
-                              </span>
-                            )}
-                            {match.matchDetails.performanceScore > 0.7 && (
-                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
-                                High Performer
-                              </span>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-600">
+                              {match.requiredExperience} years
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-600">
+                              {match.requiredSkills?.join(', ')}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center space-x-4">
+                              <div className="flex-1">
+                                <div className="w-full bg-gray-100 rounded-full h-4 relative overflow-hidden">
+                                  <div 
+                                    className="absolute top-0 left-0 h-full bg-gradient-to-r from-indigo-500 to-indigo-600 transition-all duration-500 ease-out"
+                                    style={{ width: `${(match.score || 0) * 100}%` }}
+                                  >
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex items-center justify-center bg-indigo-100 rounded-lg px-3 py-1">
+                                <span className="text-base font-bold text-indigo-700">
+                                  {formatScore(match.score || 0)}
+                                </span>
+                              </div>
+                            </div>
+                          </td>
+                        </>
+                      )}
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
+            {/* Voir plus button for matches */}
+            {matches.length > 0 && !loading && (
+              <div className="mt-4 flex justify-center">
+                <button
+                  onClick={async () => {
+                    setLoading(true);
+                    try {
+                      let response;
+                      if (activeTab === 'gigs' && selectedGig) {
+                        response = await findMatchesForGig(selectedGig._id, weights);
+                      } else if (activeTab === 'reps' && selectedRep) {
+                        response = await findGigsForRep(selectedRep._id, weights);
+                      } else if (activeTab === 'optimal') {
+                        response = await generateOptimalMatches(weights);
+                      }
+                      if (response && response.matches) {
+                        setMatches(response.matches);
+                      }
+                    } catch (error) {
+                      console.error('Error loading more matches:', error);
+                      setError('Failed to load more matches. Please try again.');
+                    } finally {
+                      setLoading(false);
+                    }
+                  }}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  Voir plus
+                </button>
+              </div>
+            )}
           </div>
         )}
 

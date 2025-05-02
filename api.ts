@@ -49,7 +49,7 @@ export const findMatchesForGig = async (gigId) => {
 
 export const findGigsForRep = async (repId) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/matches/rep/${repId}/gigs`, {
+    const response = await fetch(`${API_BASE_URL}/matches/rep/${repId}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
