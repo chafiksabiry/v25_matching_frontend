@@ -1,6 +1,6 @@
 import { Rep, Gig, Match, MatchingWeights } from './types';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://38.242.208.242:5011/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api-matching.harx.ai/api';
 
 // Fonction pour récupérer tous les reps
 export const getReps = async (): Promise<Rep[]> => {

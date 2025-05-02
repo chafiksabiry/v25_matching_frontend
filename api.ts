@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.VITE_API_URL || 'http://38.242.208.242:5011/api';
+const API_BASE_URL = process.env.VITE_API_URL || 'https://api-matching.harx.ai/api';
 
 // Reps
 export const getReps = async () => {

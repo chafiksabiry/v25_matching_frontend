@@ -7,7 +7,7 @@ RUN npm install
 
 COPY . .
 
-ENV VITE_API_URL=http://38.242.208.242:5011/api
+ENV VITE_API_URL=https://api-matching.harx.ai/api
 
 
 RUN npm run build

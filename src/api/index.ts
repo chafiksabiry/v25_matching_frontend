@@ -1,17 +1,7 @@
 import axios from 'axios';
 import { Rep, Gig, Match, MatchingWeights } from '../types';
 
-const isStandalone = import.meta.env.VITE_STANDALONE === 'true';
-let userId: string;
-let companyId: string;
-
-if (isStandalone) {
-  userId = '680a27ffefa3d29d628d0016';
-  companyId = '680bec7495ee2e5862009486';
-  console.log('API - Standalone Mode - userId:', userId, 'companyId:', companyId);
-}
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://38.242.208.242:5011/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://api-matching.harx.ai/api/';
 
 const api = axios.create({
   baseURL: API_URL,
