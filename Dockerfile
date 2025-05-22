@@ -8,6 +8,7 @@ RUN npm install
 COPY . .
 
 ENV VITE_API_URL=https://api-matching.harx.ai/api
+ENV VITE_QIANKUN=true
 
 
 RUN npm run build
