@@ -25,7 +25,7 @@ export default defineConfig(({ mode }) => {
       react({
         jsxRuntime: 'classic',
       }),
-      qiankun('app12', {
+      qiankun('app8', {
         useDevMode: true,
       }),
       removeReactRefreshScript(), // Add the script removal plugin
@@ -35,14 +35,9 @@ export default defineConfig(({ mode }) => {
       'import.meta.env': env,
     },
     server: {
-      port: 5183,
+      port: 5181,
       cors: true,
       hmr: false,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
-        'Access-Control-Allow-Headers': 'X-Requested-With, content-type, Authorization'
-      },
       fs: {
         strict: true, // Ensure static assets are correctly resolved
       },
