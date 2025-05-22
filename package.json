@@ -4,14 +4,13 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "cross-env VITE_QIANKUN=false vite",
+    "dev:standalone": "cross-env VITE_QIANKUN=false vite",
     "build": "vite build",
+    "build:qiankun": "vite build --mode qiankun",
     "lint": "eslint .",
     "preview": "vite preview",
-    "server": "node server/index.js",
-    "dev:server": "nodemon server/index.js",
-    "seed": "node server/data/seedData.js",
-    "start": "node server/index.js"
+    "server": "node server/index.js"
   },
   "dependencies": {
     "axios": "^1.6.7",
