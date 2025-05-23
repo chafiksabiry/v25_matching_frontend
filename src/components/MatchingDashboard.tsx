@@ -155,7 +155,7 @@ const MatchingDashboard: React.FC = () => {
                   if (companyId) {
                     await axios.put(
                       `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/phases/3/steps/10`,
-                      { status: 'completed' }
+                      { status: 'completed', currentStep: 13 }
                     );
                   }
                   window.location.href = '/app11';
