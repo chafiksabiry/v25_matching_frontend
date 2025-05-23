@@ -144,13 +144,21 @@ const MatchingDashboard: React.FC = () => {
             <Zap size={28} className="text-yellow-300" />
             <h1 className="text-2xl font-bold">HARX Smart Matching System</h1>
           </div>
-          <button 
-            onClick={() => setShowWeights(!showWeights)}
-            className="flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-md transition"
-          >
-            <Settings size={18} />
-            <span>Adjust Weights</span>
-          </button>
+          <div className="flex items-center space-x-4">
+            <button 
+              onClick={() => window.location.href = '/app11'}
+              className="flex items-center space-x-2 bg-gray-600 hover:bg-gray-500 px-4 py-2 rounded-md transition text-white"
+            >
+              <span>Back to onboarding</span>
+            </button>
+            <button 
+              onClick={() => setShowWeights(!showWeights)}
+              className="flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-md transition"
+            >
+              <Settings size={18} />
+              <span>Adjust Weights</span>
+            </button>
+          </div>
         </div>
       </header>
 
@@ -468,8 +476,8 @@ const MatchingDashboard: React.FC = () => {
                     }
 
                     promise
-                      .then(matches => {
-                        setMatches(matches);
+                      .then(response => {
+                        setMatches(response.matches || []);
                       })
                       .finally(() => {
                         setLoading(false);
