@@ -147,7 +147,7 @@ const MatchingDashboard: React.FC = () => {
           <div className="flex items-center space-x-4">
             <button 
               onClick={() => window.location.href = '/app11'}
-              className="flex items-center space-x-2 bg-gray-600 hover:bg-gray-500 px-4 py-2 rounded-md transition text-white"
+              className="flex items-center space-x-2 bg-indigo-500 hover:bg-indigo-400 px-6 py-2.5 rounded-lg transition text-white font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
             >
               <span>Back to onboarding</span>
             </button>
@@ -239,6 +239,7 @@ const MatchingDashboard: React.FC = () => {
                 : 'text-gray-600 hover:text-indigo-600'
               }`}
               onClick={() => setActiveTab('reps')}
+              style={{ display: 'none' }}
             >
               <div className="flex items-center justify-center space-x-2">
                 <Users size={18} />
@@ -389,7 +390,7 @@ const MatchingDashboard: React.FC = () => {
         )}
 
         {activeTab === 'reps' && !loading && (
-          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <div className="bg-white rounded-lg shadow-md p-6 mb-6" style={{ display: 'none' }}>
             <h2 className="text-xl font-semibold text-gray-800 mb-4">Select a Rep to Find Matching Gigs</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {paginatedReps.map(rep => (
