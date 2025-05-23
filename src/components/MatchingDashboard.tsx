@@ -3,6 +3,8 @@ import { Rep, Gig, Match, MatchingWeights } from '../types';
 import { formatScore } from '../utils/matchingAlgorithm';
 import { getReps, getGigs, findMatchesForGig, findGigsForRep, generateOptimalMatches } from '../api';
 import { Activity, Users, Briefcase, Zap, Settings, Clock } from 'lucide-react';
+import axios from 'axios';
+import Cookies from 'js-cookie';
 
 const defaultMatchingWeights: MatchingWeights = {
   experience: 0.15,
@@ -146,7 +148,22 @@ const MatchingDashboard: React.FC = () => {
           </div>
           <div className="flex items-center space-x-4">
             <button 
-              onClick={() => window.location.href = '/app11'}
+              onClick={async () => {
+                try {
+                  const companyId = Cookies.get("companyId");
+                  
+                  if (companyId) {
+                    await axios.put(
+                      `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/phases/3/steps/10`,
+                      { status: 'completed' }
+                    );
+                  }
+                  window.location.href = '/app11';
+                } catch (error) {
+                  console.error('Error updating onboarding progress:', error);
+                  window.location.href = '/app11';
+                }
+              }}
               className="flex items-center space-x-2 bg-indigo-500 hover:bg-indigo-400 px-6 py-2.5 rounded-lg transition text-white font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
             >
               <span>Back to onboarding</span>
