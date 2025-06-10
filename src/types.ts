@@ -103,6 +103,12 @@ export interface Rep {
       _id: string;
     }>;
   };
+  availability: {
+    days: string[];
+    hours: string;
+    timezone: string;
+    flexibility: string[];
+  };
   lastUpdated: string;
   createdAt: string;
   updatedAt: string;
@@ -113,11 +119,37 @@ export interface Gig {
   _id: string;
   title: string;
   companyName: string;
+  companyId: string;
+  seniority: {
+    level: string;
+    yearsExperience: string;
+  };
   category: string;
   description: string;
   requiredExperience?: number;
   expectedConversionRate?: number;
   targetRegion?: string;
+  skills: {
+    professional: string[];
+    technical: string[];
+    soft: string[];
+    languages: Array<{
+      name: string;
+      level?: string;
+    }>;
+  };
+  schedule: {
+    minimumHours: {
+      daily?: number;
+      weekly?: number;
+      monthly?: number;
+    };
+    days: string[];
+    hours: string;
+    timeZones: string[];
+    flexibility: string[];
+  };
+  
 }
 
 export interface MatchingWeights {
