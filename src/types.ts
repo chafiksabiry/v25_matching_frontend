@@ -11,63 +11,29 @@ export interface Rep {
     languages: boolean;
     assessment: boolean;
   };
-  personalInfo: {
+  personalInfo?: {
     name: string;
     location: string;
     email: string;
     phone: string;
-    languages: Array<{
+    timezone?: string;
+    languages?: Array<{
       language: string;
       proficiency: string;
       _id: string;
-      assessmentResults?: {
-        completeness: {
-          score: number;
-          feedback: string;
-        };
-        fluency: {
-          score: number;
-          feedback: string;
-        };
-        proficiency: {
-          score: number;
-          feedback: string;
-        };
-        overall: {
-          score: number;
-          strengths: string;
-          areasForImprovement: string;
-        };
-        completedAt: string;
-      };
     }>;
   };
-  professionalSummary: {
+  professionalSummary?: {
     yearsOfExperience: string;
     currentRole: string;
     industries: string[];
     keyExpertise: string[];
     notableCompanies: string[];
   };
-  skills: {
-    technical: Array<{
-      skill: string;
-      level: number;
-      details?: string;
-      _id: string;
-    }>;
-    professional: Array<{
-      skill: string;
-      level: number;
-      details?: string;
-      _id: string;
-    }>;
-    soft: Array<{
-      skill: string;
-      level: number;
-      details?: string;
-      _id: string;
-    }>;
+  skills?: {
+    technical?: Array<{ skill: string }>;
+    professional?: Array<{ skill: string }>;
+    soft?: Array<{ skill: string }>;
   };
   achievements: Array<{
     description: string;
@@ -103,12 +69,7 @@ export interface Rep {
       _id: string;
     }>;
   };
-  availability: {
-    days: string[];
-    hours: string;
-    timezone: string;
-    flexibility: string[];
-  };
+  availability?: any;
   lastUpdated: string;
   createdAt: string;
   updatedAt: string;
@@ -117,46 +78,28 @@ export interface Rep {
 
 export interface Gig {
   _id: string;
+  id?: string;
   title: string;
   companyName: string;
-  companyId: string;
-  seniority: {
-    level: string;
-    yearsExperience: string;
-  };
   category: string;
   description: string;
   requiredExperience?: number;
   expectedConversionRate?: number;
   targetRegion?: string;
-  skills: {
-    professional: string[];
-    technical: string[];
-    soft: string[];
-    languages: Array<{
-      name: string;
-      level?: string;
-    }>;
+  seniority?: {
+    yearsExperience: number;
   };
-  schedule: {
-    minimumHours: {
-      daily?: number;
-      weekly?: number;
-      monthly?: number;
-    };
-    days: string[];
-    hours: string;
-    timeZones: string[];
-    flexibility: string[];
+  skills?: {
+    professional?: string[];
   };
-  
+  schedule?: any;
 }
 
 export interface MatchingWeights {
   experience: number;  // Score d'expérience (0-100)
   skills: number;      // Score de compétences (0-100)
   industry: number;    // Score d'industrie (0-100)
-  language: number;    // Score de langue (0-100)
+  languages: number;    // Score de langue (0-100)
   availability: number; // Score de disponibilité (0-100)
   timezone: number;    // Score de fuseau horaire (0-100)
   performance: number; // Score de performance (0-100)
@@ -164,6 +107,11 @@ export interface MatchingWeights {
 }
 
 export interface Match {
+  requiredSkills(requiredSkills: any): unknown;
+  requiredExperience: ReactNode;
+  agentInfo: any;
+  languageMatch: any;
+  skillsMatch: any;
   _id: string;
   repId: string;
   gigId: string;
@@ -255,6 +203,8 @@ export interface Match {
   updatedAt: string;
   __v: number;
   score: number;
+  weights: MatchingWeights;
+  rep?: Rep; // Optional, to include rep details in the match
 }
 
 // ... rest of the types ... 
