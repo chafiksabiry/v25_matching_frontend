@@ -77,6 +77,7 @@ export interface Rep {
 }
 
 export interface Gig {
+  requiredLanguages: boolean;
   _id: string;
   id?: string;
   title: string;
