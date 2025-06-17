@@ -1,6 +1,6 @@
 import { Rep, Gig, Match, MatchingWeights } from './types';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5011/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api-matching.harx.ai/api';
 
 // Fonction pour récupérer tous les reps
 export const getReps = async (): Promise<Rep[]> => {
@@ -58,15 +58,7 @@ export const getGigs = async (): Promise<Gig[]> => {
 };
 
 // Fonction pour trouver les matches pour un gig
-export const findMatchesForGig = async (gigId: string, weights: MatchingWeights): Promise<{
-  skillsStats: { perfectMatches: number; partialMatches: number; noMatches: number; totalMatches: number; byType: { technical: { perfectMatches: number; partialMatches: number; noMatches: number; }; professional: { perfectMatches: number; partialMatches: number; noMatches: number; }; soft: { perfectMatches: number; partialMatches: number; noMatches: number; }; }; };
-  languageStats: { perfectMatches: number; partialMatches: number; noMatches: number; totalMatches: number; };
-  noMatches: number;
-  partialMatches: number;
-  perfectMatches: number;
-  totalMatches: number;
-  preferedmatches: never[]; matches: Match[] 
-}> => {
+export const findMatchesForGig = async (gigId: string, weights: MatchingWeights): Promise<{ matches: Match[] }> => {
   console.log('findMatchesForGig called with:', { gigId, weights });
   try {
     const response = await fetch(`${API_BASE_URL}/matches/gig/${gigId}`, {
@@ -85,11 +77,11 @@ export const findMatchesForGig = async (gigId: string, weights: MatchingWeights)
     const data = await response.json();
     console.log('Parsed API response:', data);
     
-    if (!data.preferedmatches || !Array.isArray(data.preferedmatches)) {
-      throw new Error('Invalid response format: expected preferedmatches array');
+    if (!data.matches || !Array.isArray(data.matches)) {
+      throw new Error('Invalid response format: expected matches array');
     }
     
-    return { matches: data.preferedmatches };
+    return data;
   } catch (error) {
     console.error('Error in findMatchesForGig:', error);
     throw error;
