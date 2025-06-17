@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.VITE_API_URL || 'https://api-matching.harx.ai/api';
+const API_BASE_URL = process.env.VITE_API_URL || 'http://localhost:5011/api';
 
 // Reps
 export const getReps = async () => {
@@ -31,7 +31,7 @@ export const getGigs = async () => {
 // Matches
 export const findMatchesForGig = async (gigId) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/matches/gig/${gigId}/matches`, {
+    const response = await fetch(`${API_BASE_URL}/matches/gig/${gigId}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -40,7 +40,11 @@ export const findMatchesForGig = async (gigId) => {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    return await response.json();
+    const data = await response.json();
+    if (!data.preferedmatches || !Array.isArray(data.preferedmatches)) {
+      throw new Error('Invalid response format: expected preferedmatches array');
+    }
+    return { matches: data.preferedmatches };
   } catch (error) {
     console.error('Error finding matches for gig:', error);
     throw error;

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Rep, Gig, Match, MatchingWeights } from '../types';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://api-matching.harx.ai/api/';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5011/api';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -39,6 +39,12 @@ export const deleteRep = async (id: string): Promise<void> => {
 export const getGigs = async (): Promise<Gig[]> => {
   const response = await api.get('/gigs');
   return response.data;
+};
+
+export const getGigsByCompanyId = async (companyId: string): Promise<Gig[]> => {
+  const response = await fetch(`${import.meta.env.VITE_API_URL_GIGS}/gigs/company/${companyId}`);
+  const result = await response.json();
+  return result.data;
 };
 
 export const getGigById = async (id: string): Promise<Gig> => {
@@ -86,13 +92,53 @@ export const deleteMatch = async (id: string): Promise<void> => {
 };
 
 // Matching algorithm API calls
-export const findMatchesForGig = async (
-  gigId: string, 
-  weights: MatchingWeights, 
-  limit: number = 10
-): Promise<Match[]> => {
-  const response = await api.post(`/matches/gig/${gigId}`, { weights, limit });
-  return response.data;
+interface MatchResponse {
+  preferedmatches: Match[];
+  totalMatches: number;
+  perfectMatches: number;
+  partialMatches: number;
+  noMatches: number;
+  languageStats: {
+    perfectMatches: number;
+    partialMatches: number;
+    noMatches: number;
+    totalMatches: number;
+  };
+  skillsStats: {
+    perfectMatches: number;
+    partialMatches: number;
+    noMatches: number;
+    totalMatches: number;
+    byType: {
+      technical: {
+        perfectMatches: number;
+        partialMatches: number;
+        noMatches: number;
+      };
+      professional: {
+        perfectMatches: number;
+        partialMatches: number;
+        noMatches: number;
+      };
+      soft: {
+        perfectMatches: number;
+        partialMatches: number;
+        noMatches: number;
+      };
+    };
+  };
+}
+
+export const findMatchesForGig = async (gigId: string, weights: MatchingWeights): Promise<MatchResponse> => {
+  try {
+    const response = await axios.get<MatchResponse>(`${import.meta.env.VITE_API_URL}/gig/${gigId}`, {
+      data: { weights }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error finding matches for gig:', error);
+    throw error;
+  }
 };
 
 export const findGigsForRep = async (
