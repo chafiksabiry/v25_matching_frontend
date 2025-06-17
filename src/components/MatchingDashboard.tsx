@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Rep, Gig, Match, MatchingWeights } from '../types';
 import { formatScore } from '../utils/matchingAlgorithm';
 import { getReps, getGigs, findMatchesForGig, findGigsForRep, generateOptimalMatches } from '../api';
-import { findMatchesWithAI } from '../api/matching';
 import { Activity, Users, Briefcase, Zap, Settings, Clock } from 'lucide-react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
@@ -67,8 +66,8 @@ const MatchingDashboard: React.FC = () => {
           getReps(),
           getGigs()
         ]);
-        console.log('=== REPS DATA ===', repsData);
-        console.log('=== GIGS DATA ===', gigsData);
+        console.log('Reps data:', repsData);
+        console.log('Gigs data:', gigsData);
         setReps(repsData);
         setGigs(gigsData);
       } catch (error) {
@@ -93,20 +92,19 @@ const MatchingDashboard: React.FC = () => {
         let response;
         if (activeTab === 'gigs' && selectedGig) {
           console.log('Finding matches for gig:', selectedGig);
-          // Use AI matching instead of regular matching
-          const matches = await findMatchesWithAI(selectedGig, reps);
-          console.log('=== MATCHES FOR GIG ===', matches);
-          setMatches(matches);
+          response = await findMatchesForGig(selectedGig._id, weights);
+          console.log('Response from findMatchesForGig:', response);
+          setMatches(response.matches || []);
         } else if (activeTab === 'reps' && selectedRep) {
           console.log('Finding matches for rep:', selectedRep);
           response = await findGigsForRep(selectedRep._id, weights);
-          console.log('=== MATCHES FOR REP ===', response);
+          console.log('Response from findGigsForRep:', response);
           setMatches(response.matches || []);
         } else if (activeTab === 'optimal') {
           setLoading(true);
           console.log('Generating optimal matches');
           response = await generateOptimalMatches(weights);
-          console.log('=== OPTIMAL MATCHES ===', response);
+          console.log('Response from generateOptimalMatches:', response);
           setMatches(response.matches || []);
           setLoading(false);
         } else {
@@ -120,7 +118,7 @@ const MatchingDashboard: React.FC = () => {
     };
     
     getMatches();
-  }, [activeTab, selectedGig, selectedRep, weights, reps]);
+  }, [activeTab, selectedGig, selectedRep, weights]);
   
   // Get rep or gig details for a match
   const getRepForMatch = (match: Match) => reps.find(rep => rep._id === match.repId);
@@ -496,8 +494,8 @@ const MatchingDashboard: React.FC = () => {
                     }
 
                     promise
-                      .then((response: { matches?: Match[] } | Match[]) => {
-                        setMatches(Array.isArray(response) ? response : response.matches || []);
+                      .then(response => {
+                        setMatches(response.matches || []);
                       })
                       .finally(() => {
                         setLoading(false);
@@ -582,22 +580,22 @@ const MatchingDashboard: React.FC = () => {
                         <>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm font-semibold text-indigo-900">
-                              {getRepForMatch(match)?.personalInfo?.name}
+                              {match.personalInfo?.name}
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm text-gray-600">
-                              {getRepForMatch(match)?.personalInfo?.location}
+                              {match.personalInfo?.location}
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm text-gray-600">
-                              {getRepForMatch(match)?.professionalSummary?.currentRole}
+                              {match.professionalSummary?.currentRole}
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm text-gray-600">
-                              {getRepForMatch(match)?.professionalSummary?.keyExpertise?.join(', ')}
+                              {match.professionalSummary?.keyExpertise?.join(', ')}
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
@@ -633,12 +631,12 @@ const MatchingDashboard: React.FC = () => {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm text-gray-600">
-                              {getGigForMatch(match)?.seniority?.yearsExperience} years
+                              {match.requiredExperience} years
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm text-gray-600">
-                              {getGigForMatch(match)?.skills?.professional?.join(', ')}
+                              {match.requiredSkills?.join(', ')}
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
