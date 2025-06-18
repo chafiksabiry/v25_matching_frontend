@@ -1,9 +1,10 @@
 import React from 'react';
 import MatchingDashboard from './components/MatchingDashboard';
+import './index.css';
 
 function App() {
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="matching-v1-root">
       <MatchingDashboard />
     </div>
   );
