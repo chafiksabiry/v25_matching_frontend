@@ -103,55 +103,56 @@ export interface Gig {
   status?: 'open' | 'in-progress' | 'completed' | 'cancelled';
 }
 
+export type DayOfWeek = 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday';
+
+export interface TimeSlot {
+  start: string; // HH:MM format in 24-hour
+  end: string; // HH:MM format in 24-hour
+}
+
+export interface DaySchedule {
+  day: DayOfWeek;
+  hours: TimeSlot;
+}
+
+export interface Availability {
+  schedule: DaySchedule[];
+  timeZone: string;
+  flexibility: string[];
+}
+
 export interface Match {
   _id: string;
+  repId: string;
+  gigId: string;
   score: number;
-  // Propriétés pour les matches de type rep
-  personalInfo?: {
-    name: string;
-    location: string;
-    languages: Array<{
-      language: string;
-      proficiency?: string;
-      _id?: string;
-      assessmentResults?: {
-        completeness?: {
-          score: number;
-          feedback: string;
-        };
-        fluency?: {
-          score: number;
-          feedback: string;
-        };
-        proficiency?: {
-          score: number;
-          feedback: string;
-        };
-        overall?: {
-          score: number;
-          strengths?: string;
-          areasForImprovement?: string;
-        };
-        completedAt?: string;
-      };
-    }>;
-  };
-  professionalSummary?: {
-    currentRole: string;
-    yearsOfExperience: string;
-    industries?: string[];
-    keyExpertise?: string[];
-  };
-  // Propriétés pour les matches de type gig
   title?: string;
   category?: string;
   requiredExperience?: number;
-  preferredLanguages?: string[];
-  // Propriétés communes
-  status?: 'pending' | 'accepted' | 'rejected' | 'completed';
-  createdAt?: string;
-  updatedAt?: string;
-  __v?: number;
+  requiredSkills?: string[];
+  agentInfo?: {
+    name: string;
+    email: string;
+  };
+  languageMatch?: {
+    details: {
+      matchStatus: 'perfect_match' | 'partial_match' | 'no_match';
+      matchingLanguages: Array<{
+        language: string;
+        status: 'perfect_match' | 'partial_match' | 'no_match';
+      }>;
+    };
+  };
+  skillsMatch?: {
+    details: {
+      matchStatus: 'perfect_match' | 'partial_match' | 'no_match';
+      matchingSkills: Array<{
+        skill: string;
+        status: 'perfect_match' | 'partial_match' | 'no_match';
+      }>;
+    };
+  };
+  availability: Availability;
 }
 
 export type Skill = 
@@ -189,12 +190,6 @@ export type Language =
   | 'Arabic'
   | 'Hindi'
   | 'Russian';
-
-export interface Availability {
-  day: string;
-  startTime: string;
-  endTime: string;
-}
 
 export interface MatchingWeights {
   experience: number;
