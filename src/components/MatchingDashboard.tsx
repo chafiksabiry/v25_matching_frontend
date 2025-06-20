@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Rep, Gig, Match, MatchingWeights } from '../types';
 import { formatScore } from '../utils/matchingAlgorithm';
-import { getReps, getGigs, findMatchesForGig, findGigsForRep, generateOptimalMatches } from '../api';
+import { getReps, getGigsByCompanyId, findMatchesForGig, findGigsForRep, generateOptimalMatches } from '../api';
 import { Activity, Users, Briefcase, Zap, Settings, Clock } from 'lucide-react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
@@ -62,9 +62,17 @@ const MatchingDashboard: React.FC = () => {
       setInitialLoading(true);
       try {
         console.log('Fetching data...');
+        const companyId = Cookies.get("companyId");
+        
+        if (!companyId) {
+          setError('Company ID not found. Please log in again.');
+          setInitialLoading(false);
+          return;
+        }
+
         const [repsData, gigsData] = await Promise.all([
           getReps(),
-          getGigs()
+          getGigsByCompanyId(companyId)
         ]);
         console.log('Reps data:', repsData);
         console.log('Gigs data:', gigsData);

@@ -2,9 +2,17 @@ import axios from 'axios';
 import { Rep, Gig, Match, MatchingWeights } from '../types';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://api-matching.harx.ai/api/';
+const GIGS_API_URL = import.meta.env.VITE_API_URL_GIGS || 'https://api-gigsmanual.harx.ai/api/gigs/';
 
 const api = axios.create({
   baseURL: API_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+const gigsApi = axios.create({
+  baseURL: GIGS_API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -38,6 +46,11 @@ export const deleteRep = async (id: string): Promise<void> => {
 // Gig API calls
 export const getGigs = async (): Promise<Gig[]> => {
   const response = await api.get('/gigs');
+  return response.data;
+};
+
+export const getGigsByCompanyId = async (companyId: string): Promise<Gig[]> => {
+  const response = await gigsApi.get(`/company/${companyId}`);
   return response.data;
 };
 
