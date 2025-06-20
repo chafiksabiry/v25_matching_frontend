@@ -1,4 +1,5 @@
 const API_BASE_URL = process.env.VITE_API_URL || 'http://localhost:5011/api';
+const GIGS_API_URL = process.env.VITE_API_URL_GIGS || 'https://api-gigsmanual.harx.ai/api';
 
 // Reps
 export const getReps = async () => {
@@ -24,6 +25,20 @@ export const getGigs = async () => {
     return await response.json();
   } catch (error) {
     console.error('Error in getGigs:', error);
+    throw error;
+  }
+};
+
+// Get gigs by company ID
+export const getGigsByCompanyId = async (companyId) => {
+  try {
+    const response = await fetch(`${GIGS_API_URL}/gigs/company/${companyId}`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error in getGigsByCompanyId:', error);
     throw error;
   }
 };
