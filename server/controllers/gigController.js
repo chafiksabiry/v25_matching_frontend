@@ -11,6 +11,25 @@ export const getAllGigs = async (req, res) => {
   }
 };
 
+// Get gigs by company ID
+export const getGigsByCompanyId = async (req, res) => {
+  try {
+    const { companyId } = req.params;
+    const gigs = await Gig.find({ companyId });
+    
+    if (!gigs || gigs.length === 0) {
+      return res.status(StatusCodes.NOT_FOUND).json({ 
+        message: 'No gigs found for this company',
+        companyId 
+      });
+    }
+    
+    res.status(StatusCodes.OK).json(gigs);
+  } catch (error) {
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: error.message });
+  }
+};
+
 // Get a single gig
 export const getGigById = async (req, res) => {
   try {

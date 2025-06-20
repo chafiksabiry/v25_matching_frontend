@@ -1,24 +1,3 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Encapsulation de tous les styles personnalisés */
-.matching-v1-root {
-  /* Réinitialisation des styles de base uniquement pour notre composant */
-  all: initial;
-  
-  /* Styles spécifiques à notre application */
-  font-family: system-ui, -apple-system, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* Les styles personnalisés doivent être préfixés */
-.matching-v1-root * {
-  box-sizing: border-box;
-}
-
-/* Exemple de style composant */
-.matching-v1-custom-component {
-  /* vos styles personnalisés ici */
-}
