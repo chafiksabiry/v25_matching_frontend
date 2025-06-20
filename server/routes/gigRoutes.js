@@ -4,7 +4,8 @@ import {
   getGigById,
   createGig,
   updateGig,
-  deleteGig
+  deleteGig,
+  getGigsByCompanyId
 } from '../controllers/gigController.js';
 
 const router = express.Router();
@@ -12,6 +13,9 @@ const router = express.Router();
 router.route('/')
   .get(getAllGigs)
   .post(createGig);
+
+router.route('/company/:companyId')
+  .get(getGigsByCompanyId);
 
 router.route('/:id')
   .get(getGigById)
