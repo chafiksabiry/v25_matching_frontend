@@ -57,6 +57,12 @@ export const getGigs = async (): Promise<Gig[]> => {
   }
 };
 
+export const getGigsByCompanyId = async (companyId: string): Promise<Gig[]> => {
+  const response = await fetch(`${import.meta.env.VITE_API_URL_GIGS}/gigs/company/${companyId}`);
+  const result = await response.json();
+  return result.data;
+};
+
 // Fonction pour trouver les matches pour un gig
 export const findMatchesForGig = async (gigId: string, weights: MatchingWeights): Promise<{
   skillsStats: { perfectMatches: number; partialMatches: number; noMatches: number; totalMatches: number; byType: { technical: { perfectMatches: number; partialMatches: number; noMatches: number; }; professional: { perfectMatches: number; partialMatches: number; noMatches: number; }; soft: { perfectMatches: number; partialMatches: number; noMatches: number; }; }; };
