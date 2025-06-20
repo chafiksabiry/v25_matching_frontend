@@ -7,6 +7,7 @@ import {
   findMatchesForGig,
   findGigsForRep,
   generateOptimalMatches,
+  getGigsByCompanyId,
 } from "../api";
 import {
   Activity,
@@ -208,7 +209,11 @@ const MatchingDashboard: React.FC = () => {
       setInitialLoading(true);
       try {
         console.log("Fetching data...");
-        const [repsData, gigsData] = await Promise.all([getReps(), getGigs()]);
+        const companyId = Cookies.get('companyId');
+        const [repsData, gigsData] = await Promise.all([
+          getReps(),
+          companyId ? getGigsByCompanyId(companyId) : getGigs()
+        ]);
         console.log("=== REPS DATA ===", JSON.stringify(repsData, null, 2));
         console.log("=== GIGS DATA ===", gigsData);
         setReps(repsData);

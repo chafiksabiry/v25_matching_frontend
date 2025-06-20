@@ -41,6 +41,12 @@ export const getGigs = async (): Promise<Gig[]> => {
   return response.data;
 };
 
+export const getGigsByCompanyId = async (companyId: string): Promise<Gig[]> => {
+  const response = await fetch(`${import.meta.env.VITE_API_URL_GIGS}/gigs/company/${companyId}`);
+  const result = await response.json();
+  return result.data;
+};
+
 export const getGigById = async (id: string): Promise<Gig> => {
   const response = await api.get(`/gigs/${id}`);
   return response.data;
