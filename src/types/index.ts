@@ -1,203 +1,155 @@
-export interface Rep {
-  _id?: string;
+export interface GigData {
   userId: string;
-  status: string;
-  completionSteps: {
-    basicInfo: boolean;
-    experience: boolean;
-    skills: boolean;
-    languages: boolean;
-    assessment: boolean;
-  };
-  availability: {
-    days: string[];
-    timeZones: string[];
-    flexibility: string[];
-    hours: {
-      start: string;
-      end: string;
-    };
-  };
-  personalInfo: {
-    name: string;
-    location: string;
-    email: string;
-    phone: string;
-    languages: Array<{
-      language: string;
-      proficiency: string;
-      _id: string;
-    }>;
-  };
-  professionalSummary: {
-    yearsOfExperience: string;
-    currentRole: string;
-    industries: string[];
-    keyExpertise: string[];
-    notableCompanies: string[];
-    profileDescription: string;
-  };
-  skills: {
-    technical: Array<{
-      skill: string;
-      level: number;
-      details: string;
-      _id: string;
-    }>;
-    professional: Array<{
-      skill: string;
-      level: number;
-      details: string;
-      _id: string;
-    }>;
-    soft: Array<{
-      skill: string;
-      level: number;
-      details: string;
-      _id: string;
-    }>;
-    contactCenter: Array<{
-      skill: string;
-      level: number;
-      details: string;
-      _id: string;
-    }>;
-  };
-  experience: Array<{
-    title: string;
-    company: string;
-    startDate: string | Date;
-    endDate: string | Date;
-    responsibilities: string[];
-    achievements: string[];
-    _id: string;
-  }>;
-  achievements: string[];
-  lastUpdated: Date;
-  createdAt: Date;
-  updatedAt: Date;
-  __v: number;
-}
-
-export interface Gig {
-  _id?: string;
   companyId: string;
-  companyName: string;
   title: string;
   description: string;
-  category: Industry;
-  requiredSkills: Skill[];
-  preferredLanguages: Language[];
-  requiredExperience: number; // 1-10
-  expectedConversionRate: number; // 0-1
-  compensation: {
-    base: number;
-    commission: number;
+  category: string;
+  destination_zone: string[];
+  callTypes: string[];
+  highlights: string[];
+  requirements: {
+    essential: string[];
+    preferred: string[];
   };
-  duration: {
-    startDate: string;
-    endDate: string;
+  benefits: {
+    type: string;
+    description: string;
+  }[];
+  schedule: {
+    days: string[];
+    hours: string;
+    timeZones: string[];
+    flexibility: string[];
+    minimumHours: {
+      daily?: number;
+      weekly?: number;
+      monthly?: number;
+    };
+    shifts?: {
+      name: string;
+      hours: string;
+      timezone: string;
+    }[];
   };
-  timezone: string;
-  targetRegion: string;
-  status?: 'open' | 'in-progress' | 'completed' | 'cancelled';
-}
-
-export type DayOfWeek = 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday';
-
-export interface TimeSlot {
-  start: string; // HH:MM format in 24-hour
-  end: string; // HH:MM format in 24-hour
-}
-
-export interface DaySchedule {
-  day: DayOfWeek;
-  hours: TimeSlot;
-}
-
-export interface Availability {
-  schedule: DaySchedule[];
-  timeZone: string;
-  flexibility: string[];
-}
-
-export interface Match {
-  _id: string;
-  repId: string;
-  gigId: string;
-  score: number;
-  title?: string;
-  category?: string;
-  requiredExperience?: number;
-  requiredSkills?: string[];
-  agentInfo?: {
-    name: string;
-    email: string;
+  commission: {
+    base: string;
+    baseAmount: string;
+    bonus: string;
+    bonusAmount: string;
+    structure: string;
+    currency: string;
+    minimumVolume: {
+      amount: string;
+      period: string;
+      unit: string;
+    };
+    transactionCommission: {
+      type: string;
+      amount: string;
+    };
+    kpis: {
+      metric: string;
+      target: string;
+      reward: string;
+    }[];
   };
-  languageMatch?: {
-    details: {
-      matchStatus: 'perfect_match' | 'partial_match' | 'no_match';
-      matchingLanguages: Array<{
-        language: string;
-        status: 'perfect_match' | 'partial_match' | 'no_match';
-      }>;
+  leads: {
+    types: Array<{
+      type: 'hot' | 'warm' | 'cold';
+      percentage: number;
+      description: string;
+      conversionRate?: number;
+    }>;
+    sources: string[];
+    distribution: {
+      method: string;
+      rules: string[];
+    };
+    qualificationCriteria: string[];
+  };
+  skills: {
+    languages: Array<{ name: string; level: string }>;
+    soft: string[];
+    professional: string[];
+    technical: string[];
+    certifications: Array<{
+      name: string;
+      required: boolean;
+      provider?: string;
+    }>;
+  };
+  seniority: {
+    level: string;
+    yearsExperience: string;
+  };
+  team: {
+    size: string;
+    structure: Array<{
+      roleId: string;
+      count: number;
+      seniority: {
+        level: string;
+        yearsExperience: string;
+      };
+    }>;
+    territories: string[];
+    reporting: {
+      to: string;
+      frequency: string;
+    };
+    collaboration: string[];
+  };
+  tools: {
+    provided: Array<{
+      name: string;
+      type: string;
+      description?: string;
+    }>;
+    required: Array<{
+      name: string;
+      type: string;
+      description?: string;
+    }>;
+  };
+  training: {
+    initial: {
+      duration: string;
+      format: string;
+      topics: string[];
+    };
+    ongoing: {
+      frequency: string;
+      format: string;
+      topics: string[];
+    };
+    support: string[];
+  };
+  metrics: {
+    kpis: string[];
+    targets: { [key: string]: string };
+    reporting: {
+      frequency: string;
+      metrics: string[];
     };
   };
-  skillsMatch?: {
-    details: {
-      matchStatus: 'perfect_match' | 'partial_match' | 'no_match';
-      matchingSkills: Array<{
-        skill: string;
-        status: 'perfect_match' | 'partial_match' | 'no_match';
-      }>;
-    };
+  documentation: {
+    product: Array<{ name: string; url: string }>;
+    process: Array<{ name: string; url: string }>;
+    training: Array<{ name: string; url: string }>;
   };
-  availability: Availability;
-}
-
-export type Skill = 
-  | 'Cold Calling'
-  | 'Lead Generation'
-  | 'Sales Closing'
-  | 'Customer Service'
-  | 'Product Demonstration'
-  | 'Negotiation'
-  | 'Relationship Building'
-  | 'Technical Support'
-  | 'Market Research'
-  | 'Social Media Marketing';
-
-export type Industry = 
-  | 'Technology'
-  | 'Healthcare'
-  | 'Finance'
-  | 'Retail'
-  | 'Manufacturing'
-  | 'Education'
-  | 'Real Estate'
-  | 'Hospitality'
-  | 'Automotive'
-  | 'Entertainment';
-
-export type Language = 
-  | 'English'
-  | 'Spanish'
-  | 'French'
-  | 'German'
-  | 'Mandarin'
-  | 'Japanese'
-  | 'Portuguese'
-  | 'Arabic'
-  | 'Hindi'
-  | 'Russian';
-
-export interface MatchingWeights {
-  experience: number;
-  skills: number;
-  industry: number;
-  language: number;
-  availability: number;
-  timezone: number;
-  performance: number;
-  region: number;
+  compliance: {
+    requirements: string[];
+    certifications: string[];
+    policies: string[];
+  };
+  equipment: {
+    required: Array<{
+      type: string;
+      specifications: string[];
+    }>;
+    provided: Array<{
+      type: string;
+      specifications: string[];
+    }>;
+  };
 }
