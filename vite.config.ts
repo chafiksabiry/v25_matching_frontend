@@ -20,12 +20,12 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
 
   return {
-    base: 'https://gigsmanual.harx.ai/',
+    base: 'https://matching.harx.ai/',
     plugins: [
       react({
         jsxRuntime: 'classic',
       }),
-      qiankun('app6', {
+      qiankun('app12', {
         useDevMode: true,
       }),
       removeReactRefreshScript(), // Add the script removal plugin
@@ -35,7 +35,7 @@ export default defineConfig(({ mode }) => {
       'import.meta.env': env,
     },
     server: {
-      port: 5178,
+      port: 5181,
       cors: true,
       hmr: false,
       fs: {
@@ -48,12 +48,12 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         output: {
           format: 'umd',
-          name: 'app6',
+          name: 'app12',
           entryFileNames: 'index.js', // Fixed name for the JS entry file
           chunkFileNames: 'chunk-[name].js', // Fixed name for chunks
           assetFileNames: (assetInfo) => {
             // Ensure CSS files are consistently named
-            if (assetInfo.name.endsWith('.css')) {
+            if (assetInfo.name?.endsWith('.css')) {
               return 'index.css';
             }
             return '[name].[ext]'; // Default for other asset types

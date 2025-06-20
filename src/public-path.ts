@@ -1,7 +1,9 @@
 // Extend the global `Window` interface to include qiankun-specific properties
+export {};
+
 declare global {
     interface Window {
-      __POWERED_BY_QIANKUN__?: boolean; // Optional since it might not always be defined
+      __POWERED_BY_QIANKUN__: boolean; // Must be defined as boolean
       __INJECTED_PUBLIC_PATH_BY_QIANKUN__?: string; // Optional for standalone mode
     }
 }
