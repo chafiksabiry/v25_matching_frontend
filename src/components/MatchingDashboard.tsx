@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { Rep, Gig, Match, MatchingWeights } from "../types";
-import { formatScore } from "../utils/matchingAlgorithm";
 import {
   getReps,
   getGigs,
@@ -172,6 +171,11 @@ const MatchingDashboard: React.FC = () => {
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [showMatchDetails, setShowMatchDetails] = useState(false);
 
+  const handleTabClick = (tab: TabType) => {
+    setActiveTab(tab);
+    setCurrentPage(1);
+  };
+
   const resultsTableRef = React.useRef<HTMLDivElement>(null);
 
   const scrollToResults = () => {
@@ -201,7 +205,9 @@ const MatchingDashboard: React.FC = () => {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-  const totalPages = Math.ceil(reps.length / itemsPerPage);
+  const totalPages = Math.ceil(
+    (activeTab === "gigs" ? gigs.length : reps.length) / itemsPerPage
+  );
 
   // Fetch reps and gigs on component mount
   useEffect(() => {
@@ -484,7 +490,7 @@ const MatchingDashboard: React.FC = () => {
                   ? "bg-indigo-600 text-white shadow-lg"
                   : "text-gray-600 hover:text-indigo-600 hover:bg-indigo-50"
               }`}
-              onClick={() => setActiveTab("gigs")}
+              onClick={() => handleTabClick("gigs")}
             >
               <div className="flex items-center justify-center space-x-2">
                 <Briefcase size={18} />
@@ -497,7 +503,7 @@ const MatchingDashboard: React.FC = () => {
                   ? "bg-indigo-600 text-white shadow-lg"
                   : "text-gray-600 hover:text-indigo-600 hover:bg-indigo-50"
               }`}
-              onClick={() => setActiveTab("reps")}
+              onClick={() => handleTabClick("reps")}
               style={{ display: "none" }}
             >
               <div className="flex items-center justify-center space-x-2">
@@ -511,7 +517,7 @@ const MatchingDashboard: React.FC = () => {
                   ? "bg-indigo-600 text-white shadow-lg"
                   : "text-gray-600 hover:text-indigo-600 hover:bg-indigo-50"
               }`}
-              onClick={() => setActiveTab("optimal")}
+              onClick={() => handleTabClick("optimal")}
             >
               <div className="flex items-center justify-center space-x-2">
                 <Activity size={18} />
