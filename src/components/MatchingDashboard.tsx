@@ -8,6 +8,7 @@ import {
   generateOptimalMatches,
   getGigsByCompanyId,
 } from "../api";
+import { sendMatchEmail } from "../api/emailService";
 import {
   Activity,
   Users,
@@ -824,13 +825,25 @@ const MatchingDashboard: React.FC = () => {
                         <td className="px-6 py-4 text-center">
                           <button
                             className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-lg"
-                            onClick={(e) => {
+                            onClick={async (e) => {
                               e.stopPropagation();
-                              // Ne rien faire ici, la ligne gère déjà l'ouverture des détails
+                              try {
+                                // Envoyer l'email de match directement
+                                if (selectedGig) {
+                                  await sendMatchEmail({
+                                    agentName: match.agentInfo?.name || 'Agent',
+                                    agentEmail: 'elhoucine.qara@harx.ai',
+                                    gigTitle: selectedGig.title,
+                                    companyName: selectedGig.companyName
+                                  });
+                                }
+                              } catch (error) {
+                                console.error('Erreur lors de l\'envoi de l\'email:', error);
+                              }
                             }}
                           >
                             <Zap className="w-4 h-4 mr-2" />
-                            Match
+                            Send Email
                           </button>
                         </td>
                       </tr>
@@ -1001,9 +1014,25 @@ const MatchingDashboard: React.FC = () => {
                         </button>
                         <button
                           className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-                          onClick={() => {
-                            // Handle match action
-                            handleCloseMatchDetails();
+                          onClick={async () => {
+                            try {
+                              // Envoyer l'email de match
+                              if (selectedMatch && selectedGig) {
+                                await sendMatchEmail({
+                                  agentName: selectedMatch.agentInfo?.name || 'Agent',
+                                  agentEmail: selectedMatch.agentInfo?.email || '',
+                                  gigTitle: selectedGig.title,
+                                  companyName: selectedGig.companyName
+                                });
+                              }
+                              
+                              // Fermer la modal
+                              handleCloseMatchDetails();
+                            } catch (error) {
+                              console.error('Erreur lors de l\'envoi de l\'email:', error);
+                              // Fermer quand même la modal
+                              handleCloseMatchDetails();
+                            }
                           }}
                         >
                           Confirm Match
