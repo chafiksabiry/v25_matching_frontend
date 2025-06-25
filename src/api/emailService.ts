@@ -13,6 +13,7 @@ export const sendMatchEmail = async (matchData: MatchEmailData): Promise<boolean
     // Configuration EmailJS depuis les variables d'environnement
     const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_harx_email';
     const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'user_harx_public_key';
+    const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
 
     // Vérifier que les clés sont configurées
     if (!EMAILJS_SERVICE_ID || EMAILJS_SERVICE_ID === 'service_harx_email') {
@@ -83,128 +84,177 @@ export const sendMatchEmail = async (matchData: MatchEmailData): Promise<boolean
       </html>
     `;
 
-    // Paramètres pour l'envoi direct
-    const templateParams = {
-      to_email: matchData.agentEmail,
-      to_name: matchData.agentName,
-      subject: emailSubject,
-      message: emailBody,
-      from_name: 'HARX Team',
-      from_email: 'noreply@harx.ai'
-    };
-
     console.log('📧 Envoi d\'email avec EmailJS:', {
       serviceId: EMAILJS_SERVICE_ID,
+      templateId: EMAILJS_TEMPLATE_ID || 'template_default',
       to: matchData.agentEmail,
       subject: emailSubject
     });
 
-    // Envoi avec EmailJS (sans template)
-    const response = await emailjs.send(
-      EMAILJS_SERVICE_ID,
-      'template_default', // Template par défaut d'EmailJS
-      templateParams,
-      EMAILJS_PUBLIC_KEY
-    );
+    // Essayer d'abord avec EmailJS si un template est configuré
+    if (EMAILJS_TEMPLATE_ID) {
+      try {
+        const response = await emailjs.send(
+          EMAILJS_SERVICE_ID,
+          EMAILJS_TEMPLATE_ID,
+          {
+            to_email: matchData.agentEmail,
+            to_name: matchData.agentName,
+            subject: emailSubject,
+            message: emailBody,
+            from_name: 'HARX Team',
+            from_email: 'noreply@harx.ai'
+          },
+          EMAILJS_PUBLIC_KEY
+        );
+        
+        console.log('✅ Email envoyé avec succès via EmailJS:', response);
+        showSuccessNotification(matchData);
+        return true;
+      } catch (emailjsError) {
+        console.warn('⚠️ EmailJS a échoué, utilisation du fallback:', emailjsError);
+        // Continuer avec le fallback
+      }
+    }
 
-    console.log('✅ Email envoyé avec succès:', response);
+    // Fallback: Utiliser le client email par défaut du navigateur
+    const mailtoLink = `mailto:${matchData.agentEmail}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+    window.open(mailtoLink, '_blank');
 
-    // Afficher une notification de succès
-    const notification = document.createElement('div');
-    notification.style.cssText = `
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-      color: white;
-      padding: 16px 24px;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      z-index: 10000;
-      font-family: Arial, sans-serif;
-      max-width: 350px;
-      animation: slideIn 0.3s ease-out;
-    `;
+    // Copier le contenu dans le presse-papiers
+    const textContent = `
+🎯 Match HARX Trouvé!
+
+Félicitations ${matchData.agentName}!
+
+Un nouveau match vous attend!
+
+📋 Détails du poste:
+- Titre: ${matchData.gigTitle}
+- Entreprise: ${matchData.companyName || 'HARX'}
+${matchData.matchScore ? `- Score de compatibilité: ${Math.round(matchData.matchScore * 100)}%` : ''}
+
+Notre système d'IA a identifié que votre profil correspond parfaitement à cette opportunité!
+
+Prochaines étapes:
+• Connectez-vous à votre espace HARX
+• Consultez les détails complets du poste
+• Postulez en quelques clics
+
+Lien: ${window.location.origin}/app11
+
+Si vous avez des questions, contactez-nous à support@harx.ai
+
+© 2025 HARX. Tous droits réservés.
+    `.trim();
+
+    await navigator.clipboard.writeText(textContent);
     
-    notification.innerHTML = `
-      <div style="display: flex; align-items: center; gap: 12px;">
-        <div style="font-size: 24px;">✅</div>
-        <div>
-          <div style="font-weight: bold; margin-bottom: 4px;">Email envoyé avec succès!</div>
-          <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">
-            Destinataire: ${matchData.agentEmail}
-          </div>
-          <div style="font-size: 12px; opacity: 0.8;">
-            Match: ${matchData.gigTitle} chez ${matchData.companyName || 'HARX'}
-          </div>
-        </div>
-      </div>
-    `;
-
-    // Ajouter l'animation CSS
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes slideIn {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-      }
-    `;
-    document.head.appendChild(style);
-
-    document.body.appendChild(notification);
-
-    // Supprimer la notification après 6 secondes
-    setTimeout(() => {
-      if (notification.parentNode) {
-        notification.parentNode.removeChild(notification);
-      }
-    }, 6000);
-
+    console.log('✅ Fallback email activé - client email ouvert et contenu copié');
+    showSuccessNotification(matchData, true);
     return true;
 
   } catch (error) {
     console.error('❌ Erreur lors de l\'envoi de l\'email:', error);
-    
-    // Afficher une notification d'erreur
-    const errorNotification = document.createElement('div');
-    errorNotification.style.cssText = `
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-      color: white;
-      padding: 16px 24px;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      z-index: 10000;
-      font-family: Arial, sans-serif;
-      max-width: 350px;
-      animation: slideIn 0.3s ease-out;
-    `;
-    
-    errorNotification.innerHTML = `
-      <div style="display: flex; align-items: center; gap: 12px;">
-        <div style="font-size: 24px;">❌</div>
-        <div>
-          <div style="font-weight: bold; margin-bottom: 4px;">Erreur d'envoi</div>
-          <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">
-            Impossible d'envoyer l'email
-          </div>
-          <div style="font-size: 12px; opacity: 0.8;">
-            Vérifiez la configuration EmailJS
-          </div>
-        </div>
-      </div>
-    `;
-
-    document.body.appendChild(errorNotification);
-
-    setTimeout(() => {
-      if (errorNotification.parentNode) {
-        errorNotification.parentNode.removeChild(errorNotification);
-      }
-    }, 5000);
-    
+    showErrorNotification();
     return false;
   }
+};
+
+// Fonction pour afficher la notification de succès
+const showSuccessNotification = (matchData: MatchEmailData, isFallback = false) => {
+  const notification = document.createElement('div');
+  notification.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    padding: 16px 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 10000;
+    font-family: Arial, sans-serif;
+    max-width: 350px;
+    animation: slideIn 0.3s ease-out;
+  `;
+  
+  notification.innerHTML = `
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <div style="font-size: 24px;">✅</div>
+      <div>
+        <div style="font-weight: bold; margin-bottom: 4px;">
+          ${isFallback ? 'Client email ouvert!' : 'Email envoyé avec succès!'}
+        </div>
+        <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">
+          Destinataire: ${matchData.agentEmail}
+        </div>
+        <div style="font-size: 12px; opacity: 0.8;">
+          Match: ${matchData.gigTitle} chez ${matchData.companyName || 'HARX'}
+        </div>
+        ${isFallback ? '<div style="font-size: 11px; opacity: 0.7; margin-top: 4px;">Contenu copié dans le presse-papiers</div>' : ''}
+      </div>
+    </div>
+  `;
+
+  // Ajouter l'animation CSS
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+  `;
+  document.head.appendChild(style);
+
+  document.body.appendChild(notification);
+
+  // Supprimer la notification après 6 secondes
+  setTimeout(() => {
+    if (notification.parentNode) {
+      notification.parentNode.removeChild(notification);
+    }
+  }, 6000);
+};
+
+// Fonction pour afficher la notification d'erreur
+const showErrorNotification = () => {
+  const errorNotification = document.createElement('div');
+  errorNotification.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    padding: 16px 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 10000;
+    font-family: Arial, sans-serif;
+    max-width: 350px;
+    animation: slideIn 0.3s ease-out;
+  `;
+  
+  errorNotification.innerHTML = `
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <div style="font-size: 24px;">❌</div>
+      <div>
+        <div style="font-weight: bold; margin-bottom: 4px;">Erreur d'envoi</div>
+        <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">
+          Impossible d'envoyer l'email
+        </div>
+        <div style="font-size: 12px; opacity: 0.8;">
+          Vérifiez la configuration EmailJS
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(errorNotification);
+
+  setTimeout(() => {
+    if (errorNotification.parentNode) {
+      errorNotification.parentNode.removeChild(errorNotification);
+    }
+  }, 5000);
 }; 

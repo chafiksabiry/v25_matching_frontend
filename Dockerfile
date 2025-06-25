@@ -20,6 +20,7 @@ ENV VITE_AWS_SES_FROM_EMAIL=chafik.sabiry@harx.ai
 
 ENV VITE_EMAILJS_SERVICE_ID=service_q5vmvim
 ENV VITE_EMAILJS_PUBLIC_KEY=3KIMbHKKVndyYWuK3
+ENV VITE_EMAILJS_TEMPLATE_ID=template_jfhd1ri
 
 RUN npm run build
 
