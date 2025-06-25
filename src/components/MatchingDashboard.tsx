@@ -832,7 +832,7 @@ const MatchingDashboard: React.FC = () => {
                                 if (selectedGig) {
                                   await sendMatchEmail({
                                     agentName: match.agentInfo?.name || 'Agent',
-                                    agentEmail: 'elhoucine.qara@harx.ai',
+                                    agentEmail: 'elhoucineqara114@gmail.com',
                                     gigTitle: selectedGig.title,
                                     companyName: selectedGig.companyName
                                   });
