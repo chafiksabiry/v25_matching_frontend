@@ -10,29 +10,87 @@ interface MatchEmailData {
 
 export const sendMatchEmail = async (matchData: MatchEmailData): Promise<boolean> => {
   try {
-    // Configuration EmailJS - Remplacez par vos vraies clés
-    const EMAILJS_SERVICE_ID = 'service_harx_email'; // Remplacez par votre Service ID
-    const EMAILJS_TEMPLATE_ID = 'template_harx_match'; // Remplacez par votre Template ID
-    const EMAILJS_PUBLIC_KEY = 'user_harx_public_key'; // Remplacez par votre Public Key
+    // Configuration EmailJS simple sans template
+    const EMAILJS_SERVICE_ID = 'service_harx_email'; // ⚠️ Remplacez par votre Service ID
+    const EMAILJS_PUBLIC_KEY = 'user_harx_public_key'; // ⚠️ Remplacez par votre Public Key
 
-    // Paramètres pour l'email
+    // Créer le contenu de l'email directement
+    const emailSubject = `🎯 Match trouvé pour "${matchData.gigTitle}" - HARX`;
+    const emailBody = `
+      <!DOCTYPE html>
+      <html lang="fr">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Match HARX</title>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
+          .button { display: inline-block; background: #667eea; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+          .highlight { background: #e3f2fd; padding: 15px; border-radius: 5px; margin: 15px 0; }
+          .footer { text-align: center; margin-top: 30px; color: #666; font-size: 12px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>🎯 Match HARX Trouvé!</h1>
+            <p>Félicitations ${matchData.agentName}!</p>
+          </div>
+          <div class="content">
+            <h2>Un nouveau match vous attend!</h2>
+            
+            <div class="highlight">
+              <h3>📋 Détails du poste:</h3>
+              <p><strong>Titre:</strong> ${matchData.gigTitle}</p>
+              <p><strong>Entreprise:</strong> ${matchData.companyName || 'HARX'}</p>
+              ${matchData.matchScore ? `<p><strong>Score de compatibilité:</strong> ${Math.round(matchData.matchScore * 100)}%</p>` : ''}
+            </div>
+            
+            <p>Notre système d'IA a identifié que votre profil correspond parfaitement à cette opportunité!</p>
+            
+            <p><strong>Prochaines étapes:</strong></p>
+            <ul>
+              <li>Connectez-vous à votre espace HARX</li>
+              <li>Consultez les détails complets du poste</li>
+              <li>Postulez en quelques clics</li>
+            </ul>
+            
+            <div style="text-align: center;">
+              <a href="${window.location.origin}/app11" class="button">Voir le match</a>
+            </div>
+            
+            <p style="margin-top: 30px; font-size: 14px; color: #666;">
+              Si vous avez des questions, n'hésitez pas à nous contacter à <a href="mailto:support@harx.ai">support@harx.ai</a>
+            </p>
+          </div>
+          <div class="footer">
+            <p>© 2025 HARX. Tous droits réservés.</p>
+            <p>Cet email a été envoyé automatiquement par le système HARX.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    // Paramètres pour l'envoi direct
     const templateParams = {
       to_email: matchData.agentEmail,
       to_name: matchData.agentName,
-      gig_title: matchData.gigTitle,
-      company_name: matchData.companyName || 'HARX',
-      match_score: matchData.matchScore ? `${Math.round(matchData.matchScore * 100)}%` : 'N/A',
-      harx_link: `${window.location.origin}/app11`,
+      subject: emailSubject,
+      message: emailBody,
       from_name: 'HARX Team',
       from_email: 'noreply@harx.ai'
     };
 
-    console.log('📧 Envoi d\'email réel avec EmailJS:', templateParams);
+    console.log('📧 Envoi d\'email direct:', templateParams);
 
-    // Envoi automatique avec EmailJS
+    // Envoi avec EmailJS (sans template)
     const response = await emailjs.send(
       EMAILJS_SERVICE_ID,
-      EMAILJS_TEMPLATE_ID,
+      'template_default', // Template par défaut d'EmailJS
       templateParams,
       EMAILJS_PUBLIC_KEY
     );
