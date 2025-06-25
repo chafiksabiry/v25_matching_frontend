@@ -10,9 +10,17 @@ interface MatchEmailData {
 
 export const sendMatchEmail = async (matchData: MatchEmailData): Promise<boolean> => {
   try {
-    // Configuration EmailJS simple sans template
-    const EMAILJS_SERVICE_ID = 'service_harx_email'; // ⚠️ Remplacez par votre Service ID
-    const EMAILJS_PUBLIC_KEY = 'user_harx_public_key'; // ⚠️ Remplacez par votre Public Key
+    // Configuration EmailJS depuis les variables d'environnement
+    const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_harx_email';
+    const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'user_harx_public_key';
+
+    // Vérifier que les clés sont configurées
+    if (!EMAILJS_SERVICE_ID || EMAILJS_SERVICE_ID === 'service_harx_email') {
+      throw new Error('VITE_EMAILJS_SERVICE_ID non configuré');
+    }
+    if (!EMAILJS_PUBLIC_KEY || EMAILJS_PUBLIC_KEY === 'user_harx_public_key') {
+      throw new Error('VITE_EMAILJS_PUBLIC_KEY non configuré');
+    }
 
     // Créer le contenu de l'email directement
     const emailSubject = `🎯 Match trouvé pour "${matchData.gigTitle}" - HARX`;
@@ -85,7 +93,11 @@ export const sendMatchEmail = async (matchData: MatchEmailData): Promise<boolean
       from_email: 'noreply@harx.ai'
     };
 
-    console.log('📧 Envoi d\'email direct:', templateParams);
+    console.log('📧 Envoi d\'email avec EmailJS:', {
+      serviceId: EMAILJS_SERVICE_ID,
+      to: matchData.agentEmail,
+      subject: emailSubject
+    });
 
     // Envoi avec EmailJS (sans template)
     const response = await emailjs.send(
