@@ -94,6 +94,20 @@ export const sendMatchEmail = async (matchData: MatchEmailData): Promise<boolean
     // Essayer d'abord avec EmailJS si un template est configuré
     if (EMAILJS_TEMPLATE_ID) {
       try {
+        console.log('🔧 Configuration EmailJS:', {
+          serviceId: EMAILJS_SERVICE_ID,
+          templateId: EMAILJS_TEMPLATE_ID,
+          publicKey: EMAILJS_PUBLIC_KEY,
+          templateParams: {
+            to_email: matchData.agentEmail,
+            to_name: matchData.agentName,
+            subject: emailSubject,
+            message: emailBody,
+            from_name: 'HARX Team',
+            from_email: 'noreply@harx.ai'
+          }
+        });
+
         const response = await emailjs.send(
           EMAILJS_SERVICE_ID,
           EMAILJS_TEMPLATE_ID,
@@ -109,9 +123,18 @@ export const sendMatchEmail = async (matchData: MatchEmailData): Promise<boolean
         );
         
         console.log('✅ Email envoyé avec succès via EmailJS:', response);
+        console.log('📧 Détails de la réponse:', {
+          status: response.status,
+          text: response.text
+        });
         showSuccessNotification(matchData);
         return true;
       } catch (emailjsError) {
+        console.error('❌ Erreur EmailJS détaillée:', {
+          error: emailjsError,
+          message: emailjsError instanceof Error ? emailjsError.message : 'Erreur inconnue',
+          stack: emailjsError instanceof Error ? emailjsError.stack : undefined
+        });
         console.warn('⚠️ EmailJS a échoué, utilisation du fallback:', emailjsError);
         // Continuer avec le fallback
       }
