@@ -1,3 +1,5 @@
+import emailjs from '@emailjs/browser';
+
 interface MatchEmailData {
   agentName: string;
   agentEmail: string;
@@ -8,17 +10,34 @@ interface MatchEmailData {
 
 export const sendMatchEmail = async (matchData: MatchEmailData): Promise<boolean> => {
   try {
-    // Simulation d'envoi d'email (pour test)
-    console.log('📧 Envoi d\'email simulé:', {
-      to: matchData.agentEmail,
-      subject: `🎯 Match trouvé pour "${matchData.gigTitle}" - HARX`,
-      agentName: matchData.agentName,
-      gigTitle: matchData.gigTitle,
-      companyName: matchData.companyName
-    });
+    // Configuration EmailJS - Remplacez par vos vraies clés
+    const EMAILJS_SERVICE_ID = 'service_harx_email'; // Remplacez par votre Service ID
+    const EMAILJS_TEMPLATE_ID = 'template_harx_match'; // Remplacez par votre Template ID
+    const EMAILJS_PUBLIC_KEY = 'user_harx_public_key'; // Remplacez par votre Public Key
 
-    // Simuler un délai d'envoi
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Paramètres pour l'email
+    const templateParams = {
+      to_email: matchData.agentEmail,
+      to_name: matchData.agentName,
+      gig_title: matchData.gigTitle,
+      company_name: matchData.companyName || 'HARX',
+      match_score: matchData.matchScore ? `${Math.round(matchData.matchScore * 100)}%` : 'N/A',
+      harx_link: `${window.location.origin}/app11`,
+      from_name: 'HARX Team',
+      from_email: 'noreply@harx.ai'
+    };
+
+    console.log('📧 Envoi d\'email réel avec EmailJS:', templateParams);
+
+    // Envoi automatique avec EmailJS
+    const response = await emailjs.send(
+      EMAILJS_SERVICE_ID,
+      EMAILJS_TEMPLATE_ID,
+      templateParams,
+      EMAILJS_PUBLIC_KEY
+    );
+
+    console.log('✅ Email envoyé avec succès:', response);
 
     // Afficher une notification de succès
     const notification = document.createElement('div');
@@ -46,7 +65,7 @@ export const sendMatchEmail = async (matchData: MatchEmailData): Promise<boolean
             Destinataire: ${matchData.agentEmail}
           </div>
           <div style="font-size: 12px; opacity: 0.8;">
-            Match: ${matchData.gigTitle} chez ${matchData.companyName}
+            Match: ${matchData.gigTitle} chez ${matchData.companyName || 'HARX'}
           </div>
         </div>
       </div>
@@ -71,39 +90,10 @@ export const sendMatchEmail = async (matchData: MatchEmailData): Promise<boolean
       }
     }, 6000);
 
-    // Copier les détails dans le presse-papiers pour référence
-    const emailDetails = `
-🎯 Match HARX Trouvé!
-
-Félicitations ${matchData.agentName}!
-
-Un nouveau match vous attend:
-
-📋 Détails du poste:
-• Titre: ${matchData.gigTitle}
-• Entreprise: ${matchData.companyName}
-${matchData.matchScore ? `• Score de compatibilité: ${Math.round(matchData.matchScore * 100)}%` : ''}
-
-Notre système d'IA a identifié que votre profil correspond parfaitement à cette opportunité!
-
-Prochaines étapes:
-1. Connectez-vous à votre espace HARX
-2. Consultez les détails complets du poste
-3. Postulez en quelques clics
-
-Lien: ${window.location.origin}/app11
-
-© 2025 HARX. Tous droits réservés.
-    `.trim();
-
-    if (navigator.clipboard) {
-      await navigator.clipboard.writeText(emailDetails);
-    }
-
     return true;
 
   } catch (error) {
-    console.error('Erreur lors de l\'envoi de l\'email:', error);
+    console.error('❌ Erreur lors de l\'envoi de l\'email:', error);
     
     // Afficher une notification d'erreur
     const errorNotification = document.createElement('div');
@@ -118,7 +108,7 @@ Lien: ${window.location.origin}/app11
       box-shadow: 0 4px 12px rgba(0,0,0,0.15);
       z-index: 10000;
       font-family: Arial, sans-serif;
-      max-width: 300px;
+      max-width: 350px;
       animation: slideIn 0.3s ease-out;
     `;
     
@@ -127,8 +117,11 @@ Lien: ${window.location.origin}/app11
         <div style="font-size: 24px;">❌</div>
         <div>
           <div style="font-weight: bold; margin-bottom: 4px;">Erreur d'envoi</div>
-          <div style="font-size: 14px; opacity: 0.9;">
-            Impossible d'envoyer l'email. Vérifiez la configuration.
+          <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">
+            Impossible d'envoyer l'email
+          </div>
+          <div style="font-size: 12px; opacity: 0.8;">
+            Vérifiez la configuration EmailJS
           </div>
         </div>
       </div>
