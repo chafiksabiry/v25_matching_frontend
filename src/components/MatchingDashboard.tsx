@@ -189,6 +189,7 @@ const MatchingDashboard: React.FC = () => {
 
   const handleGigSelect = (gig: Gig) => {
     setSelectedGig(gig);
+    setCurrentPage(1);
     setTimeout(scrollToResults, 100);
   };
 
@@ -689,7 +690,7 @@ const MatchingDashboard: React.FC = () => {
               ))}
             </div>
             {/* Pagination Controls */}
-            {(activeTab === "gigs" ? gigs.length : reps.length) > itemsPerPage && (
+            {totalPages > 1 && (
               <div className="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6 rounded-b-xl mt-6">
                 <div className="flex flex-1 justify-between sm:hidden">
                   <button
