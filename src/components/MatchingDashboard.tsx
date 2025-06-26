@@ -7,6 +7,7 @@ import {
   findGigsForRep,
   generateOptimalMatches,
   getGigsByCompanyId,
+  createGigAgent,
 } from "../api";
 import { sendMatchEmail } from "../api/emailService";
 import {
@@ -351,6 +352,65 @@ const MatchingDashboard: React.FC = () => {
   const handleCloseMatchDetails = () => {
     setShowMatchDetails(false);
     setSelectedMatch(null);
+  };
+
+  // Helper function to handle email sending and GigAgent creation
+  const handleSendEmailAndCreateGigAgent = async (match: Match, gig: Gig) => {
+    try {
+      console.log('📧 Starting email and GigAgent creation process...');
+      
+      // 1. Send the email
+      const agentEmail = match.agentInfo?.email || 'test@example.com';
+      console.log('📧 Sending email to:', agentEmail);
+      
+      await sendMatchEmail({
+        agentName: match.agentInfo?.name || 'Agent',
+        agentEmail: agentEmail,
+        gigTitle: gig.title,
+        companyName: gig.companyName
+      });
+      
+      console.log('✅ Email sent successfully');
+      
+      // 2. Create GigAgent assignment
+      console.log('📋 Creating GigAgent assignment...');
+      
+      const gigAgentData = {
+        agentId: match.repId,
+        gigId: gig._id || '',
+        matchScore: match.score || 0,
+        matchDetails: {
+          languageMatch: match.languageMatch ? {
+            score: match.languageMatch.details?.matchStatus === 'perfect_match' ? 1 : 
+                   match.languageMatch.details?.matchStatus === 'partial_match' ? 0.5 : 0,
+            details: {
+              matchingLanguages: match.languageMatch.details?.matchingLanguages || [],
+              missingLanguages: match.languageMatch.details?.missingLanguages || [],
+              insufficientLanguages: match.languageMatch.details?.insufficientLanguages || [],
+              matchStatus: match.languageMatch.details?.matchStatus || 'no_match'
+            }
+          } : undefined,
+          skillsMatch: match.skillsMatch ? {
+            details: {
+              matchingSkills: match.skillsMatch.details?.matchingSkills || [],
+              missingSkills: match.skillsMatch.details?.missingSkills || [],
+              insufficientSkills: match.skillsMatch.details?.insufficientSkills || [],
+              matchStatus: match.skillsMatch.details?.matchStatus || 'no_match'
+            }
+          } : undefined
+        }
+      };
+      
+      const gigAgentResponse = await createGigAgent(gigAgentData);
+      console.log('✅ GigAgent created successfully:', gigAgentResponse.message);
+      
+      // Show success message
+      alert(`✅ Email sent and assignment created successfully!\n\nAgent: ${match.agentInfo?.name}\nGig: ${gig.title}\nAssignment ID: ${gigAgentResponse.gigAgent._id}`);
+      
+    } catch (error) {
+      console.error('❌ Error in email and GigAgent creation process:', error);
+      alert(`❌ Error: ${error instanceof Error ? error.message : 'Unknown error occurred'}`);
+    }
   };
 
   if (selectedGig) {
@@ -840,19 +900,8 @@ const MatchingDashboard: React.FC = () => {
                             onClick={async (e) => {
                               e.stopPropagation();
                               try {
-                                // Envoyer l'email de match directement
-                                if (selectedGig) {
-                                  // Utiliser l'email réel de l'agent ou un email de test
-                                  const agentEmail = match.agentInfo?.email || 'test@example.com';
-                                  
-                                  console.log('📧 Envoi vers:', agentEmail);
-                                  
-                                  await sendMatchEmail({
-                                    agentName: match.agentInfo?.name || 'Agent',
-                                    agentEmail: agentEmail, // Utiliser l'email réel de l'agent
-                                    gigTitle: selectedGig.title,
-                                    companyName: selectedGig.companyName
-                                  });
+                                if (selectedMatch && selectedGig) {
+                                  await handleSendEmailAndCreateGigAgent(selectedMatch, selectedGig);
                                 }
                               } catch (error) {
                                 console.error('Erreur lors de l\'envoi de l\'email:', error);
@@ -1091,22 +1140,11 @@ const MatchingDashboard: React.FC = () => {
                           className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                           onClick={async () => {
                             try {
-                              // Envoyer l'email de match
                               if (selectedMatch && selectedGig) {
-                                await sendMatchEmail({
-                                  agentName: selectedMatch.agentInfo?.name || 'Agent',
-                                  agentEmail: selectedMatch.agentInfo?.email || '',
-                                  gigTitle: selectedGig.title,
-                                  companyName: selectedGig.companyName
-                                });
+                                await handleSendEmailAndCreateGigAgent(selectedMatch, selectedGig);
                               }
-                              
-                              // Fermer la modal
-                              handleCloseMatchDetails();
                             } catch (error) {
                               console.error('Erreur lors de l\'envoi de l\'email:', error);
-                              // Fermer quand même la modal
-                              handleCloseMatchDetails();
                             }
                           }}
                         >

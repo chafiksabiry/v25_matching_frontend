@@ -188,15 +188,15 @@ export const generateOptimalMatches = async (weights: MatchingWeights): Promise<
         
         // Skills matching
         if (weights.skills > 0) {
-          const gigSkills = gig.requiredSkills || [];
+          const gigSkills = gig.skills?.professional || [];
           const repSkills = [
             ...(rep.skills?.technical || []),
             ...(rep.skills?.professional || []),
             ...(rep.skills?.soft || [])
           ];
           
-          const matchingSkills = gigSkills.filter(gigSkill => 
-            repSkills.some(repSkill => repSkill.skill === gigSkill)
+          const matchingSkills = gigSkills.filter((gigSkill: any) => 
+            repSkills.some((repSkill: any) => repSkill.skill === gigSkill.skill)
           );
           
           score += (matchingSkills.length / Math.max(gigSkills.length, 1)) * weights.skills;
@@ -215,15 +215,15 @@ export const generateOptimalMatches = async (weights: MatchingWeights): Promise<
         }
         
         // Language matching
-        if (weights.language > 0) {
-          const gigLanguages = gig.preferredLanguages || [];
+        if (weights.languages > 0) {
+          const gigLanguages = (gig as any).skills?.languages || [];
           const repLanguages = rep.personalInfo?.languages || [];
           
-          const matchingLanguages = gigLanguages.filter(gigLang => 
-            repLanguages.some(repLang => repLang.language === gigLang)
+          const matchingLanguages = gigLanguages.filter((gigLang: any) => 
+            repLanguages.some((repLang: any) => repLang.language === gigLang.language)
           );
           
-          score += (matchingLanguages.length / Math.max(gigLanguages.length, 1)) * weights.language;
+          score += (matchingLanguages.length / Math.max(gigLanguages.length, 1)) * weights.languages;
         }
         
         if (score > 0.3) { // Only include matches with reasonable scores
@@ -235,12 +235,11 @@ export const generateOptimalMatches = async (weights: MatchingWeights): Promise<
             title: gig.title,
             category: gig.category,
             requiredExperience: gig.requiredExperience,
-            requiredSkills: gig.requiredSkills,
             agentInfo: {
               name: rep.personalInfo?.name || '',
               email: rep.personalInfo?.email || ''
             }
-          });
+          } as Match);
         }
       }
     }
@@ -249,6 +248,90 @@ export const generateOptimalMatches = async (weights: MatchingWeights): Promise<
     return matches.sort((a, b) => b.score - a.score).slice(0, 10);
   } catch (error) {
     console.error('Error generating optimal matches:', error);
+    throw error;
+  }
+};
+
+// GigAgent API calls
+export const createGigAgent = async (gigAgentData: {
+  agentId: string;
+  gigId: string;
+  matchScore: number;
+  matchDetails?: {
+    languageMatch?: {
+      score: number;
+      details: {
+        matchingLanguages: Array<{
+          language: string;
+          requiredLevel: string;
+          agentLevel: string;
+        }>;
+        missingLanguages: string[];
+        insufficientLanguages: Array<{
+          language: string;
+          requiredLevel: string;
+          agentLevel: string;
+        }>;
+        matchStatus: 'perfect_match' | 'partial_match' | 'no_match';
+      };
+    };
+    skillsMatch?: {
+      details: {
+        matchingSkills: Array<{
+          skill: string;
+          requiredLevel: number;
+          agentLevel: number;
+          type: string;
+        }>;
+        missingSkills: Array<{
+          skill: string;
+          type: string;
+        }>;
+        insufficientSkills: Array<{
+          skill: string;
+          requiredLevel: number;
+          agentLevel: number;
+          type: string;
+        }>;
+        matchStatus: 'perfect_match' | 'partial_match' | 'no_match';
+      };
+    };
+    scheduleMatch?: {
+      score: number;
+      details: {
+        matchingDays: Array<{
+          day: string;
+          gigHours: {
+            start: string;
+            end: string;
+          };
+          agentHours: {
+            start: string;
+            end: string;
+          };
+        }>;
+        missingDays: string[];
+        insufficientHours: Array<{
+          day: string;
+          gigHours: {
+            start: string;
+            end: string;
+          };
+          agentHours: {
+            start: string;
+            end: string;
+          };
+        }>;
+      };
+      matchStatus: 'perfect_match' | 'partial_match' | 'no_match';
+    };
+  };
+}): Promise<{ message: string; gigAgent: any; emailSent: boolean; matchScore: number }> => {
+  try {
+    const response = await api.post('/gig-agents', gigAgentData);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating gig agent assignment:', error);
     throw error;
   }
 };
