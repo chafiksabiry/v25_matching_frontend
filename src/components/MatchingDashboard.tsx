@@ -820,7 +820,7 @@ const MatchingDashboard: React.FC = () => {
                         </td>
                         <td className="px-6 py-4 text-center">
                           <button
-                            className="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg shadow-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-xl font-semibold text-base gap-2 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2"
+                            className="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-blue-500 to-violet-600 text-white rounded-lg shadow-md hover:from-blue-600 hover:to-violet-700 transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-lg font-semibold text-base gap-2 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
                             onClick={() => handleCreateGigAgent(match)}
                             title="Inviter cet agent à ce gig"
                           >
