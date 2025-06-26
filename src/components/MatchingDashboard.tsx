@@ -327,9 +327,6 @@ const MatchingDashboard: React.FC = () => {
     console.log('Gig sélectionné:', selectedGig);
     console.log('========================');
     
-    // Afficher une alerte avec les données
-    alert(`Données à envoyer:\n\nagentId: ${requestData.agentId}\ngigId: ${requestData.gigId}\n\nMatch agentId: ${match.agentId}\nGig _id: ${selectedGig._id}`);
-
     try {
       const response = await createGigAgent(requestData);
 
