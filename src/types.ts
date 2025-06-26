@@ -108,6 +108,7 @@ export interface MatchingWeights {
 }
 
 export interface Match {
+  agentId: any;
   requiredSkills(requiredSkills: any): unknown;
   requiredExperience: ReactNode;
   agentInfo: any;
