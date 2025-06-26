@@ -44,7 +44,8 @@ export const getGigs = async (): Promise<Gig[]> => {
 export const getGigsByCompanyId = async (companyId: string): Promise<Gig[]> => {
   const GIGS_API_URL = import.meta.env.VITE_API_URL_GIGS || 'https://api-gigsmanual.harx.ai/api';
   const response = await axios.get(`${GIGS_API_URL}/gigs/company/${companyId}`);
-  return response.data;
+  // Extract the data property from the response
+  return response.data.data || response.data;
 };
 
 export const getGigById = async (id: string): Promise<Gig> => {

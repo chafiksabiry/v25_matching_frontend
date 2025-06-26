@@ -105,6 +105,42 @@ interface MatchDetails {
   matchStatus: string;
 }
 
+// Type adapté pour les gigs reçus de l'API
+interface ApiGig {
+  _id: string;
+  companyId: string;
+  title: string;
+  description: string;
+  category: string;
+  seniority: {
+    level: string;
+    yearsExperience: string;
+  };
+  skills: {
+    professional: any[];
+    technical: any[];
+    soft: any[];
+    languages: any[];
+  };
+  availability: {
+    schedule: Array<{
+      day: string;
+      hours: {
+        start: string;
+        end: string;
+      };
+    }>;
+    timeZone: string;
+    flexibility: string[];
+  };
+  commission: any;
+  destination_zone: string;
+  createdAt: string;
+  updatedAt: string;
+  userId: string;
+  __v: number;
+}
+
 const defaultMatchingWeights: MatchingWeights = {
   experience: 0.15,
   skills: 0.2,
@@ -120,8 +156,8 @@ type TabType = "gigs" | "reps" | "optimal";
 
 const MatchingDashboard: React.FC = () => {
   const [reps, setReps] = useState<Rep[]>([]);
-  const [gigs, setGigs] = useState<Gig[]>([]);
-  const [selectedGig, setSelectedGig] = useState<Gig | null>(null);
+  const [gigs, setGigs] = useState<any[]>([]);
+  const [selectedGig, setSelectedGig] = useState<any | null>(null);
   const [selectedRep, setSelectedRep] = useState<Rep | null>(null);
   const [weights, setWeights] = useState<MatchingWeights>(
     defaultMatchingWeights
@@ -189,7 +225,7 @@ const MatchingDashboard: React.FC = () => {
     }
   };
 
-  const handleGigSelect = (gig: Gig) => {
+  const handleGigSelect = (gig: any) => {
     setSelectedGig(gig);
     setCurrentPage(1);
     setTimeout(scrollToResults, 100);
@@ -219,12 +255,22 @@ const MatchingDashboard: React.FC = () => {
       try {
         console.log("Fetching data...");
         const companyId = Cookies.get('companyId') || '685abf28641398dc582f4c95';
-        const [repsData, gigsData] = await Promise.all([
+        const [repsData, gigsResponse] = await Promise.all([
           getReps(),
           companyId ? getGigsByCompanyId(companyId) : getGigs()
         ]);
         console.log("=== REPS DATA ===", JSON.stringify(repsData, null, 2));
-        console.log("=== GIGS DATA ===", gigsData);
+        console.log("=== GIGS RESPONSE ===", gigsResponse);
+        
+        // Extract gigs data from the response structure
+        const gigsData: any = gigsResponse && typeof gigsResponse === 'object' && 'data' in gigsResponse 
+          ? gigsResponse.data 
+          : Array.isArray(gigsResponse) 
+            ? gigsResponse 
+            : [];
+        
+        console.log("=== EXTRACTED GIGS DATA ===", gigsData);
+        
         setReps(repsData);
         setGigs(gigsData);
       } catch (error) {
@@ -355,7 +401,7 @@ const MatchingDashboard: React.FC = () => {
   };
 
   // Helper function to handle email sending and GigAgent creation
-  const handleSendEmailAndCreateGigAgent = async (match: Match, gig: Gig) => {
+  const handleSendEmailAndCreateGigAgent = async (match: Match, gig: any) => {
     try {
       console.log('📧 Starting email and GigAgent creation process...');
       
@@ -367,7 +413,7 @@ const MatchingDashboard: React.FC = () => {
         agentName: match.agentInfo?.name || 'Agent',
         agentEmail: agentEmail,
         gigTitle: gig.title,
-        companyName: gig.companyName
+        companyName: gig.companyId
       });
       
       console.log('✅ Email sent successfully');
@@ -723,20 +769,17 @@ const MatchingDashboard: React.FC = () => {
                     </span>
                   </div>
                   <p className="text-sm text-gray-500 mb-4">
-                    {gig.companyName}
+                    Company ID: {gig.companyId}
                   </p>
                   <div className="space-y-2 text-sm text-gray-600">
                     <div className="flex items-center space-x-2">
                       <Clock size={16} className="text-gray-400" />
-                      <p>Required Experience: {gig.requiredExperience}+ years</p>
+                      <p>Required Experience: {gig.seniority?.yearsExperience || 'N/A'}+ years</p>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Activity size={16} className="text-gray-400" />
                       <p>
-                        Expected Conversion:{" "}
-                        {gig.expectedConversionRate
-                          ? `${(gig.expectedConversionRate * 100).toFixed(1)}%`
-                          : "N/A"}
+                        Seniority Level: {gig.seniority?.level || 'N/A'}
                       </p>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -744,7 +787,7 @@ const MatchingDashboard: React.FC = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                       </svg>
-                      <p>Region: {gig.targetRegion || "Any"}</p>
+                      <p>Destination Zone: {gig.destination_zone || "Any"}</p>
                     </div>
                   </div>
                 </div>
