@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Email HARX - Outlook</title>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+            width: 100%;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .tips {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .tips h3 {
+            margin-top: 0;
+            color: #856404;
+        }
+        .tips ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .tips li {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📧 Test Email HARX - Outlook</h1>
+            <p>Testez l'envoi d'emails vers Outlook/Hotmail/Live</p>
+        </div>
+
+        <form id="emailForm">
+            <div class="form-group">
+                <label for="emailType">Type de test :</label>
+                <select id="emailType" required>
+                    <option value="">Sélectionnez un type</option>
+                    <option value="outlook">Outlook.com</option>
+                    <option value="hotmail">Hotmail.com</option>
+                    <option value="live">Live.com</option>
+                    <option value="gmail">Gmail (comparaison)</option>
+                    <option value="custom">Email personnalisé</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="customEmailGroup" style="display: none;">
+                <label for="customEmail">Email personnalisé :</label>
+                <input type="email" id="customEmail" placeholder="votre-email@exemple.com">
+            </div>
+
+            <div class="form-group">
+                <label for="testName">Nom du destinataire :</label>
+                <input type="text" id="testName" value="Test HARX" required>
+            </div>
+
+            <div class="form-group">
+                <label for="testSubject">Sujet de test :</label>
+                <input type="text" id="testSubject" value="🎯 Test HARX - Outlook" required>
+            </div>
+
+            <div class="form-group">
+                <label for="testMessage">Message de test :</label>
+                <textarea id="testMessage" rows="4" placeholder="Message de test...">Test d'envoi d'email HARX vers Outlook. Si vous recevez cet email, le système fonctionne correctement.</textarea>
+            </div>
+
+            <button type="submit" class="btn" id="sendBtn">📤 Envoyer l'email de test</button>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Envoi en cours...</p>
+        </div>
+
+        <div class="result" id="result"></div>
+
+        <div class="tips">
+            <h3>💡 Conseils pour Outlook</h3>
+            <ul>
+                <li><strong>Vérifiez immédiatement</strong> le dossier "Courrier indésirable" après envoi</li>
+                <li><strong>Ajoutez noreply@harx.ai</strong> à vos contacts Outlook</li>
+                <li><strong>Créez une règle</strong> pour ne jamais marquer les emails HARX comme indésirable</li>
+                <li><strong>Attendez 2-5 minutes</strong> - Outlook peut prendre plus de temps que Gmail</li>
+                <li><strong>Vérifiez les paramètres</strong> de sécurité de votre compte Outlook</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Configuration EmailJS
+        const EMAILJS_SERVICE_ID = 'service_q5vmvim';
+        const EMAILJS_PUBLIC_KEY = '3KIMbHKKVndyYWuK3';
+        const EMAILJS_TEMPLATE_ID = 'template_jfhd1ri';
+
+        // Initialiser EmailJS
+        emailjs.init(EMAILJS_PUBLIC_KEY);
+
+        // Gestion du formulaire
+        document.getElementById('emailForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const emailType = document.getElementById('emailType').value;
+            const customEmail = document.getElementById('customEmail').value;
+            const testName = document.getElementById('testName').value;
+            const testSubject = document.getElementById('testSubject').value;
+            const testMessage = document.getElementById('testMessage').value;
+
+            let targetEmail = '';
+            
+            // Déterminer l'email cible
+            switch(emailType) {
+                case 'outlook':
+                    targetEmail = 'test-outlook@outlook.com';
+                    break;
+                case 'hotmail':
+                    targetEmail = 'test-hotmail@hotmail.com';
+                    break;
+                case 'live':
+                    targetEmail = 'test-live@live.com';
+                    break;
+                case 'gmail':
+                    targetEmail = 'test-gmail@gmail.com';
+                    break;
+                case 'custom':
+                    targetEmail = customEmail;
+                    break;
+                default:
+                    showResult('Veuillez sélectionner un type de test', 'error');
+                    return;
+            }
+
+            if (!targetEmail) {
+                showResult('Veuillez saisir un email valide', 'error');
+                return;
+            }
+
+            // Afficher le loading
+            showLoading(true);
+            showResult('', '');
+
+            try {
+                // Paramètres optimisés pour Outlook
+                const templateParams = {
+                    to_email: targetEmail,
+                    to_name: testName,
+                    subject: testSubject,
+                    message: testMessage,
+                    from_name: 'HARX Team',
+                    from_email: 'noreply@harx.ai',
+                    reply_to: 'support@harx.ai',
+                    email_type: 'html',
+                    priority: 'high',
+                    custom_headers: JSON.stringify({
+                        'X-Mailer': 'HARX Matching System',
+                        'X-Priority': '1',
+                        'X-MSMail-Priority': 'High',
+                        'Importance': 'High',
+                        'X-Report-Abuse': 'Please report abuse here: support@harx.ai'
+                    })
+                };
+
+                console.log('📧 Envoi de test vers:', targetEmail);
+                console.log('🔧 Paramètres:', templateParams);
+
+                const response = await emailjs.send(
+                    EMAILJS_SERVICE_ID,
+                    EMAILJS_TEMPLATE_ID,
+                    templateParams,
+                    EMAILJS_PUBLIC_KEY
+                );
+
+                console.log('✅ Réponse EmailJS:', response);
+                
+                const isOutlook = targetEmail.includes('outlook') || targetEmail.includes('hotmail') || targetEmail.includes('live');
+                
+                if (isOutlook) {
+                    showResult(`
+                        <strong>✅ Email envoyé avec succès!</strong><br>
+                        <strong>Destinataire:</strong> ${targetEmail}<br>
+                        <strong>Status:</strong> ${response.status}<br><br>
+                        <strong>💡 IMPORTANT pour Outlook:</strong><br>
+                        • Vérifiez votre dossier "Courrier indésirable"<br>
+                        • L'email peut prendre 2-5 minutes à arriver<br>
+                        • Ajoutez noreply@harx.ai à vos contacts
+                    `, 'success');
+                } else {
+                    showResult(`
+                        <strong>✅ Email envoyé avec succès!</strong><br>
+                        <strong>Destinataire:</strong> ${targetEmail}<br>
+                        <strong>Status:</strong> ${response.status}
+                    `, 'success');
+                }
+
+            } catch (error) {
+                console.error('❌ Erreur:', error);
+                showResult(`
+                    <strong>❌ Erreur lors de l'envoi</strong><br>
+                    <strong>Erreur:</strong> ${error.message || error}<br><br>
+                    <strong>Solutions possibles:</strong><br>
+                    • Vérifiez la configuration EmailJS<br>
+                    • Vérifiez les limites du plan gratuit<br>
+                    • Contactez le support HARX
+                `, 'error');
+            } finally {
+                showLoading(false);
+            }
+        });
+
+        // Gestion de l'affichage/masquage du champ email personnalisé
+        document.getElementById('emailType').addEventListener('change', function() {
+            const customGroup = document.getElementById('customEmailGroup');
+            if (this.value === 'custom') {
+                customGroup.style.display = 'block';
+            } else {
+                customGroup.style.display = 'none';
+            }
+        });
+
+        function showLoading(show) {
+            const loading = document.getElementById('loading');
+            const sendBtn = document.getElementById('sendBtn');
+            
+            if (show) {
+                loading.style.display = 'block';
+                sendBtn.disabled = true;
+                sendBtn.textContent = '📤 Envoi en cours...';
+            } else {
+                loading.style.display = 'none';
+                sendBtn.disabled = false;
+                sendBtn.textContent = '📤 Envoyer l\'email de test';
+            }
+        }
+
+        function showResult(message, type) {
+            const result = document.getElementById('result');
+            if (message) {
+                result.innerHTML = message;
+                result.className = `result ${type}`;
+                result.style.display = 'block';
+            } else {
+                result.style.display = 'none';
+            }
+        }
+
+        // Test rapide avec des emails prédéfinis
+        function quickTest(email) {
+            document.getElementById('emailType').value = 'custom';
+            document.getElementById('customEmail').value = email;
+            document.getElementById('customEmailGroup').style.display = 'block';
+            document.getElementById('testName').value = 'Test HARX';
+            document.getElementById('testSubject').value = '🎯 Test HARX - ' + new Date().toLocaleString();
+            document.getElementById('testMessage').value = 'Test automatique HARX - ' + new Date().toISOString();
+        }
+
+        // Ajouter des boutons de test rapide
+        const quickTestDiv = document.createElement('div');
+        quickTestDiv.innerHTML = `
+            <div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                <h4>🧪 Tests rapides :</h4>
+                <button onclick="quickTest('votre-email@outlook.com')" style="margin: 5px; padding: 8px 15px; background: #0078d4; color: white; border: none; border-radius: 5px; cursor: pointer;">Test Outlook</button>
+                <button onclick="quickTest('votre-email@hotmail.com')" style="margin: 5px; padding: 8px 15px; background: #0078d4; color: white; border: none; border-radius: 5px; cursor: pointer;">Test Hotmail</button>
+                <button onclick="quickTest('votre-email@gmail.com')" style="margin: 5px; padding: 8px 15px; background: #ea4335; color: white; border: none; border-radius: 5px; cursor: pointer;">Test Gmail</button>
+            </div>
+        `;
+        document.querySelector('.container').insertBefore(quickTestDiv, document.querySelector('.tips'));
+    </script>
+</body>
+</html> 
