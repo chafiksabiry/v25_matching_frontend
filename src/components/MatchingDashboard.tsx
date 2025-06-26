@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { Toaster, toast } from 'react-hot-toast';
 
 interface MatchResponse {
   matches: Match[];
@@ -319,7 +320,10 @@ const MatchingDashboard: React.FC = () => {
       const response = await createGigAgent(requestData);
 
       console.log('Gig-Agent created successfully:', response);
-      setGigAgentSuccess(`Agent successfully assigned to "${selectedGig.title}"! Email sent: ${response.emailSent ? 'Yes' : 'No'}`);
+      toast.success(
+        `Agent successfully assigned to "${selectedGig.title}"! Email sent: ${response.emailSent ? 'Yes' : 'No'}`,
+        { duration: 5000 }
+      );
       
       // Close the modal after successful creation
       setTimeout(() => {
@@ -340,6 +344,7 @@ const MatchingDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <Toaster position="top-left" />
       {/* Header */}
       <header className="bg-gradient-to-r from-indigo-700 to-indigo-800 text-white p-6 shadow-lg">
         <div className="container mx-auto flex justify-between items-center">
