@@ -300,7 +300,7 @@ const MatchingDashboard: React.FC = () => {
 
     // Debug logging
     console.log('Creating gig-agent with data:', {
-      agentId: match.repId,
+      agentId: match.agentId,
       gigId: selectedGig._id,
       match: match
     });
@@ -309,7 +309,7 @@ const MatchingDashboard: React.FC = () => {
 
     // Afficher les données avant l'appel
     const requestData = {
-      agentId: match.repId,
+      agentId: match.agentId,
       gigId: selectedGig._id
     };
     
@@ -321,7 +321,7 @@ const MatchingDashboard: React.FC = () => {
     console.log('========================');
     
     // Afficher une alerte avec les données
-    alert(`Données à envoyer:\n\nagentId: ${requestData.agentId}\ngigId: ${requestData.gigId}\n\nMatch repId: ${match.repId}\nGig _id: ${selectedGig._id}`);
+    alert(`Données à envoyer:\n\nagentId: ${requestData.agentId}\ngigId: ${requestData.gigId}\n\nMatch agentId: ${match.agentId}\nGig _id: ${selectedGig._id}`);
 
     try {
       const response = await createGigAgent(requestData);
