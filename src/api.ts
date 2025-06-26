@@ -162,4 +162,40 @@ export const generateOptimalMatches = async (weights: MatchingWeights): Promise<
     console.error('Error in generateOptimalMatches:', error);
     throw error;
   }
+};
+
+// Gig-Agent API calls
+interface GigAgentRequest {
+  agentId: string;
+  gigId: string;
+}
+
+interface GigAgentResponse {
+  message: string;
+  gigAgent: any;
+  emailSent: boolean;
+  matchScore: number;
+}
+
+export const createGigAgent = async (data: GigAgentRequest): Promise<GigAgentResponse> => {
+  try {
+    const MATCHING_API_URL = import.meta.env.VITE_MATCHING_API_URL || 'https://api-matching.harx.ai/api';
+    const response = await fetch(`${MATCHING_API_URL}/gig-agents`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data)
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to create gig-agent assignment');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error creating gig-agent assignment:', error);
+    throw error;
+  }
 }; 
