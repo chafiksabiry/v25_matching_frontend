@@ -331,10 +331,6 @@ const MatchingDashboard: React.FC = () => {
       const response = await createGigAgent(requestData);
 
       console.log('Gig-Agent created successfully:', response);
-      toast.success(
-        `Agent successfully assigned to "${selectedGig.title}"! Email sent: ${response.emailSent ? 'Yes' : 'No'}`,
-        { duration: 5000 }
-      );
       
       // Close the modal after successful creation
       setTimeout(() => {
@@ -819,14 +815,25 @@ const MatchingDashboard: React.FC = () => {
                           )}
                         </td>
                         <td className="px-6 py-4 text-center">
-                          <button
-                            className="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-blue-500 to-violet-600 text-white rounded-lg shadow-md hover:from-blue-600 hover:to-violet-700 transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-lg font-semibold text-base gap-2 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
-                            onClick={() => handleCreateGigAgent(match)}
-                            title="Inviter cet agent à ce gig"
-                          >
-                            <Zap className="w-5 h-5 mr-1 animate-pulse" />
-                            Invite
-                          </button>
+                          {match.alreadyAssigned ? (
+                            <button
+                              className="inline-flex items-center px-5 py-2.5 bg-gray-300 text-gray-500 rounded-lg font-semibold text-base cursor-not-allowed"
+                              disabled
+                              title="Cet agent est déjà invité à ce gig"
+                            >
+                              <Zap className="w-5 h-5 mr-1" />
+                              Assigné
+                            </button>
+                          ) : (
+                            <button
+                              className="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-blue-500 to-violet-600 text-white rounded-lg shadow-md hover:from-blue-600 hover:to-violet-700 transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-lg font-semibold text-base gap-2 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
+                              onClick={() => handleCreateGigAgent(match)}
+                              title="Inviter cet agent à ce gig"
+                            >
+                              <Zap className="w-5 h-5 mr-1 animate-pulse" />
+                              Invite
+                            </button>
+                          )}
                         </td>
                       </tr>
                     ))}
