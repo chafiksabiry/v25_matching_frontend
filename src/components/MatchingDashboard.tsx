@@ -141,15 +141,6 @@ const MatchingDashboard: React.FC = () => {
     setTimeout(scrollToResults, 100);
   };
 
-  const handleRepSelect = (rep: Rep) => {
-    setSelectedRep(rep);
-    setTimeout(scrollToResults, 100); // Petit délai pour laisser le temps aux résultats de se charger
-  };
-
-  const paginatedReps = reps.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
   const paginatedGigs = gigs.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
