@@ -130,29 +130,80 @@ export interface Match {
   category?: string;
   requiredExperience?: number;
   requiredSkills?: string[];
+  
+  // Basic agent information
   agentInfo?: {
     name: string;
     email: string;
+    photo?: string | null;
+    location?: string;
+    phone?: string;
+    languages?: Array<{
+      language: string;
+      proficiency?: string;
+    }>;
+    skills?: {
+      technical?: Array<{ skill: string; level?: number }>;
+      professional?: Array<{ skill: string; level?: number }>;
+      soft?: Array<{ skill: string; level?: number }>;
+      contactCenter?: Array<{ skill: string; level?: number }>;
+    };
+    experience?: Array<{
+      title: string;
+      company: string;
+      startDate: string | Date;
+      endDate: string | Date;
+    }>;
   };
+  
+  // Detailed matching information (optional)
   languageMatch?: {
     details: {
       matchStatus: 'perfect_match' | 'partial_match' | 'no_match';
       matchingLanguages: Array<{
         language: string;
         status: 'perfect_match' | 'partial_match' | 'no_match';
+        requiredLevel?: string;
+        agentLevel?: string;
+      }>;
+      missingLanguages?: Array<{
+        language: string;
+        requiredLevel?: string;
+      }>;
+      insufficientLanguages?: Array<{
+        language: string;
+        requiredLevel?: string;
+        agentLevel?: string;
       }>;
     };
   };
+  
   skillsMatch?: {
     details: {
       matchStatus: 'perfect_match' | 'partial_match' | 'no_match';
       matchingSkills: Array<{
         skill: string;
         status: 'perfect_match' | 'partial_match' | 'no_match';
+        requiredLevel?: number;
+        agentLevel?: number;
+      }>;
+      missingSkills?: Array<{
+        skill: string;
+        requiredLevel?: number;
+      }>;
+      insufficientSkills?: Array<{
+        skill: string;
+        requiredLevel?: number;
+        agentLevel?: number;
       }>;
     };
   };
-  availability: Availability;
+  
+  availability?: Availability;
+  
+  // Additional properties that might be returned by the new API
+  matchStatus?: string;
+  agentId?: string;
 }
 
 export type Skill = 

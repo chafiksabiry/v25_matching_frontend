@@ -283,22 +283,22 @@ const MatchingDashboard: React.FC = () => {
           setLoading(false);
         } else if (activeTab === "reps" && selectedRep) {
           setLoading(true);
-          response = await findGigsForRep(selectedRep._id, weights);
+          const repResponse = await findGigsForRep(selectedRep._id, weights);
           console.log("Rep Response Structure:", {
-            matches: response.matches
+            matches: repResponse
           });
-          console.log("First Match Structure:", response.matches[0]);
-          setMatches(response.matches || []);
+          console.log("First Match Structure:", Array.isArray(repResponse) && repResponse.length > 0 ? repResponse[0] : 'No matches');
+          setMatches(Array.isArray(repResponse) ? repResponse : []);
           setMatchStats(null);
           setLoading(false);
         } else if (activeTab === "optimal") {
           setLoading(true);
-          response = await generateOptimalMatches(weights);
+          const optimalResponse = await generateOptimalMatches(weights);
           console.log("Optimal Response Structure:", {
-            matches: response.matches
+            matches: optimalResponse
           });
-          console.log("First Match Structure:", response.matches[0]);
-          setMatches(response.matches || []);
+          console.log("First Match Structure:", Array.isArray(optimalResponse) && optimalResponse.length > 0 ? optimalResponse[0] : 'No matches');
+          setMatches(Array.isArray(optimalResponse) ? optimalResponse : []);
           setMatchStats(null);
           setLoading(false);
         } else {
@@ -797,7 +797,7 @@ const MatchingDashboard: React.FC = () => {
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          {match.agentInfo?.languages?.length > 0 ? (
+                          {match.agentInfo?.languages && match.agentInfo.languages.length > 0 ? (
                             <div className="flex flex-wrap gap-2">
                               {match.agentInfo.languages.map((lang: { language: string; proficiency?: string }, i: number) => (
                                 <span key={i} className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-medium">
@@ -810,11 +810,23 @@ const MatchingDashboard: React.FC = () => {
                           )}
                         </td>
                         <td className="px-6 py-4">
-                          {match.skillsMatch?.details?.matchingSkills?.length > 0 ? (
+                          {match.skillsMatch?.details?.matchingSkills && match.skillsMatch.details.matchingSkills.length > 0 ? (
                             <div className="flex flex-wrap gap-2">
                               {match.skillsMatch.details.matchingSkills.map((skill: { skill: string; requiredLevel?: number }, i: number) => (
                                 <span key={i} className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-medium">
                                   {skill.skill} {skill.requiredLevel && <span>(Level {skill.requiredLevel})</span>}
+                                </span>
+                              ))}
+                            </div>
+                          ) : match.agentInfo?.skills ? (
+                            <div className="flex flex-wrap gap-2">
+                              {[
+                                ...(match.agentInfo.skills.technical || []),
+                                ...(match.agentInfo.skills.professional || []),
+                                ...(match.agentInfo.skills.soft || [])
+                              ].slice(0, 3).map((skill: { skill: string; level?: number }, i: number) => (
+                                <span key={i} className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-medium">
+                                  {skill.skill} {skill.level && <span>(Level {skill.level})</span>}
                                 </span>
                               ))}
                             </div>
@@ -830,9 +842,14 @@ const MatchingDashboard: React.FC = () => {
                               try {
                                 // Envoyer l'email de match directement
                                 if (selectedGig) {
+                                  // Utiliser l'email réel de l'agent ou un email de test
+                                  const agentEmail = match.agentInfo?.email || 'test@example.com';
+                                  
+                                  console.log('📧 Envoi vers:', agentEmail);
+                                  
                                   await sendMatchEmail({
                                     agentName: match.agentInfo?.name || 'Agent',
-                                    agentEmail: 'elhoucine.qara@harx.ai',
+                                    agentEmail: agentEmail, // Utiliser l'email réel de l'agent
                                     gigTitle: selectedGig.title,
                                     companyName: selectedGig.companyName
                                   });
@@ -980,6 +997,64 @@ const MatchingDashboard: React.FC = () => {
                               ))}
                               {(!selectedMatch.languageMatch?.details?.matchingLanguages?.length && !selectedMatch.languageMatch?.details?.missingLanguages?.length && !selectedMatch.languageMatch?.details?.insufficientLanguages?.length) && (
                                 <div className="text-gray-400">Aucune langue requise</div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Fallback: Basic Agent Information when detailed matching is not available */}
+                        {(!selectedMatch.skillsMatch?.details && !selectedMatch.languageMatch?.details) && (
+                          <div className="bg-gray-50 rounded-xl p-6">
+                            <h4 className="text-lg font-semibold text-gray-900 mb-4">Agent Information</h4>
+                            <div className="space-y-4">
+                              {/* Skills */}
+                              {selectedMatch.agentInfo?.skills && (
+                                <div>
+                                  <h5 className="font-medium text-gray-800 mb-2">Skills</h5>
+                                  <div className="flex flex-wrap gap-2">
+                                    {[
+                                      ...(selectedMatch.agentInfo.skills.technical || []),
+                                      ...(selectedMatch.agentInfo.skills.professional || []),
+                                      ...(selectedMatch.agentInfo.skills.soft || [])
+                                    ].slice(0, 5).map((skill: { skill: string; level?: number }, i: number) => (
+                                      <span key={i} className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-medium">
+                                        {skill.skill} {skill.level && <span>(Level {skill.level})</span>}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                              
+                              {/* Languages */}
+                              {selectedMatch.agentInfo?.languages && (
+                                <div>
+                                  <h5 className="font-medium text-gray-800 mb-2">Languages</h5>
+                                  <div className="flex flex-wrap gap-2">
+                                    {selectedMatch.agentInfo.languages.map((lang: { language: string; proficiency?: string }, i: number) => (
+                                      <span key={i} className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-medium">
+                                        {lang.language} {lang.proficiency && <span>({lang.proficiency})</span>}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                              
+                              {/* Experience */}
+                              {selectedMatch.agentInfo?.experience && selectedMatch.agentInfo.experience.length > 0 && (
+                                <div>
+                                  <h5 className="font-medium text-gray-800 mb-2">Experience</h5>
+                                  <div className="space-y-2">
+                                    {selectedMatch.agentInfo.experience.slice(0, 3).map((exp: { title: string; company: string; startDate: string | Date; endDate: string | Date }, i: number) => (
+                                      <div key={i} className="bg-white rounded-lg p-3 shadow-sm">
+                                        <div className="font-medium text-gray-900">{exp.title}</div>
+                                        <div className="text-sm text-gray-600">{exp.company}</div>
+                                        <div className="text-xs text-gray-500">
+                                          {new Date(exp.startDate).getFullYear()} - {new Date(exp.endDate).getFullYear()}
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
                               )}
                             </div>
                           </div>

@@ -91,68 +91,166 @@ export const deleteMatch = async (id: string): Promise<void> => {
   await api.delete(`/matches/${id}`);
 };
 
-// Matching algorithm API calls
+// New matching algorithm API calls using the provided endpoints
 interface MatchResponse {
-  preferedmatches: Match[];
-  totalMatches: number;
-  perfectMatches: number;
-  partialMatches: number;
-  noMatches: number;
-  languageStats: {
+  matches: Match[];
+  totalMatches?: number;
+  perfectMatches?: number;
+  partialMatches?: number;
+  noMatches?: number;
+  languageStats?: {
     perfectMatches: number;
     partialMatches: number;
     noMatches: number;
     totalMatches: number;
   };
-  skillsStats: {
+  skillsStats?: {
     perfectMatches: number;
     partialMatches: number;
     noMatches: number;
     totalMatches: number;
     byType: {
-      technical: {
-        perfectMatches: number;
-        partialMatches: number;
-        noMatches: number;
-      };
-      professional: {
-        perfectMatches: number;
-        partialMatches: number;
-        noMatches: number;
-      };
-      soft: {
-        perfectMatches: number;
-        partialMatches: number;
-        noMatches: number;
-      };
+      technical: { perfectMatches: number; partialMatches: number; noMatches: number };
+      professional: { perfectMatches: number; partialMatches: number; noMatches: number };
+      soft: { perfectMatches: number; partialMatches: number; noMatches: number };
     };
   };
 }
 
+// Find agents for a gig (using the new endpoint)
 export const findMatchesForGig = async (gigId: string, weights: MatchingWeights): Promise<MatchResponse> => {
   try {
-    const response = await axios.get<MatchResponse>(`${import.meta.env.VITE_API_URL}/gig/${gigId}`, {
-      data: { weights }
+    const response = await api.post<MatchResponse>('/gigs/find-agents-for-gig', {
+      gigId,
+      weights
     });
-    return response.data;
+    
+    // Ensure the response has the expected structure
+    const data = response.data;
+    if (!data.matches) {
+      console.warn('Response does not contain matches array:', data);
+      return {
+        matches: [],
+        totalMatches: 0,
+        perfectMatches: 0,
+        partialMatches: 0,
+        noMatches: 0
+      };
+    }
+    
+    return data;
   } catch (error) {
     console.error('Error finding matches for gig:', error);
     throw error;
   }
 };
 
+// Find gigs for an agent (using the new endpoint)
 export const findGigsForRep = async (
   repId: string, 
-  weights: MatchingWeights, 
-  limit: number = 10
+  weights: MatchingWeights
 ): Promise<Match[]> => {
-  const response = await api.post(`/matches/rep/${repId}`, { weights, limit });
-  return response.data;
+  try {
+    const response = await api.post<MatchResponse>('/gigs/find-gigs-for-agent', {
+      agentId: repId,
+      weights
+    });
+    
+    // Handle different response structures
+    const data = response.data;
+    if (Array.isArray(data)) {
+      return data;
+    } else if (data.matches && Array.isArray(data.matches)) {
+      return data.matches;
+    } else {
+      console.warn('Unexpected response structure:', data);
+      return [];
+    }
+  } catch (error) {
+    console.error('Error finding gigs for rep:', error);
+    throw error;
+  }
 };
 
+// Generate optimal matches (this might need to be updated based on your backend)
 export const generateOptimalMatches = async (weights: MatchingWeights): Promise<Match[]> => {
-  const response = await api.post('/matches/optimize', { weights });
-  return response.data;
+  try {
+    // For now, we'll get all gigs and reps and do basic matching
+    const [gigs, reps] = await Promise.all([getGigs(), getReps()]);
+    
+    // Simple matching logic - you might want to implement this differently
+    const matches: Match[] = [];
+    
+    for (const gig of gigs) {
+      for (const rep of reps) {
+        // Basic matching score calculation
+        let score = 0;
+        
+        // Skills matching
+        if (weights.skills > 0) {
+          const gigSkills = gig.requiredSkills || [];
+          const repSkills = [
+            ...(rep.skills?.technical || []),
+            ...(rep.skills?.professional || []),
+            ...(rep.skills?.soft || [])
+          ];
+          
+          const matchingSkills = gigSkills.filter(gigSkill => 
+            repSkills.some(repSkill => repSkill.skill === gigSkill)
+          );
+          
+          score += (matchingSkills.length / Math.max(gigSkills.length, 1)) * weights.skills;
+        }
+        
+        // Experience matching
+        if (weights.experience > 0) {
+          const repExperience = parseInt(rep.professionalSummary?.yearsOfExperience || '0');
+          const requiredExperience = gig.requiredExperience || 0;
+          
+          if (repExperience >= requiredExperience) {
+            score += weights.experience;
+          } else {
+            score += (repExperience / requiredExperience) * weights.experience;
+          }
+        }
+        
+        // Language matching
+        if (weights.language > 0) {
+          const gigLanguages = gig.preferredLanguages || [];
+          const repLanguages = rep.personalInfo?.languages || [];
+          
+          const matchingLanguages = gigLanguages.filter(gigLang => 
+            repLanguages.some(repLang => repLang.language === gigLang)
+          );
+          
+          score += (matchingLanguages.length / Math.max(gigLanguages.length, 1)) * weights.language;
+        }
+        
+        if (score > 0.3) { // Only include matches with reasonable scores
+          matches.push({
+            _id: `${gig._id}-${rep._id}`,
+            repId: rep._id || '',
+            gigId: gig._id || '',
+            score,
+            title: gig.title,
+            category: gig.category,
+            requiredExperience: gig.requiredExperience,
+            requiredSkills: gig.requiredSkills,
+            agentInfo: {
+              name: rep.personalInfo?.name || '',
+              email: rep.personalInfo?.email || ''
+            }
+          });
+        }
+      }
+    }
+    
+    // Sort by score and return top matches
+    return matches.sort((a, b) => b.score - a.score).slice(0, 10);
+  } catch (error) {
+    console.error('Error generating optimal matches:', error);
+    throw error;
+  }
 };
 
 export default api;
