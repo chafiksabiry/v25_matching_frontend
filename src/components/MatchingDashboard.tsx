@@ -299,17 +299,31 @@ const MatchingDashboard: React.FC = () => {
 
     console.log("match object:", match);
 
-    // Afficher les données avant l'appel
+    // Préparer matchDetails sans skillsMatch si matchingSkills est vide
+    let matchDetails = { ...match };
+    if (
+      !(
+        match.skillsMatch &&
+        match.skillsMatch.details &&
+        Array.isArray(match.skillsMatch.details.matchingSkills) &&
+        match.skillsMatch.details.matchingSkills.length > 0
+      )
+    ) {
+      // Supprimer skillsMatch si matchingSkills est vide ou absent
+      const { skillsMatch, ...rest } = matchDetails;
+      matchDetails = rest;
+    }
+
     const requestData = {
       agentId: match.agentId,
       gigId: selectedGig._id,
-      matchDetails: match
+      matchDetails
     };
     
     console.log('=== DONNÉES À ENVOYER ===');
     console.log('agentId:', requestData.agentId);
     console.log('gigId:', requestData.gigId);
-    console.log('Match complet:', match);
+    console.log('Match complet:', matchDetails);
     console.log('Gig sélectionné:', selectedGig);
     console.log('========================');
     
