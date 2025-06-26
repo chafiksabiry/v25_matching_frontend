@@ -177,13 +177,15 @@ export const createGigAgent = async (data: GigAgentRequest): Promise<GigAgentRes
     
     const response = await axios.post<GigAgentResponse>(`${MATCHING_API_URL}/gig-agents`, data);
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating gig-agent assignment:', error);
     if (axios.isAxiosError(error)) {
       console.error('Response status:', error.response?.status);
       console.error('Response data:', error.response?.data);
       console.error('Request URL:', error.config?.url);
       console.error('Request data:', error.config?.data);
+    } else {
+      console.error('Non-Axios error:', error);
     }
     throw error;
   }

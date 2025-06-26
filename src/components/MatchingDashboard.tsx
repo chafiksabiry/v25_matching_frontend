@@ -305,11 +305,24 @@ const MatchingDashboard: React.FC = () => {
       match: match
     });
 
+    // Afficher les données avant l'appel
+    const requestData = {
+      agentId: match.repId,
+      gigId: selectedGig._id
+    };
+    
+    console.log('=== DONNÉES À ENVOYER ===');
+    console.log('agentId:', requestData.agentId);
+    console.log('gigId:', requestData.gigId);
+    console.log('Match complet:', match);
+    console.log('Gig sélectionné:', selectedGig);
+    console.log('========================');
+    
+    // Afficher une alerte avec les données
+    alert(`Données à envoyer:\n\nagentId: ${requestData.agentId}\ngigId: ${requestData.gigId}\n\nMatch repId: ${match.repId}\nGig _id: ${selectedGig._id}`);
+
     try {
-      const response = await createGigAgent({
-        agentId: match.repId,
-        gigId: selectedGig._id
-      });
+      const response = await createGigAgent(requestData);
 
       console.log('Gig-Agent created successfully:', response);
       setGigAgentSuccess(`Agent successfully assigned to "${selectedGig.title}"! Email sent: ${response.emailSent ? 'Yes' : 'No'}`);
