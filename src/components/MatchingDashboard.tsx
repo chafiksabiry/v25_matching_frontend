@@ -200,16 +200,16 @@ const MatchingDashboard: React.FC = () => {
     setTimeout(scrollToResults, 100); // Petit délai pour laisser le temps aux résultats de se charger
   };
 
-  const paginatedReps = reps.slice(
+  const paginatedReps = Array.isArray(reps) ? reps.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
-  );
-  const paginatedGigs = gigs.slice(
+  ) : [];
+  const paginatedGigs = Array.isArray(gigs) ? gigs.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
-  );
+  ) : [];
   const totalPages = Math.ceil(
-    (activeTab === "gigs" ? gigs.length : reps.length) / itemsPerPage
+    (activeTab === "gigs" ? (Array.isArray(gigs) ? gigs.length : 0) : (Array.isArray(reps) ? reps.length : 0)) / itemsPerPage
   );
 
   // Fetch reps and gigs on component mount
@@ -880,15 +880,18 @@ const MatchingDashboard: React.FC = () => {
                             </div>
                           ) : match.agentInfo?.skills ? (
                             <div className="flex flex-wrap gap-2">
-                              {[
-                                ...(match.agentInfo.skills.technical || []),
-                                ...(match.agentInfo.skills.professional || []),
-                                ...(match.agentInfo.skills.soft || [])
-                              ].slice(0, 3).map((skill: { skill: string; level?: number }, i: number) => (
-                                <span key={i} className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-medium">
-                                  {skill.skill} {skill.level && <span>(Level {skill.level})</span>}
-                                </span>
-                              ))}
+                              {(() => {
+                                const allSkills = [
+                                  ...(Array.isArray(match.agentInfo.skills.technical) ? match.agentInfo.skills.technical : []),
+                                  ...(Array.isArray(match.agentInfo.skills.professional) ? match.agentInfo.skills.professional : []),
+                                  ...(Array.isArray(match.agentInfo.skills.soft) ? match.agentInfo.skills.soft : [])
+                                ];
+                                return allSkills.slice(0, 3).map((skill: { skill: string; level?: number }, i: number) => (
+                                  <span key={i} className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-medium">
+                                    {skill.skill} {skill.level && <span>(Level {skill.level})</span>}
+                                  </span>
+                                ));
+                              })()}
                             </div>
                           ) : (
                             <span className="text-gray-400">No skills</span>
@@ -1061,15 +1064,18 @@ const MatchingDashboard: React.FC = () => {
                                 <div>
                                   <h5 className="font-medium text-gray-800 mb-2">Skills</h5>
                                   <div className="flex flex-wrap gap-2">
-                                    {[
-                                      ...(selectedMatch.agentInfo.skills.technical || []),
-                                      ...(selectedMatch.agentInfo.skills.professional || []),
-                                      ...(selectedMatch.agentInfo.skills.soft || [])
-                                    ].slice(0, 5).map((skill: { skill: string; level?: number }, i: number) => (
-                                      <span key={i} className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-medium">
-                                        {skill.skill} {skill.level && <span>(Level {skill.level})</span>}
-                                      </span>
-                                    ))}
+                                    {(() => {
+                                      const allSkills = [
+                                        ...(Array.isArray(selectedMatch.agentInfo.skills.technical) ? selectedMatch.agentInfo.skills.technical : []),
+                                        ...(Array.isArray(selectedMatch.agentInfo.skills.professional) ? selectedMatch.agentInfo.skills.professional : []),
+                                        ...(Array.isArray(selectedMatch.agentInfo.skills.soft) ? selectedMatch.agentInfo.skills.soft : [])
+                                      ];
+                                      return allSkills.slice(0, 5).map((skill: { skill: string; level?: number }, i: number) => (
+                                        <span key={i} className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-medium">
+                                          {skill.skill} {skill.level && <span>(Level {skill.level})</span>}
+                                        </span>
+                                      ));
+                                    })()}
                                   </div>
                                 </div>
                               )}
@@ -1079,17 +1085,17 @@ const MatchingDashboard: React.FC = () => {
                                 <div>
                                   <h5 className="font-medium text-gray-800 mb-2">Languages</h5>
                                   <div className="flex flex-wrap gap-2">
-                                    {selectedMatch.agentInfo.languages.map((lang: { language: string; proficiency?: string }, i: number) => (
+                                    {Array.isArray(selectedMatch.agentInfo.languages) ? selectedMatch.agentInfo.languages.map((lang: { language: string; proficiency?: string }, i: number) => (
                                       <span key={i} className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-medium">
                                         {lang.language} {lang.proficiency && <span>({lang.proficiency})</span>}
                                       </span>
-                                    ))}
+                                    )) : null}
                                   </div>
                                 </div>
                               )}
                               
                               {/* Experience */}
-                              {selectedMatch.agentInfo?.experience && selectedMatch.agentInfo.experience.length > 0 && (
+                              {selectedMatch.agentInfo?.experience && Array.isArray(selectedMatch.agentInfo.experience) && selectedMatch.agentInfo.experience.length > 0 && (
                                 <div>
                                   <h5 className="font-medium text-gray-800 mb-2">Experience</h5>
                                   <div className="space-y-2">
