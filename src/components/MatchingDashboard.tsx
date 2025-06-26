@@ -50,60 +50,6 @@ interface BasicMatchResponse {
   matches: Match[];
 }
 
-interface MatchingLanguage {
-  language: string;
-  requiredLevel: string;
-  agentLevel: string;
-}
-
-interface MatchingSkill {
-  skill: string;
-  type: string;
-  requiredLevel?: number;
-  agentLevel?: number;
-}
-
-interface LanguageMatchDetails {
-  matchingLanguages: MatchingLanguage[];
-  missingLanguages: any[];
-  insufficientLanguages: any[];
-  matchStatus: string;
-}
-
-interface SkillsMatchDetails {
-  matchingSkills: MatchingSkill[];
-  missingSkills: any[];
-  insufficientSkills: any[];
-  matchStatus: string;
-}
-
-interface MatchDetails {
-  _id: string;
-  agentId: string;
-  agentInfo: {
-    name: string;
-    email: string;
-    photo: string | null;
-    location: string;
-    phone: string;
-    languages: any[];
-    skills: {
-      technical: any[];
-      professional: any[];
-      soft: any[];
-      contactCenter: any[];
-    };
-    experience: any[];
-  };
-  languageMatch: {
-    details: LanguageMatchDetails;
-  };
-  skillsMatch: {
-    details: SkillsMatchDetails;
-  };
-  matchStatus: string;
-}
-
 const defaultMatchingWeights: MatchingWeights = {
   experience: 0.15,
   skills: 0.2,
@@ -169,8 +115,6 @@ const MatchingDashboard: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
-  const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
-  const [showMatchDetails, setShowMatchDetails] = useState(false);
   const [creatingGigAgent, setCreatingGigAgent] = useState(false);
   const [gigAgentSuccess, setGigAgentSuccess] = useState<string | null>(null);
   const [gigAgentError, setGigAgentError] = useState<string | null>(null);
@@ -343,19 +287,6 @@ const MatchingDashboard: React.FC = () => {
   const slideUp = "animate-[slideUp_0.3s_ease-out]";
   const pulse = "animate-[pulse_2s_infinite]";
 
-  // Add this function to handle match selection
-  const handleMatchSelect = (match: Match) => {
-    console.log('Rep sélectionné :', match.agentInfo);
-    setSelectedMatch(match);
-    setShowMatchDetails(true);
-  };
-
-  // Add this function to close match details
-  const handleCloseMatchDetails = () => {
-    setShowMatchDetails(false);
-    setSelectedMatch(null);
-  };
-
   // Add this function to handle gig-agent creation
   const handleCreateGigAgent = async (match: Match) => {
     if (!selectedGig) {
@@ -378,7 +309,6 @@ const MatchingDashboard: React.FC = () => {
       
       // Close the modal after successful creation
       setTimeout(() => {
-        handleCloseMatchDetails();
         setGigAgentSuccess(null);
       }, 3000);
 
@@ -815,8 +745,7 @@ const MatchingDashboard: React.FC = () => {
                     {matches.map((match, index) => (
                       <tr 
                         key={index} 
-                        className="hover:bg-indigo-50 transition-all duration-200 cursor-pointer"
-                        onClick={() => handleMatchSelect(match)}
+                        className="hover:bg-indigo-50 transition-all duration-200"
                       >
                         <td className="px-6 py-4">
                           <div className="flex items-center space-x-4">
@@ -862,10 +791,7 @@ const MatchingDashboard: React.FC = () => {
                         <td className="px-6 py-4 text-center">
                           <button
                             className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-lg"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleMatchSelect(match);
-                            }}
+                            onClick={() => handleCreateGigAgent(match)}
                           >
                             <Zap className="w-4 h-4 mr-2" />
                             Match
@@ -877,216 +803,25 @@ const MatchingDashboard: React.FC = () => {
                 </table>
               </div>
 
-              {/* Match Details Modal */}
-              {showMatchDetails && selectedMatch && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                  <div className="bg-blue-50 rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-                    <div className="p-6">
-                      <div className="flex justify-between items-start mb-6">
-                        <div className="flex items-center space-x-4">
-                          {selectedMatch.agentInfo?.photo ? (
-                            <img src={selectedMatch.agentInfo.photo} alt="avatar" className="w-16 h-16 rounded-full border-2 border-indigo-100 shadow-sm" />
-                          ) : (
-                            <div className="w-16 h-16 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-2xl shadow-sm">
-                              {selectedMatch.agentInfo?.name?.[0] || "?"}
-                            </div>
-                          )}
-                          <div>
-                            <h3 className="text-2xl font-bold text-gray-900">{selectedMatch.agentInfo?.name}</h3>
-                            <p className="text-gray-600">{selectedMatch.agentInfo?.email}</p>
-                          </div>
-                        </div>
-                        <button
-                          onClick={handleCloseMatchDetails}
-                          className="text-gray-400 hover:text-gray-600 transition-colors"
-                        >
-                          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
-                      </div>
+              {/* Success/Error Messages */}
+              {gigAgentSuccess && (
+                <div className="mt-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+                  <div className="flex items-center">
+                    <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    {gigAgentSuccess}
+                  </div>
+                </div>
+              )}
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Skills Comparison - only if weight > 0 */}
-                        {weights.skills > 0 && (
-                          <div className="bg-gray-50 rounded-xl p-6">
-                            <h4 className="text-lg font-semibold text-gray-900 mb-4">Skills Match Analysis</h4>
-                            <div className="space-y-4">
-                              {/* Matching skills */}
-                              {selectedMatch.skillsMatch?.details?.matchingSkills?.map((skill: any, idx: number) => (
-                                <div key={idx} className="bg-white rounded-lg p-4 shadow-sm">
-                                  <div className="flex justify-between items-center mb-2">
-                                    <span className="font-medium text-gray-900">{skill.skill}</span>
-                                    <span className="text-sm text-green-600 bg-green-100 px-2 py-1 rounded-full">
-                                      Validé
-                                    </span>
-                                  </div>
-                                  <div className="flex justify-between text-sm text-gray-600">
-                                    <span>Required Level: {skill.requiredLevel || 'N/A'}</span>
-                                    <span>Agent Level: {skill.agentLevel || 'N/A'}</span>
-                                  </div>
-                                </div>
-                              ))}
-                              {/* Missing/insufficient skills */}
-                              {selectedMatch.skillsMatch?.details?.missingSkills?.map((skill: any, idx: number) => (
-                                <div key={idx} className="bg-white rounded-lg p-4 shadow-sm">
-                                  <div className="flex justify-between items-center mb-2">
-                                    <span className="font-medium text-gray-900">{skill.skill}</span>
-                                    <span className="text-sm text-red-600 bg-red-100 px-2 py-1 rounded-full">
-                                      Non validé
-                                    </span>
-                                  </div>
-                                </div>
-                              ))}
-                              {selectedMatch.skillsMatch?.details?.insufficientSkills?.map((skill: any, idx: number) => (
-                                <div key={idx} className="bg-white rounded-lg p-4 shadow-sm">
-                                  <div className="flex justify-between items-center mb-2">
-                                    <span className="font-medium text-gray-900">{skill.skill}</span>
-                                    <span className="text-sm text-yellow-600 bg-yellow-100 px-2 py-1 rounded-full">
-                                      Niveau insuffisant
-                                    </span>
-                                  </div>
-                                  <div className="flex justify-between text-sm text-gray-600">
-                                    <span>Required Level: {skill.requiredLevel || 'N/A'}</span>
-                                    <span>Agent Level: {skill.agentLevel || 'N/A'}</span>
-                                  </div>
-                                </div>
-                              ))}
-                              {/* Si aucune requirement */}
-                              {(!selectedMatch.skillsMatch?.details?.matchingSkills?.length && !selectedMatch.skillsMatch?.details?.missingSkills?.length && !selectedMatch.skillsMatch?.details?.insufficientSkills?.length) && (
-                                <div className="text-gray-400">Aucune compétence requise</div>
-                              )}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Languages Comparison - only if weight > 0 */}
-                        {weights.languages > 0 && (
-                          <div className="bg-gray-50 rounded-xl p-6">
-                            <h4 className="text-lg font-semibold text-gray-900 mb-4">Languages Match Analysis</h4>
-                            <div className="space-y-4">
-                              {selectedMatch.languageMatch?.details?.matchingLanguages?.map((lang: any, idx: number) => (
-                                <div key={idx} className="bg-white rounded-lg p-4 shadow-sm">
-                                  <div className="flex justify-between items-center mb-2">
-                                    <span className="font-medium text-gray-900">{lang.language}</span>
-                                    <span className="text-sm text-green-600 bg-green-100 px-2 py-1 rounded-full">
-                                      Validé
-                                    </span>
-                                  </div>
-                                  <div className="flex justify-between text-sm text-gray-600">
-                                    <span>Required: {lang.requiredLevel}</span>
-                                    <span>Agent: {lang.agentLevel}</span>
-                                  </div>
-                                </div>
-                              ))}
-                              {selectedMatch.languageMatch?.details?.missingLanguages?.map((lang: any, idx: number) => (
-                                <div key={idx} className="bg-white rounded-lg p-4 shadow-sm">
-                                  <div className="flex justify-between items-center mb-2">
-                                    <span className="font-medium text-gray-900">{lang.language}</span>
-                                    <span className="text-sm text-red-600 bg-red-100 px-2 py-1 rounded-full">
-                                      Non validé
-                                    </span>
-                                  </div>
-                                </div>
-                              ))}
-                              {selectedMatch.languageMatch?.details?.insufficientLanguages?.map((lang: any, idx: number) => (
-                                <div key={idx} className="bg-white rounded-lg p-4 shadow-sm">
-                                  <div className="flex justify-between items-center mb-2">
-                                    <span className="font-medium text-gray-900">{lang.language}</span>
-                                    <span className="text-sm text-yellow-600 bg-yellow-100 px-2 py-1 rounded-full">
-                                      Niveau insuffisant
-                                    </span>
-                                  </div>
-                                  <div className="flex justify-between text-sm text-gray-600">
-                                    <span>Required: {lang.requiredLevel}</span>
-                                    <span>Agent: {lang.agentLevel}</span>
-                                  </div>
-                                </div>
-                              ))}
-                              {(!selectedMatch.languageMatch?.details?.matchingLanguages?.length && !selectedMatch.languageMatch?.details?.missingLanguages?.length && !selectedMatch.languageMatch?.details?.insufficientLanguages?.length) && (
-                                <div className="text-gray-400">Aucune langue requise</div>
-                              )}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Availability Comparison - only if weight > 0 */}
-                        {/* Ajoute ici la logique pour la disponibilité si tu as les données et la structure */}
-                      </div>
-
-                      {/* Additional Information */}
-                      <div className="mt-6 bg-gray-50 rounded-xl p-6">
-                        <h4 className="text-lg font-semibold text-gray-900 mb-4">Additional Information</h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <p className="text-sm text-gray-600 mb-2">Location</p>
-                            <p className="font-medium text-gray-900">{selectedMatch.agentInfo?.location || 'Not specified'}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm text-gray-600 mb-2">Phone</p>
-                            <p className="font-medium text-gray-900">{selectedMatch.agentInfo?.phone || 'Not specified'}</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Action Buttons */}
-                      <div className="mt-6 flex justify-end space-x-4">
-                        <button
-                          onClick={handleCloseMatchDetails}
-                          className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                        >
-                          Close
-                        </button>
-                        <button
-                          className={`px-4 py-2 rounded-lg transition-colors flex items-center space-x-2 ${
-                            creatingGigAgent 
-                              ? 'bg-gray-400 text-white cursor-not-allowed' 
-                              : 'bg-indigo-600 text-white hover:bg-indigo-700'
-                          }`}
-                          onClick={() => {
-                            if (selectedMatch && !creatingGigAgent) {
-                              handleCreateGigAgent(selectedMatch);
-                            }
-                          }}
-                          disabled={creatingGigAgent}
-                        >
-                          {creatingGigAgent ? (
-                            <>
-                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                              <span>Creating...</span>
-                            </>
-                          ) : (
-                            <>
-                              <Zap className="w-4 h-4" />
-                              <span>Confirm Match</span>
-                            </>
-                          )}
-                        </button>
-                      </div>
-
-                      {/* Success/Error Messages */}
-                      {gigAgentSuccess && (
-                        <div className="mt-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
-                          <div className="flex items-center">
-                            <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                            </svg>
-                            {gigAgentSuccess}
-                          </div>
-                        </div>
-                      )}
-
-                      {gigAgentError && (
-                        <div className="mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-                          <div className="flex items-center">
-                            <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                            </svg>
-                            {gigAgentError}
-                          </div>
-                        </div>
-                      )}
-                    </div>
+              {gigAgentError && (
+                <div className="mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                  <div className="flex items-center">
+                    <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                    {gigAgentError}
                   </div>
                 </div>
               )}
