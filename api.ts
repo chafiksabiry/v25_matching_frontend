@@ -1,5 +1,18 @@
-const API_BASE_URL = process.env.VITE_API_URL || 'http://localhost:5011/api';
-const GIGS_API_URL = process.env.VITE_API_URL_GIGS || 'https://api-gigsmanual.harx.ai/api';
+/// <reference types="vite/client" />
+
+// Add type definitions for environment variables
+declare global {
+  namespace NodeJS {
+    interface ProcessEnv {
+      VITE_API_URL?: string;
+      VITE_API_URL_GIGS?: string;
+      VITE_MATCHING_API_URL?: string;
+    }
+  }
+}
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5011/api';
+const GIGS_API_URL = import.meta.env.VITE_API_URL_GIGS || 'https://api-gigsmanual.harx.ai/api';
 
 // Reps
 export const getReps = async () => {

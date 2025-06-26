@@ -298,6 +298,13 @@ const MatchingDashboard: React.FC = () => {
     setGigAgentError(null);
     setGigAgentSuccess(null);
 
+    // Debug logging
+    console.log('Creating gig-agent with data:', {
+      agentId: match.repId,
+      gigId: selectedGig._id,
+      match: match
+    });
+
     try {
       const response = await createGigAgent({
         agentId: match.repId,

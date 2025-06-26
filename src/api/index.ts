@@ -170,11 +170,21 @@ interface GigAgentResponse {
 
 export const createGigAgent = async (data: GigAgentRequest): Promise<GigAgentResponse> => {
   try {
-    const MATCHING_API_URL = process.env.VITE_MATCHING_API_URL || 'https://api-matching.harx.ai/api';
+    const MATCHING_API_URL = import.meta.env.VITE_MATCHING_API_URL || 'https://api-matching.harx.ai/api';
+    
+    console.log('Creating gig-agent with URL:', `${MATCHING_API_URL}/gig-agents`);
+    console.log('Request data:', data);
+    
     const response = await axios.post<GigAgentResponse>(`${MATCHING_API_URL}/gig-agents`, data);
     return response.data;
   } catch (error) {
     console.error('Error creating gig-agent assignment:', error);
+    if (axios.isAxiosError(error)) {
+      console.error('Response status:', error.response?.status);
+      console.error('Response data:', error.response?.data);
+      console.error('Request URL:', error.config?.url);
+      console.error('Request data:', error.config?.data);
+    }
     throw error;
   }
 };
