@@ -288,11 +288,22 @@ const MatchingDashboard: React.FC = () => {
   useEffect(() => {
     const getMatches = async () => {
       if (initialLoading) return;
+      
+      console.log("=== DEBUG: getMatches called ===");
+      console.log("activeTab:", activeTab);
+      console.log("selectedGig:", selectedGig);
+      console.log("selectedRep:", selectedRep);
+      console.log("weights:", weights);
+      
       try {
         let response: MatchResponse | BasicMatchResponse;
         if (activeTab === "gigs" && selectedGig) {
+          console.log("=== DEBUG: Calling findMatchesForGig ===");
+          console.log("gigId:", selectedGig._id);
           setLoading(true);
           const gigResponse = await findMatchesForGig(selectedGig._id, weights);
+          console.log("=== DEBUG: findMatchesForGig response ===");
+          console.log("Full response:", gigResponse);
           console.log("Gig Response Structure:", {
             matches: gigResponse.matches,
             totalMatches: gigResponse.totalMatches,
@@ -302,7 +313,8 @@ const MatchingDashboard: React.FC = () => {
             languageStats: gigResponse.languageStats,
             skillsStats: gigResponse.skillsStats
           });
-          console.log("First Match Structure:", gigResponse.matches[0]);
+          console.log("First Match Structure:", gigResponse.matches?.[0]);
+          console.log("Matches length:", gigResponse.matches?.length);
           setMatches(gigResponse.matches || []);
           setMatchStats({
             totalMatches: gigResponse.totalMatches || 0,
@@ -349,11 +361,12 @@ const MatchingDashboard: React.FC = () => {
           setMatchStats(null);
           setLoading(false);
         } else {
+          console.log("=== DEBUG: No conditions met, clearing matches ===");
           setMatches([]);
           setMatchStats(null);
         }
       } catch (error) {
-        console.error("Error getting matches:", error);
+        console.error("=== DEBUG: Error getting matches ===", error);
         setError("Failed to get matches. Please try again.");
         setMatches([]);
         setMatchStats(null);

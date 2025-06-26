@@ -118,18 +118,55 @@ interface MatchResponse {
   };
 }
 
+// Interface for the actual API response
+interface ApiMatchResponse {
+  preferedmatches: Match[];
+  totalMatches: number;
+  perfectMatches: number;
+  partialMatches: number;
+  noMatches: number;
+  languageStats: {
+    perfectMatches: number;
+    partialMatches: number;
+    noMatches: number;
+    totalMatches: number;
+  };
+  skillsStats: {
+    perfectMatches: number;
+    partialMatches: number;
+    noMatches: number;
+    totalMatches: number;
+    byType: {
+      technical: { perfectMatches: number; partialMatches: number; noMatches: number };
+      professional: { perfectMatches: number; partialMatches: number; noMatches: number };
+      soft: { perfectMatches: number; partialMatches: number; noMatches: number };
+    };
+  };
+  scheduleStats: {
+    perfectMatches: number;
+    partialMatches: number;
+    noMatches: number;
+    totalMatches: number;
+  };
+}
+
 // Find agents for a gig (using the new endpoint)
 export const findMatchesForGig = async (gigId: string, weights: MatchingWeights): Promise<MatchResponse> => {
   try {
-    const response = await api.post<MatchResponse>('/gigs/find-agents-for-gig', {
-      gigId,
-      weights
-    });
+    console.log("=== DEBUG: Calling matches/gig/:id endpoint ===");
+    console.log("gigId:", gigId);
+    console.log("weights:", weights);
+    
+    const response = await api.get<ApiMatchResponse>(`/matches/gig/${gigId}`);
+    
+    console.log("=== DEBUG: Raw response ===");
+    console.log("Response:", response);
+    console.log("Response data:", response.data);
     
     // Ensure the response has the expected structure
     const data = response.data;
-    if (!data.matches) {
-      console.warn('Response does not contain matches array:', data);
+    if (!data.preferedmatches) {
+      console.warn('Response does not contain preferedmatches array:', data);
       return {
         matches: [],
         totalMatches: 0,
@@ -139,7 +176,21 @@ export const findMatchesForGig = async (gigId: string, weights: MatchingWeights)
       };
     }
     
-    return data;
+    // Transform preferedmatches to matches for compatibility
+    const transformedResponse: MatchResponse = {
+      matches: data.preferedmatches || [],
+      totalMatches: data.totalMatches || 0,
+      perfectMatches: data.perfectMatches || 0,
+      partialMatches: data.partialMatches || 0,
+      noMatches: data.noMatches || 0,
+      languageStats: data.languageStats,
+      skillsStats: data.skillsStats
+    };
+    
+    console.log("=== DEBUG: Transformed response ===");
+    console.log("Transformed response:", transformedResponse);
+    
+    return transformedResponse;
   } catch (error) {
     console.error('Error finding matches for gig:', error);
     throw error;
@@ -330,7 +381,7 @@ export const createGigAgent = async (gigAgentData: {
 }): Promise<{ message: string; gigAgent: any; emailSent: boolean; matchScore: number }> => {
   try {
     const response = await api.post('/gig-agents', gigAgentData);
-    return response.data;
+  return response.data;
   } catch (error) {
     console.error('Error creating gig agent assignment:', error);
     throw error;
