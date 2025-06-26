@@ -8,7 +8,7 @@ import {
   generateOptimalMatches,
   getGigsByCompanyId,
   createGigAgent,
-} from "../api";
+} from "../api/index";
 import { sendMatchEmail } from "../api/emailService";
 import {
   Activity,
