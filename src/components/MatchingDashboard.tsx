@@ -7,8 +7,8 @@ import {
   findGigsForRep,
   generateOptimalMatches,
   getGigsByCompanyId,
-  createGigAgent,
 } from "../api";
+import { createGigAgent } from "../api/index";
 import {
   Activity,
   Users,
