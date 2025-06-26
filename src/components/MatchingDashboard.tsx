@@ -310,7 +310,8 @@ const MatchingDashboard: React.FC = () => {
     // Afficher les données avant l'appel
     const requestData = {
       agentId: match.agentId,
-      gigId: selectedGig._id
+      gigId: selectedGig._id,
+      matchDetails: match
     };
     
     console.log('=== DONNÉES À ENVOYER ===');
