@@ -8,8 +8,7 @@ import {
   generateOptimalMatches,
   getGigsByCompanyId,
   createGigAgent,
-} from "../api/index";
-import { sendMatchEmail } from "../api/emailService";
+} from "../api";
 import {
   Activity,
   Users,
@@ -105,42 +104,6 @@ interface MatchDetails {
   matchStatus: string;
 }
 
-// Type adapté pour les gigs reçus de l'API
-interface ApiGig {
-  _id: string;
-  companyId: string;
-  title: string;
-  description: string;
-  category: string;
-  seniority: {
-    level: string;
-    yearsExperience: string;
-  };
-  skills: {
-    professional: any[];
-    technical: any[];
-    soft: any[];
-    languages: any[];
-  };
-  availability: {
-    schedule: Array<{
-      day: string;
-      hours: {
-        start: string;
-        end: string;
-      };
-    }>;
-    timeZone: string;
-    flexibility: string[];
-  };
-  commission: any;
-  destination_zone: string;
-  createdAt: string;
-  updatedAt: string;
-  userId: string;
-  __v: number;
-}
-
 const defaultMatchingWeights: MatchingWeights = {
   experience: 0.15,
   skills: 0.2,
@@ -156,8 +119,8 @@ type TabType = "gigs" | "reps" | "optimal";
 
 const MatchingDashboard: React.FC = () => {
   const [reps, setReps] = useState<Rep[]>([]);
-  const [gigs, setGigs] = useState<any[]>([]);
-  const [selectedGig, setSelectedGig] = useState<any | null>(null);
+  const [gigs, setGigs] = useState<Gig[]>([]);
+  const [selectedGig, setSelectedGig] = useState<Gig | null>(null);
   const [selectedRep, setSelectedRep] = useState<Rep | null>(null);
   const [weights, setWeights] = useState<MatchingWeights>(
     defaultMatchingWeights
@@ -208,6 +171,9 @@ const MatchingDashboard: React.FC = () => {
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [showMatchDetails, setShowMatchDetails] = useState(false);
+  const [creatingGigAgent, setCreatingGigAgent] = useState(false);
+  const [gigAgentSuccess, setGigAgentSuccess] = useState<string | null>(null);
+  const [gigAgentError, setGigAgentError] = useState<string | null>(null);
 
   const handleTabClick = (tab: TabType) => {
     setActiveTab(tab);
@@ -225,7 +191,7 @@ const MatchingDashboard: React.FC = () => {
     }
   };
 
-  const handleGigSelect = (gig: any) => {
+  const handleGigSelect = (gig: Gig) => {
     setSelectedGig(gig);
     setCurrentPage(1);
     setTimeout(scrollToResults, 100);
@@ -236,16 +202,16 @@ const MatchingDashboard: React.FC = () => {
     setTimeout(scrollToResults, 100); // Petit délai pour laisser le temps aux résultats de se charger
   };
 
-  const paginatedReps = Array.isArray(reps) ? reps.slice(
+  const paginatedReps = reps.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
-  ) : [];
-  const paginatedGigs = Array.isArray(gigs) ? gigs.slice(
+  );
+  const paginatedGigs = gigs.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
-  ) : [];
+  );
   const totalPages = Math.ceil(
-    (activeTab === "gigs" ? (Array.isArray(gigs) ? gigs.length : 0) : (Array.isArray(reps) ? reps.length : 0)) / itemsPerPage
+    (activeTab === "gigs" ? gigs.length : reps.length) / itemsPerPage
   );
 
   // Fetch reps and gigs on component mount
@@ -255,22 +221,12 @@ const MatchingDashboard: React.FC = () => {
       try {
         console.log("Fetching data...");
         const companyId = Cookies.get('companyId') || '685abf28641398dc582f4c95';
-        const [repsData, gigsResponse] = await Promise.all([
+        const [repsData, gigsData] = await Promise.all([
           getReps(),
           companyId ? getGigsByCompanyId(companyId) : getGigs()
         ]);
         console.log("=== REPS DATA ===", JSON.stringify(repsData, null, 2));
-        console.log("=== GIGS RESPONSE ===", gigsResponse);
-        
-        // Extract gigs data from the response structure
-        const gigsData: any = gigsResponse && typeof gigsResponse === 'object' && 'data' in gigsResponse 
-          ? gigsResponse.data 
-          : Array.isArray(gigsResponse) 
-            ? gigsResponse 
-            : [];
-        
-        console.log("=== EXTRACTED GIGS DATA ===", gigsData);
-        
+        console.log("=== GIGS DATA ===", gigsData);
         setReps(repsData);
         setGigs(gigsData);
       } catch (error) {
@@ -288,22 +244,11 @@ const MatchingDashboard: React.FC = () => {
   useEffect(() => {
     const getMatches = async () => {
       if (initialLoading) return;
-      
-      console.log("=== DEBUG: getMatches called ===");
-      console.log("activeTab:", activeTab);
-      console.log("selectedGig:", selectedGig);
-      console.log("selectedRep:", selectedRep);
-      console.log("weights:", weights);
-      
       try {
         let response: MatchResponse | BasicMatchResponse;
         if (activeTab === "gigs" && selectedGig) {
-          console.log("=== DEBUG: Calling findMatchesForGig ===");
-          console.log("gigId:", selectedGig._id);
           setLoading(true);
           const gigResponse = await findMatchesForGig(selectedGig._id, weights);
-          console.log("=== DEBUG: findMatchesForGig response ===");
-          console.log("Full response:", gigResponse);
           console.log("Gig Response Structure:", {
             matches: gigResponse.matches,
             totalMatches: gigResponse.totalMatches,
@@ -313,8 +258,7 @@ const MatchingDashboard: React.FC = () => {
             languageStats: gigResponse.languageStats,
             skillsStats: gigResponse.skillsStats
           });
-          console.log("First Match Structure:", gigResponse.matches?.[0]);
-          console.log("Matches length:", gigResponse.matches?.length);
+          console.log("First Match Structure:", gigResponse.matches[0]);
           setMatches(gigResponse.matches || []);
           setMatchStats({
             totalMatches: gigResponse.totalMatches || 0,
@@ -342,31 +286,30 @@ const MatchingDashboard: React.FC = () => {
           setLoading(false);
         } else if (activeTab === "reps" && selectedRep) {
           setLoading(true);
-          const repResponse = await findGigsForRep(selectedRep._id, weights);
+          response = await findGigsForRep(selectedRep._id, weights);
           console.log("Rep Response Structure:", {
-            matches: repResponse
+            matches: response.matches
           });
-          console.log("First Match Structure:", Array.isArray(repResponse) && repResponse.length > 0 ? repResponse[0] : 'No matches');
-          setMatches(Array.isArray(repResponse) ? repResponse : []);
+          console.log("First Match Structure:", response.matches[0]);
+          setMatches(response.matches || []);
           setMatchStats(null);
           setLoading(false);
         } else if (activeTab === "optimal") {
           setLoading(true);
-          const optimalResponse = await generateOptimalMatches(weights);
+          response = await generateOptimalMatches(weights);
           console.log("Optimal Response Structure:", {
-            matches: optimalResponse
+            matches: response.matches
           });
-          console.log("First Match Structure:", Array.isArray(optimalResponse) && optimalResponse.length > 0 ? optimalResponse[0] : 'No matches');
-          setMatches(Array.isArray(optimalResponse) ? optimalResponse : []);
+          console.log("First Match Structure:", response.matches[0]);
+          setMatches(response.matches || []);
           setMatchStats(null);
           setLoading(false);
         } else {
-          console.log("=== DEBUG: No conditions met, clearing matches ===");
           setMatches([]);
           setMatchStats(null);
         }
       } catch (error) {
-        console.error("=== DEBUG: Error getting matches ===", error);
+        console.error("Error getting matches:", error);
         setError("Failed to get matches. Please try again.");
         setMatches([]);
         setMatchStats(null);
@@ -413,62 +356,37 @@ const MatchingDashboard: React.FC = () => {
     setSelectedMatch(null);
   };
 
-  // Helper function to handle email sending and GigAgent creation
-  const handleSendEmailAndCreateGigAgent = async (match: Match, gig: any) => {
+  // Add this function to handle gig-agent creation
+  const handleCreateGigAgent = async (match: Match) => {
+    if (!selectedGig) {
+      setGigAgentError("No gig selected");
+      return;
+    }
+
+    setCreatingGigAgent(true);
+    setGigAgentError(null);
+    setGigAgentSuccess(null);
+
     try {
-      console.log('📧 Starting email and GigAgent creation process...');
-      
-      // 1. Send the email
-      const agentEmail = match.agentInfo?.email || 'test@example.com';
-      console.log('📧 Sending email to:', agentEmail);
-      
-      await sendMatchEmail({
-        agentName: match.agentInfo?.name || 'Agent',
-        agentEmail: agentEmail,
-        gigTitle: gig.title,
-        companyName: gig.companyId
-      });
-      
-      console.log('✅ Email sent successfully');
-      
-      // 2. Create GigAgent assignment
-      console.log('📋 Creating GigAgent assignment...');
-      
-      const gigAgentData = {
+      const response = await createGigAgent({
         agentId: match.repId,
-        gigId: gig._id || '',
-        matchScore: match.score || 0,
-        matchDetails: {
-          languageMatch: match.languageMatch ? {
-            score: match.languageMatch.details?.matchStatus === 'perfect_match' ? 1 : 
-                   match.languageMatch.details?.matchStatus === 'partial_match' ? 0.5 : 0,
-            details: {
-              matchingLanguages: match.languageMatch.details?.matchingLanguages || [],
-              missingLanguages: match.languageMatch.details?.missingLanguages || [],
-              insufficientLanguages: match.languageMatch.details?.insufficientLanguages || [],
-              matchStatus: match.languageMatch.details?.matchStatus || 'no_match'
-            }
-          } : undefined,
-          skillsMatch: match.skillsMatch ? {
-            details: {
-              matchingSkills: match.skillsMatch.details?.matchingSkills || [],
-              missingSkills: match.skillsMatch.details?.missingSkills || [],
-              insufficientSkills: match.skillsMatch.details?.insufficientSkills || [],
-              matchStatus: match.skillsMatch.details?.matchStatus || 'no_match'
-            }
-          } : undefined
-        }
-      };
+        gigId: selectedGig._id
+      });
+
+      console.log('Gig-Agent created successfully:', response);
+      setGigAgentSuccess(`Agent successfully assigned to "${selectedGig.title}"! Email sent: ${response.emailSent ? 'Yes' : 'No'}`);
       
-      const gigAgentResponse = await createGigAgent(gigAgentData);
-      console.log('✅ GigAgent created successfully:', gigAgentResponse.message);
-      
-      // Show success message
-      alert(`✅ Email sent and assignment created successfully!\n\nAgent: ${match.agentInfo?.name}\nGig: ${gig.title}\nAssignment ID: ${gigAgentResponse.gigAgent._id}`);
-      
+      // Close the modal after successful creation
+      setTimeout(() => {
+        handleCloseMatchDetails();
+        setGigAgentSuccess(null);
+      }, 3000);
+
     } catch (error) {
-      console.error('❌ Error in email and GigAgent creation process:', error);
-      alert(`❌ Error: ${error instanceof Error ? error.message : 'Unknown error occurred'}`);
+      console.error('Error creating gig-agent:', error);
+      setGigAgentError('Failed to assign agent to gig. Please try again.');
+    } finally {
+      setCreatingGigAgent(false);
     }
   };
 
@@ -782,17 +700,20 @@ const MatchingDashboard: React.FC = () => {
                     </span>
                   </div>
                   <p className="text-sm text-gray-500 mb-4">
-                    Company ID: {gig.companyId}
+                    {gig.companyName}
                   </p>
                   <div className="space-y-2 text-sm text-gray-600">
                     <div className="flex items-center space-x-2">
                       <Clock size={16} className="text-gray-400" />
-                      <p>Required Experience: {gig.seniority?.yearsExperience || 'N/A'}+ years</p>
+                      <p>Required Experience: {gig.requiredExperience}+ years</p>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Activity size={16} className="text-gray-400" />
                       <p>
-                        Seniority Level: {gig.seniority?.level || 'N/A'}
+                        Expected Conversion:{" "}
+                        {gig.expectedConversionRate
+                          ? `${(gig.expectedConversionRate * 100).toFixed(1)}%`
+                          : "N/A"}
                       </p>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -800,7 +721,7 @@ const MatchingDashboard: React.FC = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                       </svg>
-                      <p>Destination Zone: {gig.destination_zone || "Any"}</p>
+                      <p>Region: {gig.targetRegion || "Any"}</p>
                     </div>
                   </div>
                 </div>
@@ -913,7 +834,7 @@ const MatchingDashboard: React.FC = () => {
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          {match.agentInfo?.languages && match.agentInfo.languages.length > 0 ? (
+                          {match.agentInfo?.languages?.length > 0 ? (
                             <div className="flex flex-wrap gap-2">
                               {match.agentInfo.languages.map((lang: { language: string; proficiency?: string }, i: number) => (
                                 <span key={i} className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-medium">
@@ -926,28 +847,13 @@ const MatchingDashboard: React.FC = () => {
                           )}
                         </td>
                         <td className="px-6 py-4">
-                          {match.skillsMatch?.details?.matchingSkills && match.skillsMatch.details.matchingSkills.length > 0 ? (
+                          {match.skillsMatch?.details?.matchingSkills?.length > 0 ? (
                             <div className="flex flex-wrap gap-2">
                               {match.skillsMatch.details.matchingSkills.map((skill: { skill: string; requiredLevel?: number }, i: number) => (
                                 <span key={i} className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-medium">
                                   {skill.skill} {skill.requiredLevel && <span>(Level {skill.requiredLevel})</span>}
                                 </span>
                               ))}
-                            </div>
-                          ) : match.agentInfo?.skills ? (
-                            <div className="flex flex-wrap gap-2">
-                              {(() => {
-                                const allSkills = [
-                                  ...(Array.isArray(match.agentInfo.skills.technical) ? match.agentInfo.skills.technical : []),
-                                  ...(Array.isArray(match.agentInfo.skills.professional) ? match.agentInfo.skills.professional : []),
-                                  ...(Array.isArray(match.agentInfo.skills.soft) ? match.agentInfo.skills.soft : [])
-                                ];
-                                return allSkills.slice(0, 3).map((skill: { skill: string; level?: number }, i: number) => (
-                                  <span key={i} className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-medium">
-                                    {skill.skill} {skill.level && <span>(Level {skill.level})</span>}
-                                  </span>
-                                ));
-                              })()}
                             </div>
                           ) : (
                             <span className="text-gray-400">No skills</span>
@@ -956,19 +862,13 @@ const MatchingDashboard: React.FC = () => {
                         <td className="px-6 py-4 text-center">
                           <button
                             className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-lg"
-                            onClick={async (e) => {
+                            onClick={(e) => {
                               e.stopPropagation();
-                              try {
-                                if (selectedMatch && selectedGig) {
-                                  await handleSendEmailAndCreateGigAgent(selectedMatch, selectedGig);
-                                }
-                              } catch (error) {
-                                console.error('Erreur lors de l\'envoi de l\'email:', error);
-                              }
+                              handleMatchSelect(match);
                             }}
                           >
                             <Zap className="w-4 h-4 mr-2" />
-                            Send Email
+                            Match
                           </button>
                         </td>
                       </tr>
@@ -1110,67 +1010,6 @@ const MatchingDashboard: React.FC = () => {
                           </div>
                         )}
 
-                        {/* Fallback: Basic Agent Information when detailed matching is not available */}
-                        {(!selectedMatch.skillsMatch?.details && !selectedMatch.languageMatch?.details) && (
-                          <div className="bg-gray-50 rounded-xl p-6">
-                            <h4 className="text-lg font-semibold text-gray-900 mb-4">Agent Information</h4>
-                            <div className="space-y-4">
-                              {/* Skills */}
-                              {selectedMatch.agentInfo?.skills && (
-                                <div>
-                                  <h5 className="font-medium text-gray-800 mb-2">Skills</h5>
-                                  <div className="flex flex-wrap gap-2">
-                                    {(() => {
-                                      const allSkills = [
-                                        ...(Array.isArray(selectedMatch.agentInfo.skills.technical) ? selectedMatch.agentInfo.skills.technical : []),
-                                        ...(Array.isArray(selectedMatch.agentInfo.skills.professional) ? selectedMatch.agentInfo.skills.professional : []),
-                                        ...(Array.isArray(selectedMatch.agentInfo.skills.soft) ? selectedMatch.agentInfo.skills.soft : [])
-                                      ];
-                                      return allSkills.slice(0, 5).map((skill: { skill: string; level?: number }, i: number) => (
-                                        <span key={i} className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-medium">
-                                          {skill.skill} {skill.level && <span>(Level {skill.level})</span>}
-                                        </span>
-                                      ));
-                                    })()}
-                                  </div>
-                                </div>
-                              )}
-                              
-                              {/* Languages */}
-                              {selectedMatch.agentInfo?.languages && (
-                                <div>
-                                  <h5 className="font-medium text-gray-800 mb-2">Languages</h5>
-                                  <div className="flex flex-wrap gap-2">
-                                    {Array.isArray(selectedMatch.agentInfo.languages) ? selectedMatch.agentInfo.languages.map((lang: { language: string; proficiency?: string }, i: number) => (
-                                      <span key={i} className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-medium">
-                                        {lang.language} {lang.proficiency && <span>({lang.proficiency})</span>}
-                                      </span>
-                                    )) : null}
-                                  </div>
-                                </div>
-                              )}
-                              
-                              {/* Experience */}
-                              {selectedMatch.agentInfo?.experience && Array.isArray(selectedMatch.agentInfo.experience) && selectedMatch.agentInfo.experience.length > 0 && (
-                                <div>
-                                  <h5 className="font-medium text-gray-800 mb-2">Experience</h5>
-                                  <div className="space-y-2">
-                                    {selectedMatch.agentInfo.experience.slice(0, 3).map((exp: { title: string; company: string; startDate: string | Date; endDate: string | Date }, i: number) => (
-                                      <div key={i} className="bg-white rounded-lg p-3 shadow-sm">
-                                        <div className="font-medium text-gray-900">{exp.title}</div>
-                                        <div className="text-sm text-gray-600">{exp.company}</div>
-                                        <div className="text-xs text-gray-500">
-                                          {new Date(exp.startDate).getFullYear()} - {new Date(exp.endDate).getFullYear()}
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        )}
-
                         {/* Availability Comparison - only if weight > 0 */}
                         {/* Ajoute ici la logique pour la disponibilité si tu as les données et la structure */}
                       </div>
@@ -1199,20 +1038,54 @@ const MatchingDashboard: React.FC = () => {
                           Close
                         </button>
                         <button
-                          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-                          onClick={async () => {
-                            try {
-                              if (selectedMatch && selectedGig) {
-                                await handleSendEmailAndCreateGigAgent(selectedMatch, selectedGig);
-                              }
-                            } catch (error) {
-                              console.error('Erreur lors de l\'envoi de l\'email:', error);
+                          className={`px-4 py-2 rounded-lg transition-colors flex items-center space-x-2 ${
+                            creatingGigAgent 
+                              ? 'bg-gray-400 text-white cursor-not-allowed' 
+                              : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                          }`}
+                          onClick={() => {
+                            if (selectedMatch && !creatingGigAgent) {
+                              handleCreateGigAgent(selectedMatch);
                             }
                           }}
+                          disabled={creatingGigAgent}
                         >
-                          Confirm Match
+                          {creatingGigAgent ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                              <span>Creating...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Zap className="w-4 h-4" />
+                              <span>Confirm Match</span>
+                            </>
+                          )}
                         </button>
                       </div>
+
+                      {/* Success/Error Messages */}
+                      {gigAgentSuccess && (
+                        <div className="mt-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+                          <div className="flex items-center">
+                            <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                            </svg>
+                            {gigAgentSuccess}
+                          </div>
+                        </div>
+                      )}
+
+                      {gigAgentError && (
+                        <div className="mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                          <div className="flex items-center">
+                            <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                            </svg>
+                            {gigAgentError}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

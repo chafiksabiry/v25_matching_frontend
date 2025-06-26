@@ -44,8 +44,7 @@ export const getGigs = async (): Promise<Gig[]> => {
 export const getGigsByCompanyId = async (companyId: string): Promise<Gig[]> => {
   const GIGS_API_URL = import.meta.env.VITE_API_URL_GIGS || 'https://api-gigsmanual.harx.ai/api';
   const response = await axios.get(`${GIGS_API_URL}/gigs/company/${companyId}`);
-  // Extract the data property from the response
-  return response.data.data || response.data;
+  return response.data;
 };
 
 export const getGigById = async (id: string): Promise<Gig> => {
@@ -92,34 +91,8 @@ export const deleteMatch = async (id: string): Promise<void> => {
   await api.delete(`/matches/${id}`);
 };
 
-// New matching algorithm API calls using the provided endpoints
+// Matching algorithm API calls
 interface MatchResponse {
-  matches: Match[];
-  totalMatches?: number;
-  perfectMatches?: number;
-  partialMatches?: number;
-  noMatches?: number;
-  languageStats?: {
-    perfectMatches: number;
-    partialMatches: number;
-    noMatches: number;
-    totalMatches: number;
-  };
-  skillsStats?: {
-    perfectMatches: number;
-    partialMatches: number;
-    noMatches: number;
-    totalMatches: number;
-    byType: {
-      technical: { perfectMatches: number; partialMatches: number; noMatches: number };
-      professional: { perfectMatches: number; partialMatches: number; noMatches: number };
-      soft: { perfectMatches: number; partialMatches: number; noMatches: number };
-    };
-  };
-}
-
-// Interface for the actual API response
-interface ApiMatchResponse {
   preferedmatches: Match[];
   totalMatches: number;
   perfectMatches: number;
@@ -137,253 +110,71 @@ interface ApiMatchResponse {
     noMatches: number;
     totalMatches: number;
     byType: {
-      technical: { perfectMatches: number; partialMatches: number; noMatches: number };
-      professional: { perfectMatches: number; partialMatches: number; noMatches: number };
-      soft: { perfectMatches: number; partialMatches: number; noMatches: number };
+      technical: {
+        perfectMatches: number;
+        partialMatches: number;
+        noMatches: number;
+      };
+      professional: {
+        perfectMatches: number;
+        partialMatches: number;
+        noMatches: number;
+      };
+      soft: {
+        perfectMatches: number;
+        partialMatches: number;
+        noMatches: number;
+      };
     };
-  };
-  scheduleStats: {
-    perfectMatches: number;
-    partialMatches: number;
-    noMatches: number;
-    totalMatches: number;
   };
 }
 
-// Find agents for a gig (using the new endpoint)
 export const findMatchesForGig = async (gigId: string, weights: MatchingWeights): Promise<MatchResponse> => {
   try {
-    console.log("=== DEBUG: Calling matches/gig/:id endpoint ===");
-    console.log("gigId:", gigId);
-    console.log("weights:", weights);
-    
-    const response = await api.get<ApiMatchResponse>(`/matches/gig/${gigId}`);
-    
-    console.log("=== DEBUG: Raw response ===");
-    console.log("Response:", response);
-    console.log("Response data:", response.data);
-    
-    // Ensure the response has the expected structure
-    const data = response.data;
-    if (!data.preferedmatches) {
-      console.warn('Response does not contain preferedmatches array:', data);
-      return {
-        matches: [],
-        totalMatches: 0,
-        perfectMatches: 0,
-        partialMatches: 0,
-        noMatches: 0
-      };
-    }
-    
-    // Transform preferedmatches to matches for compatibility
-    const transformedResponse: MatchResponse = {
-      matches: data.preferedmatches || [],
-      totalMatches: data.totalMatches || 0,
-      perfectMatches: data.perfectMatches || 0,
-      partialMatches: data.partialMatches || 0,
-      noMatches: data.noMatches || 0,
-      languageStats: data.languageStats,
-      skillsStats: data.skillsStats
-    };
-    
-    console.log("=== DEBUG: Transformed response ===");
-    console.log("Transformed response:", transformedResponse);
-    
-    return transformedResponse;
+    const response = await axios.get<MatchResponse>(`${import.meta.env.VITE_API_URL}/gig/${gigId}`, {
+      data: { weights }
+    });
+    return response.data;
   } catch (error) {
     console.error('Error finding matches for gig:', error);
     throw error;
   }
 };
 
-// Find gigs for an agent (using the new endpoint)
 export const findGigsForRep = async (
   repId: string, 
-  weights: MatchingWeights
+  weights: MatchingWeights, 
+  limit: number = 10
 ): Promise<Match[]> => {
-  try {
-    const response = await api.post<MatchResponse>('/gigs/find-gigs-for-agent', {
-      agentId: repId,
-      weights
-    });
-    
-    // Handle different response structures
-    const data = response.data;
-    if (Array.isArray(data)) {
-      return data;
-    } else if (data.matches && Array.isArray(data.matches)) {
-      return data.matches;
-    } else {
-      console.warn('Unexpected response structure:', data);
-      return [];
-    }
-  } catch (error) {
-    console.error('Error finding gigs for rep:', error);
-    throw error;
-  }
+  const response = await api.post(`/matches/rep/${repId}`, { weights, limit });
+  return response.data;
 };
 
-// Generate optimal matches (this might need to be updated based on your backend)
 export const generateOptimalMatches = async (weights: MatchingWeights): Promise<Match[]> => {
-  try {
-    // For now, we'll get all gigs and reps and do basic matching
-    const [gigs, reps] = await Promise.all([getGigs(), getReps()]);
-    
-    // Simple matching logic - you might want to implement this differently
-    const matches: Match[] = [];
-    
-    for (const gig of gigs) {
-      for (const rep of reps) {
-        // Basic matching score calculation
-        let score = 0;
-        
-        // Skills matching
-        if (weights.skills > 0) {
-          const gigSkills = gig.skills?.professional || [];
-          const repSkills = [
-            ...(rep.skills?.technical || []),
-            ...(rep.skills?.professional || []),
-            ...(rep.skills?.soft || [])
-          ];
-          
-          const matchingSkills = gigSkills.filter((gigSkill: any) => 
-            repSkills.some((repSkill: any) => repSkill.skill === gigSkill.skill)
-          );
-          
-          score += (matchingSkills.length / Math.max(gigSkills.length, 1)) * weights.skills;
-        }
-        
-        // Experience matching
-        if (weights.experience > 0) {
-          const repExperience = parseInt(rep.professionalSummary?.yearsOfExperience || '0');
-          const requiredExperience = gig.requiredExperience || 0;
-          
-          if (repExperience >= requiredExperience) {
-            score += weights.experience;
-          } else {
-            score += (repExperience / requiredExperience) * weights.experience;
-          }
-        }
-        
-        // Language matching
-        if (weights.languages > 0) {
-          const gigLanguages = (gig as any).skills?.languages || [];
-          const repLanguages = rep.personalInfo?.languages || [];
-          
-          const matchingLanguages = gigLanguages.filter((gigLang: any) => 
-            repLanguages.some((repLang: any) => repLang.language === gigLang.language)
-          );
-          
-          score += (matchingLanguages.length / Math.max(gigLanguages.length, 1)) * weights.languages;
-        }
-        
-        if (score > 0.3) { // Only include matches with reasonable scores
-          matches.push({
-            _id: `${gig._id}-${rep._id}`,
-            repId: rep._id || '',
-            gigId: gig._id || '',
-            score,
-            title: gig.title,
-            category: gig.category,
-            requiredExperience: gig.requiredExperience,
-            agentInfo: {
-              name: rep.personalInfo?.name || '',
-              email: rep.personalInfo?.email || ''
-            }
-          } as Match);
-        }
-      }
-    }
-    
-    // Sort by score and return top matches
-    return matches.sort((a, b) => b.score - a.score).slice(0, 10);
-  } catch (error) {
-    console.error('Error generating optimal matches:', error);
-    throw error;
-  }
+  const response = await api.post('/matches/optimize', { weights });
+  return response.data;
 };
 
-// GigAgent API calls
-export const createGigAgent = async (gigAgentData: {
+// Gig-Agent API calls
+interface GigAgentRequest {
   agentId: string;
   gigId: string;
+}
+
+interface GigAgentResponse {
+  message: string;
+  gigAgent: any;
+  emailSent: boolean;
   matchScore: number;
-  matchDetails?: {
-    languageMatch?: {
-      score: number;
-      details: {
-        matchingLanguages: Array<{
-          language: string;
-          requiredLevel: string;
-          agentLevel: string;
-        }>;
-        missingLanguages: string[];
-        insufficientLanguages: Array<{
-          language: string;
-          requiredLevel: string;
-          agentLevel: string;
-        }>;
-        matchStatus: 'perfect_match' | 'partial_match' | 'no_match';
-      };
-    };
-    skillsMatch?: {
-      details: {
-        matchingSkills: Array<{
-          skill: string;
-          requiredLevel: number;
-          agentLevel: number;
-          type: string;
-        }>;
-        missingSkills: Array<{
-          skill: string;
-          type: string;
-        }>;
-        insufficientSkills: Array<{
-          skill: string;
-          requiredLevel: number;
-          agentLevel: number;
-          type: string;
-        }>;
-        matchStatus: 'perfect_match' | 'partial_match' | 'no_match';
-      };
-    };
-    scheduleMatch?: {
-      score: number;
-      details: {
-        matchingDays: Array<{
-          day: string;
-          gigHours: {
-            start: string;
-            end: string;
-          };
-          agentHours: {
-            start: string;
-            end: string;
-          };
-        }>;
-        missingDays: string[];
-        insufficientHours: Array<{
-          day: string;
-          gigHours: {
-            start: string;
-            end: string;
-          };
-          agentHours: {
-            start: string;
-            end: string;
-          };
-        }>;
-      };
-      matchStatus: 'perfect_match' | 'partial_match' | 'no_match';
-    };
-  };
-}): Promise<{ message: string; gigAgent: any; emailSent: boolean; matchScore: number }> => {
+}
+
+export const createGigAgent = async (data: GigAgentRequest): Promise<GigAgentResponse> => {
   try {
-    const response = await api.post('/gig-agents', gigAgentData);
-  return response.data;
+    const MATCHING_API_URL = import.meta.env.VITE_MATCHING_API_URL || 'https://api-matching.harx.ai/api';
+    const response = await axios.post<GigAgentResponse>(`${MATCHING_API_URL}/gig-agents`, data);
+    return response.data;
   } catch (error) {
-    console.error('Error creating gig agent assignment:', error);
+    console.error('Error creating gig-agent assignment:', error);
     throw error;
   }
 };

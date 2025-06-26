@@ -7,20 +7,12 @@ RUN npm install
 
 COPY . .
 
-ENV VITE_API_URL=https://api-matching.harx.ai/api
 ENV VITE_API_URL_GIGS=https://api-gigsmanual.harx.ai/api
+ENV VITE_API_URL=https://api-matching.harx.ai/api
 ENV VITE_QIANKUN=true
 ENV VITE_IS_QIANKUN=true
 ENV VITE_COMPANY_API_URL=https://api-companysearchwizard.harx.ai/api
 
-ENV VITE_AWS_REGION=eu-west-3
-ENV VITE_AWS_ACCESS_KEY_ID=AKIAWODTAOGLI4ZJPWA7
-ENV VITE_AWS_SECRET_ACCESS_KEY=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
-ENV VITE_AWS_SES_FROM_EMAIL=chafik.sabiry@harx.ai
-
-ENV VITE_EMAILJS_SERVICE_ID=service_q5vmvim
-ENV VITE_EMAILJS_PUBLIC_KEY=3KIMbHKKVndyYWuK3
-ENV VITE_EMAILJS_TEMPLATE_ID=template_jfhd1ri
 
 RUN npm run build
 
