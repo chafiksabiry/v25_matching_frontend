@@ -167,7 +167,7 @@ const MatchingDashboard: React.FC = () => {
           console.log('=== PREFEREDMATCHES ===', gigResponse.preferedmatches);
           console.log('=== MATCHES LENGTH ===', gigResponse.preferedmatches?.length);
           
-          setMatches(gigResponse.preferedmatches || []);
+          setMatches(gigResponse.matches || gigResponse.preferedmatches || []);
           setMatchStats({
             totalMatches: gigResponse.totalMatches || 0,
             perfectMatches: gigResponse.perfectMatches || 0,
@@ -747,18 +747,18 @@ const MatchingDashboard: React.FC = () => {
                                   <h4 className="font-semibold text-gray-700">Timezone</h4>
                                   <div className="space-y-1">
                                     <div className={`${
-                                      match.timezoneMatch?.matchStatus === 'perfect_match' 
+                                      (match as any).timezoneMatch?.matchStatus === 'perfect_match' 
                                         ? 'text-green-600' 
-                                        : match.timezoneMatch?.matchStatus === 'partial_match'
+                                        : (match as any).timezoneMatch?.matchStatus === 'partial_match'
                                         ? 'text-yellow-600'
                                         : 'text-red-600'
                                     }`}>
-                                      {(match.timezoneMatch?.matchStatus === 'perfect_match' && '✓ Perfect') ||
-                                       (match.timezoneMatch?.matchStatus === 'partial_match' && '⚠ Partial') ||
-                                       (match.timezoneMatch?.matchStatus === 'no_match' && '✗ No Match')}
+                                      {(match as any).timezoneMatch?.matchStatus === 'perfect_match' ? '✓ Perfect' :
+                                       (match as any).timezoneMatch?.matchStatus === 'partial_match' ? '⚠ Partial' :
+                                       (match as any).timezoneMatch?.matchStatus === 'no_match' ? '✗ No Match' : ''}
                                     </div>
                                     <div className="text-xs text-gray-500">
-                                      {match.timezoneMatch?.details?.reason}
+                                      {(match as any).timezoneMatch?.details?.reason}
                                     </div>
                                   </div>
                                 </div>
@@ -768,18 +768,18 @@ const MatchingDashboard: React.FC = () => {
                                   <h4 className="font-semibold text-gray-700">Region</h4>
                                   <div className="space-y-1">
                                     <div className={`${
-                                      match.regionMatch?.matchStatus === 'perfect_match' 
+                                      (match as any).regionMatch?.matchStatus === 'perfect_match' 
                                         ? 'text-green-600' 
-                                        : match.regionMatch?.matchStatus === 'partial_match'
+                                        : (match as any).regionMatch?.matchStatus === 'partial_match'
                                         ? 'text-yellow-600'
                                         : 'text-red-600'
                                     }`}>
-                                      {(match.regionMatch?.matchStatus === 'perfect_match' && '✓ Perfect') ||
-                                       (match.regionMatch?.matchStatus === 'partial_match' && '⚠ Partial') ||
-                                       (match.regionMatch?.matchStatus === 'no_match' && '✗ No Match')}
+                                      {(match as any).regionMatch?.matchStatus === 'perfect_match' ? '✓ Perfect' :
+                                       (match as any).regionMatch?.matchStatus === 'partial_match' ? '⚠ Partial' :
+                                       (match as any).regionMatch?.matchStatus === 'no_match' ? '✗ No Match' : ''}
                                     </div>
                                     <div className="text-xs text-gray-500">
-                                      {match.regionMatch?.details?.reason}
+                                      {(match as any).regionMatch?.details?.reason}
                                     </div>
                                   </div>
                                 </div>
