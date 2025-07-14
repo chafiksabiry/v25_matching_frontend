@@ -538,8 +538,7 @@ const MatchingDashboard: React.FC = () => {
                     </div>
                     <div className="flex items-center space-x-2">
                       <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       <p>Region: {gig.targetRegion || "Any"}</p>
                     </div>
@@ -658,159 +657,47 @@ const MatchingDashboard: React.FC = () => {
                                     </svg>
                                     {match.agentInfo?.email}
                                   </div>
-                                  
-                                  {/* Timezone Information */}
-                                  <div className="bg-blue-50 rounded-lg p-3 border border-blue-100">
-                                    <div className="flex items-center justify-between mb-2">
-                                      <span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Timezone</span>
-                                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                        (match as any).timezoneMatch?.matchStatus === 'perfect_match' 
-                                          ? 'bg-green-100 text-green-700' 
-                                          : (match as any).timezoneMatch?.matchStatus === 'partial_match'
-                                          ? 'bg-yellow-100 text-yellow-700'
-                                          : 'bg-red-100 text-red-700'
-                                      }`}>
-                                        {(match as any).timezoneMatch?.matchStatus === 'perfect_match' ? 'Perfect' : 
-                                         (match as any).timezoneMatch?.matchStatus === 'partial_match' ? 'Partial' : 'No Match'}
-                                      </span>
-                                    </div>
-                                    <div className="space-y-1">
-                                      <div className="flex items-center text-sm">
-                                        <svg className="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                        <span className="font-medium text-gray-800">{match.agentInfo?.timezone?.gmtDisplay}</span>
-                                      </div>
-                                      <div className="flex items-center text-sm text-gray-600">
-                                        <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        </svg>
-                                        <span>{match.agentInfo?.timezone?.countryName} ({match.agentInfo?.timezone?.countryCode})</span>
-                                      </div>
-                                      <div className="text-xs text-gray-500">
-                                        {match.agentInfo?.timezone?.timezoneName}
-                                      </div>
-                                    </div>
+                                  {/* TIMEZONE SIMPLIFIÉ */}
+                                  <div className="mt-2 flex items-center space-x-2 text-sm text-gray-700">
+                                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span>
+                                      {match.agentInfo?.timezone?.timezoneName} ({match.agentInfo?.timezone?.gmtDisplay})
+                                    </span>
                                   </div>
-
-                                  {/* Region Match */}
-                                  <div className="mt-2 bg-gray-50 rounded-lg p-2 border border-gray-100">
-                                    <div className="flex items-center justify-between">
-                                      <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Region</span>
-                                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                        (match as any).regionMatch?.matchStatus === 'perfect_match' 
-                                          ? 'bg-green-100 text-green-700' 
-                                          : 'bg-red-100 text-red-700'
-                                      }`}>
-                                        {(match as any).regionMatch?.matchStatus === 'perfect_match' ? 'Match' : 'No Match'}
-                                      </span>
-                                    </div>
-                                  </div>
+                                  {/* FIN TIMEZONE SIMPLIFIÉ */}
+                                  {/* Region Match supprimé */}
                                 </div>
                               </div>
                             </td>
                             <td className="px-6 py-4">
-                              <div className="space-y-3">
-                                {/* Language Match Status */}
-                                <div className="flex items-center justify-between">
-                                  <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Language Match</span>
-                                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                    (match as any).languageMatch?.details?.matchStatus === 'perfect_match' 
-                                      ? 'bg-green-100 text-green-700' 
-                                      : (match as any).languageMatch?.details?.matchStatus === 'partial_match'
-                                      ? 'bg-yellow-100 text-yellow-700'
-                                      : 'bg-red-100 text-red-700'
-                                  }`}>
-                                    {(match as any).languageMatch?.details?.matchStatus === 'perfect_match' ? 'Perfect' : 
-                                     (match as any).languageMatch?.details?.matchStatus === 'partial_match' ? 'Partial' : 'No Match'}
-                                  </span>
+                              {/* LANGUAGES SIMPLIFIÉ */}
+                              {match.agentInfo?.languages?.length > 0 ? (
+                                <div className="flex flex-wrap gap-2">
+                                  {match.agentInfo.languages.map((lang: { language: string; proficiency?: string }, i: number) => (
+                                    <span key={i} className="px-2 py-1 rounded text-xs text-gray-800 border border-gray-200">
+                                      {lang.language}{lang.proficiency && ` (${lang.proficiency})`}
+                                    </span>
+                                  ))}
                                 </div>
-
-                                {/* Agent Languages */}
-                                {match.agentInfo?.languages?.length > 0 ? (
-                                  <div className="space-y-2">
-                                    <div className="text-xs font-medium text-gray-700">Agent Languages:</div>
-                                    <div className="flex flex-wrap gap-2">
-                                      {match.agentInfo.languages.map((lang: { language: string; proficiency?: string; iso639_1?: string }, i: number) => (
-                                        <span key={i} className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-medium flex items-center">
-                                          <span className="mr-1">🌐</span>
-                                          {lang.language} 
-                                          {lang.proficiency && <span className="ml-1 text-indigo-600">({lang.proficiency})</span>}
-                                        </span>
-                                      ))}
-                                    </div>
-                                  </div>
-                                ) : (
-                                  <div className="text-gray-400 text-sm">No languages specified</div>
-                                )}
-
-                                {/* Language Match Details */}
-                                {(match as any).languageMatch?.details?.insufficientLanguages?.length > 0 && (
-                                  <div className="mt-2 p-2 bg-red-50 rounded border border-red-100">
-                                    <div className="text-xs font-medium text-red-700 mb-1">Insufficient Levels:</div>
-                                    {(match as any).languageMatch.details.insufficientLanguages.map((lang: any, i: number) => (
-                                      <div key={i} className="text-xs text-red-600">
-                                        {lang.language}: Required {lang.requiredLevel}, Agent has {lang.agentLevel}
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
+                              ) : (
+                                <div className="text-gray-400 text-sm">No languages specified</div>
+                              )}
                             </td>
                             <td className="px-6 py-4">
-                              <div className="space-y-3">
-                                {/* Skills Match Status */}
-                                <div className="flex items-center justify-between">
-                                  <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Skills Match</span>
-                                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                    (match as any).skillsMatch?.details?.matchStatus === 'perfect_match' 
-                                      ? 'bg-green-100 text-green-700' 
-                                      : (match as any).skillsMatch?.details?.matchStatus === 'partial_match'
-                                      ? 'bg-yellow-100 text-yellow-700'
-                                      : 'bg-red-100 text-red-700'
-                                  }`}>
-                                    {(match as any).skillsMatch?.details?.matchStatus === 'perfect_match' ? 'Perfect' : 
-                                     (match as any).skillsMatch?.details?.matchStatus === 'partial_match' ? 'Partial' : 'No Match'}
-                                  </span>
+                              {/* SKILLS SIMPLIFIÉ */}
+                              {match.skillsMatch?.details?.matchingSkills?.length > 0 ? (
+                                <div className="flex flex-wrap gap-2">
+                                  {match.skillsMatch.details.matchingSkills.map((skill: { skillName: string }, i: number) => (
+                                    <span key={i} className="px-2 py-1 rounded text-xs text-gray-800 border border-gray-200">
+                                      {skill.skillName}
+                                    </span>
+                                  ))}
                                 </div>
-
-                                {/* Matching Skills */}
-                                {match.skillsMatch?.details?.matchingSkills?.length > 0 ? (
-                                  <div className="space-y-2">
-                                    <div className="text-xs font-medium text-gray-700">Matching Skills:</div>
-                                    <div className="flex flex-wrap gap-2">
-                                      {match.skillsMatch.details.matchingSkills.map((skill: { skillName: string; requiredLevel?: number; agentLevel?: number; type?: string }, i: number) => (
-                                        <span key={i} className={`px-3 py-1 rounded-full text-xs font-medium flex items-center ${
-                                          skill.type === 'technical' ? 'bg-blue-100 text-blue-700' :
-                                          skill.type === 'professional' ? 'bg-purple-100 text-purple-700' :
-                                          skill.type === 'soft' ? 'bg-orange-100 text-orange-700' :
-                                          'bg-green-100 text-green-700'
-                                        }`}>
-                                          <span className="mr-1">⚡</span>
-                                          {skill.skillName}
-                                          {skill.requiredLevel && <span className="ml-1 text-xs opacity-75">(L{skill.requiredLevel})</span>}
-                                          {skill.type && <span className="ml-1 text-xs opacity-75">({skill.type})</span>}
-                                        </span>
-                                      ))}
-                                    </div>
-                                  </div>
-                                ) : (
-                                  <div className="text-gray-400 text-sm">No matching skills</div>
-                                )}
-
-                                {/* Missing Skills */}
-                                {match.skillsMatch?.details?.missingSkills?.length > 0 && (
-                                  <div className="mt-2 p-2 bg-red-50 rounded border border-red-100">
-                                    <div className="text-xs font-medium text-red-700 mb-1">Missing Skills:</div>
-                                    {(match as any).skillsMatch.details.missingSkills.map((skill: any, i: number) => (
-                                      <div key={i} className="text-xs text-red-600">
-                                        {skill.skillName} (Required Level {skill.requiredLevel})
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
+                              ) : (
+                                <div className="text-gray-400 text-sm">No matching skills</div>
+                              )}
                             </td>
                             <td className="px-6 py-4 text-center">
                               <button
