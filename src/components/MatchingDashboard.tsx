@@ -96,6 +96,7 @@ const MatchingDashboard: React.FC = () => {
   const [creatingGigAgent, setCreatingGigAgent] = useState(false);
   const [gigAgentSuccess, setGigAgentSuccess] = useState<string | null>(null);
   const [gigAgentError, setGigAgentError] = useState<string | null>(null);
+  const [expandedMatches, setExpandedMatches] = useState<Set<number>>(new Set());
 
   const handleTabClick = (tab: TabType) => {
     setActiveTab(tab);
@@ -242,6 +243,19 @@ const MatchingDashboard: React.FC = () => {
   const fadeIn = "animate-[fadeIn_0.5s_ease-in-out]";
   const slideUp = "animate-[slideUp_0.3s_ease-out]";
   const pulse = "animate-[pulse_2s_infinite]";
+
+  // Toggle match details visibility
+  const toggleMatchDetails = (index: number) => {
+    setExpandedMatches(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(index)) {
+        newSet.delete(index);
+      } else {
+        newSet.add(index);
+      }
+      return newSet;
+    });
+  };
 
   // Add this function to handle gig-agent creation
   const handleCreateGigAgent = async (match: Match) => {
@@ -626,7 +640,8 @@ const MatchingDashboard: React.FC = () => {
                         {matches.map((match, index) => (
                           <React.Fragment key={index}>
                             <tr 
-                              className="hover:bg-indigo-50 transition-all duration-200"
+                              className="hover:bg-indigo-50 transition-all duration-200 cursor-pointer"
+                              onClick={() => toggleMatchDetails(index)}
                             >
                             <td className="px-6 py-4">
                               <div className="flex items-center space-x-4">
@@ -695,6 +710,7 @@ const MatchingDashboard: React.FC = () => {
                             </td>
                           </tr>
                           {/* Détails du match */}
+                          {expandedMatches.has(index) && (
                           <tr className="bg-gray-50">
                             <td colSpan={5} className="px-6 py-4">
                               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
@@ -786,6 +802,7 @@ const MatchingDashboard: React.FC = () => {
                               </div>
                             </td>
                           </tr>
+                          )}
                           </React.Fragment>
                         ))}
                       </tbody>
