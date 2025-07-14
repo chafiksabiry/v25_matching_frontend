@@ -653,6 +653,8 @@ const MatchingDashboard: React.FC = () => {
                                 <div>
                                   <div className="font-semibold text-gray-900">{match.agentInfo?.name}</div>
                                   <div className="text-sm text-gray-500">{match.agentInfo?.email}</div>
+                                  <div className="text-sm text-gray-500">{match.agentInfo?.timezone?.gmtDisplay}</div>
+                                  <div className="text-sm text-gray-500">{match.agentInfo?.timezone?.countryName}</div>
                                 </div>
                               </div>
                             </td>
