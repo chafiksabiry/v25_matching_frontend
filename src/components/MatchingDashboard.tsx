@@ -628,7 +628,7 @@ const MatchingDashboard: React.FC = () => {
                     <table className="min-w-full bg-white">
                       <thead className="bg-indigo-50">
                         <tr>
-                          <th className="px-6 py-4 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Agent</th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Personal Info</th>
                           <th className="px-6 py-4 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Languages</th>
                           <th className="px-6 py-4 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Skills</th>
                           <th className="px-6 py-4 text-center text-xs font-bold text-indigo-700 uppercase tracking-wider">Action</th>
@@ -666,8 +666,16 @@ const MatchingDashboard: React.FC = () => {
                                       {match.agentInfo?.timezone?.timezoneName} ({match.agentInfo?.timezone?.gmtDisplay})
                                     </span>
                                   </div>
-                                  {/* FIN TIMEZONE SIMPLIFIÉ */}
-                                  {/* Region Match supprimé */}
+                                  {/* REGION */}
+                                  <div className="flex items-center space-x-2 text-sm text-gray-700 mt-1">
+                                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span>
+                                      {match.agentInfo?.region || "N/A"}
+                                    </span>
+                                  </div>
+                                  {/* FIN REGION */}
                                 </div>
                               </div>
                             </td>
@@ -675,11 +683,20 @@ const MatchingDashboard: React.FC = () => {
                               {/* LANGUAGES SIMPLIFIÉ */}
                               {match.agentInfo?.languages?.length > 0 ? (
                                 <div className="flex flex-wrap gap-2">
-                                  {match.agentInfo.languages.map((lang: { language: string; proficiency?: string }, i: number) => (
-                                    <span key={i} className="px-2 py-1 rounded text-xs text-gray-800 border border-gray-200">
-                                      {lang.language}{lang.proficiency && ` (${lang.proficiency})`}
-                                    </span>
-                                  ))}
+                                  {match.agentInfo.languages.map((lang: { language: string; proficiency?: string }, i: number) => {
+                                    let levelLabel = '';
+                                    if (lang.proficiency) {
+                                      if (["A1", "A2"].includes(lang.proficiency)) levelLabel = 'Débutant';
+                                      else if (["B1", "B2"].includes(lang.proficiency)) levelLabel = 'Intermédiaire';
+                                      else if (["C1", "C2"].includes(lang.proficiency)) levelLabel = 'Avancé';
+                                    }
+                                    return (
+                                      <span key={i} className="px-2 py-1 rounded text-xs text-gray-800 border border-gray-200">
+                                        {lang.language}
+                                        {lang.proficiency && ` (${lang.proficiency}${levelLabel ? ' - ' + levelLabel : ''})`}
+                                      </span>
+                                    );
+                                  })}
                                 </div>
                               ) : (
                                 <div className="text-gray-400 text-sm">No languages specified</div>
