@@ -1,10 +1,10 @@
 import React from 'react';
-import PreferedMatchesTest from './components/PreferedMatchesTest';
+import MatchingDashboard from './components/MatchingDashboard';
 
 function App() {
   return (
-    <div className="App">
-      <PreferedMatchesTest />
+    <div className="min-h-screen bg-gray-100">
+      <MatchingDashboard />
     </div>
   );
 }
