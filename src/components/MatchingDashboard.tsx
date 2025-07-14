@@ -391,6 +391,149 @@ const MatchingDashboard: React.FC = () => {
               <Settings size={18} className="animate-spin-slow" />
               <span>Adjust Weights</span>
             </button>
+            <button
+              onClick={() => {
+                // Test avec les données fournies
+                const testData = {
+                  agentId: "686b89bf9b64bf944052bcb6",
+                  agentInfo: {
+                    name: "Formoterol bilon",
+                    email: "formoterol-rep@yopmail.com",
+                    photo: null,
+                    location: "",
+                    phone: "",
+                    languages: [
+                      {
+                        "_id": "686b89bf9b64bf944052bcb8",
+                        "language": "English",
+                        "proficiency": "C1",
+                        "iso639_1": "en"
+                      },
+                      {
+                        "_id": "686b92329b64bf944052be9c",
+                        "language": "frensh",
+                        "proficiency": "A2",
+                        "iso639_1": "fr"
+                      }
+                    ],
+                    skills: {
+                      technical: [
+                        {
+                          "_id": "6874a9302f8db069ee2c09b8",
+                          "skill": "6868132ac44e8a46719af39e",
+                          "level": 0,
+                          "name": "CRM Systems Daily Use"
+                        }
+                      ],
+                      professional: [
+                        {
+                          "_id": "6874a9302f8db069ee2c09b9",
+                          "skill": "68681321c44e8a46719af37c",
+                          "level": 0,
+                          "name": "Call Dispositioning"
+                        }
+                      ],
+                      soft: [
+                        {
+                          "_id": "6874a9302f8db069ee2c09ba",
+                          "skill": "6868131dc44e8a46719af350",
+                          "level": 0,
+                          "name": "Active Listening"
+                        }
+                      ],
+                      contactCenter: []
+                    },
+                    experience: []
+                  },
+                  languageMatch: {
+                    details: {
+                      matchingLanguages: [],
+                      missingLanguages: [],
+                      insufficientLanguages: [
+                        {
+                          "language": "French",
+                          "requiredLevel": "C2",
+                          "agentLevel": "A2"
+                        }
+                      ],
+                      matchStatus: "no_match"
+                    }
+                  },
+                  skillsMatch: {
+                    details: {
+                      matchingSkills: [
+                        {
+                          "skill": "6868132ac44e8a46719af39e",
+                          "skillName": "CRM Systems Daily Use",
+                          "requiredLevel": 1,
+                          "agentLevel": 0,
+                          "type": "technical",
+                          "agentSkillName": "CRM Systems Daily Use"
+                        },
+                        {
+                          "skill": "68681321c44e8a46719af37c",
+                          "skillName": "Call Dispositioning",
+                          "requiredLevel": 1,
+                          "agentLevel": 0,
+                          "type": "professional",
+                          "agentSkillName": "Call Dispositioning"
+                        },
+                        {
+                          "skill": "6868131dc44e8a46719af350",
+                          "skillName": "Active Listening",
+                          "requiredLevel": 1,
+                          "agentLevel": 0,
+                          "type": "soft",
+                          "agentSkillName": "Active Listening"
+                        }
+                      ],
+                      missingSkills: [],
+                      insufficientSkills: [],
+                      matchStatus: "perfect_match"
+                    }
+                  },
+                  timezoneMatch: {
+                    score: 1,
+                    details: {
+                      gigTimezone: "Europe/Paris",
+                      agentTimezone: "Africa/Ceuta",
+                      gigGmtOffset: 7200,
+                      agentGmtOffset: 7200,
+                      gmtOffsetDifference: 0,
+                      reason: "Same timezone"
+                    },
+                    matchStatus: "perfect_match"
+                  },
+                  regionMatch: {
+                    score: 0,
+                    details: {
+                      gigDestinationZone: "FR",
+                      agentCountryCode: "ES",
+                      reason: "Different regions/countries"
+                    },
+                    matchStatus: "no_match"
+                  },
+                  scheduleMatch: {
+                    score: 0,
+                    details: {
+                      matchingDays: [],
+                      missingDays: [
+                        "Tuesday",
+                        "Thursday"
+                      ],
+                      insufficientHours: []
+                    },
+                    matchStatus: "no_match"
+                  },
+                  matchStatus: "partial_match"
+                };
+                setMatches([testData as any]);
+                console.log('Test data set:', testData);
+              }}
+              className="flex items-center space-x-2 bg-green-600 hover:bg-green-500 px-4 py-2 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+            >
+              <span>Test Data</span>
+            </button>
           </div>
         </div>
       </header>
@@ -652,7 +795,7 @@ const MatchingDashboard: React.FC = () => {
                         {match.agentInfo?.name || 'Unknown Agent'}
                       </h4>
                       <span className="text-sm px-2 py-1 bg-blue-100 text-blue-800 rounded">
-                        {match.matchStatus}
+                        {(match as any).matchStatus || 'unknown'}
                       </span>
                     </div>
                     <p className="text-sm text-gray-600 mb-2">
@@ -664,7 +807,7 @@ const MatchingDashboard: React.FC = () => {
                     {match.agentInfo?.languages?.length > 0 && (
                       <div className="mt-2">
                         <span className="text-xs font-medium text-gray-700">Languages: </span>
-                        {match.agentInfo.languages.map((lang, i) => (
+                        {match.agentInfo.languages.map((lang: { language: string; proficiency?: string }, i: number) => (
                           <span key={i} className="text-xs bg-gray-100 px-2 py-1 rounded mr-1">
                             {lang.language} ({lang.proficiency})
                           </span>
@@ -674,7 +817,7 @@ const MatchingDashboard: React.FC = () => {
                     {match.skillsMatch?.details?.matchingSkills?.length > 0 && (
                       <div className="mt-2">
                         <span className="text-xs font-medium text-gray-700">Skills: </span>
-                        {match.skillsMatch.details.matchingSkills.map((skill, i) => (
+                        {match.skillsMatch.details.matchingSkills.map((skill: { skill: string; skillName?: string }, i: number) => (
                           <span key={i} className="text-xs bg-green-100 px-2 py-1 rounded mr-1">
                             {skill.skillName || skill.skill}
                           </span>
@@ -683,6 +826,18 @@ const MatchingDashboard: React.FC = () => {
                     )}
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* Raw Data Display - For debugging */}
+          {matches && matches.length > 0 && (
+            <div className="mt-6 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+              <h3 className="text-lg font-semibold text-purple-800 mb-4">Raw Preferedmatches Data:</h3>
+              <div className="bg-white p-4 rounded border">
+                <pre className="text-xs text-purple-600 overflow-auto max-h-96">
+                  {JSON.stringify({ preferedmatches: matches }, null, 2)}
+                </pre>
               </div>
             </div>
           )}
