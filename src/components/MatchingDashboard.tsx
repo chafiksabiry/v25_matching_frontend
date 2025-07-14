@@ -632,7 +632,6 @@ const MatchingDashboard: React.FC = () => {
                           <th className="px-6 py-4 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Agent</th>
                           <th className="px-6 py-4 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Languages</th>
                           <th className="px-6 py-4 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Skills</th>
-                          <th className="px-6 py-4 text-center text-xs font-bold text-indigo-700 uppercase tracking-wider">Match Status</th>
                           <th className="px-6 py-4 text-center text-xs font-bold text-indigo-700 uppercase tracking-wider">Action</th>
                         </tr>
                       </thead>
@@ -640,8 +639,7 @@ const MatchingDashboard: React.FC = () => {
                         {matches.map((match, index) => (
                           <React.Fragment key={index}>
                             <tr 
-                              className="hover:bg-indigo-50 transition-all duration-200 cursor-pointer"
-                              onClick={() => toggleMatchDetails(index)}
+                              className="hover:bg-indigo-50 transition-all duration-200"
                             >
                             <td className="px-6 py-4">
                               <div className="flex items-center space-x-4">
@@ -686,19 +684,6 @@ const MatchingDashboard: React.FC = () => {
                               )}
                             </td>
                             <td className="px-6 py-4 text-center">
-                              <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                                (match as any).matchStatus === 'perfect_match' 
-                                  ? 'bg-green-100 text-green-800' 
-                                  : (match as any).matchStatus === 'partial_match'
-                                  ? 'bg-yellow-100 text-yellow-800'
-                                  : 'bg-red-100 text-red-800'
-                              }`}>
-                                {(match as any).matchStatus === 'perfect_match' && 'Perfect Match'}
-                                {(match as any).matchStatus === 'partial_match' && 'Partial Match'}
-                                {(match as any).matchStatus === 'no_match' && 'No Match'}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 text-center">
                               <button
                                 className="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-blue-500 to-violet-600 text-white rounded-lg shadow-md hover:from-blue-600 hover:to-violet-700 transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-lg font-semibold text-base gap-2 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
                                 onClick={() => handleCreateGigAgent(match)}
@@ -710,7 +695,6 @@ const MatchingDashboard: React.FC = () => {
                             </td>
                           </tr>
                           {/* Détails du match */}
-                          {expandedMatches.has(index) && (
                           <tr className="bg-gray-50">
                             <td colSpan={5} className="px-6 py-4">
                               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
@@ -802,7 +786,6 @@ const MatchingDashboard: React.FC = () => {
                               </div>
                             </td>
                           </tr>
-                          )}
                           </React.Fragment>
                         ))}
                       </tbody>
