@@ -8,8 +8,9 @@ import {
   findGigsForRep,
   generateOptimalMatches,
   getGigsByCompanyId,
+  createGigAgent,
 } from "../api";
-import { createGigAgent } from "../api/index";
+
 import {
   Activity,
   Users,
@@ -95,6 +96,7 @@ const MatchingDashboard: React.FC = () => {
   const [creatingGigAgent, setCreatingGigAgent] = useState(false);
   const [gigAgentSuccess, setGigAgentSuccess] = useState<string | null>(null);
   const [gigAgentError, setGigAgentError] = useState<string | null>(null);
+  const [skillsDetails, setSkillsDetails] = useState<{[key: string]: any}>({});
 
   const handleTabClick = (tab: TabType) => {
     setActiveTab(tab);
@@ -112,10 +114,51 @@ const MatchingDashboard: React.FC = () => {
     }
   };
 
-  const handleGigSelect = (gig: Gig) => {
+  const handleGigSelect = async (gig: any) => {
     setSelectedGig(gig);
     setCurrentPage(1);
     setTimeout(scrollToResults, 100);
+    
+    // Fetch skills details for the selected gig
+    try {
+      const allSkills = [
+        ...(gig.skills?.professional || []),
+        ...(gig.skills?.technical || []),
+        ...(gig.skills?.soft || [])
+      ];
+      
+      if (allSkills.length > 0) {
+        const SKILLS_API_URL = import.meta.env.VITE_SKILLS_API_URL || 'https://api-skills.harx.ai/api';
+        const skillsMap: {[key: string]: any} = {};
+        
+        for (const skill of allSkills) {
+          try {
+            const skillId = skill.skill || skill;
+            let skillDetails;
+            
+            // Try to determine skill type based on the collection or try all types
+            try {
+              skillDetails = await axios.get(`${SKILLS_API_URL}/professional-skills/${skillId}`);
+            } catch {
+              try {
+                skillDetails = await axios.get(`${SKILLS_API_URL}/technical-skills/${skillId}`);
+              } catch {
+                skillDetails = await axios.get(`${SKILLS_API_URL}/soft-skills/${skillId}`);
+              }
+            }
+            
+            skillsMap[skillId] = skillDetails.data;
+          } catch (error) {
+            console.error(`Error fetching skill ${skill.skill || skill}:`, error);
+            skillsMap[skill.skill || skill] = { name: 'Unknown Skill', description: 'Skill not found' };
+          }
+        }
+        
+        setSkillsDetails(skillsMap);
+      }
+    } catch (error) {
+      console.error('Error fetching skills details:', error);
+    }
   };
 
   const paginatedGigs = gigs.slice(
@@ -473,105 +516,6 @@ const MatchingDashboard: React.FC = () => {
               <Briefcase size={24} className="text-indigo-600" />
               <span>Select a Gig to Find Matching Reps</span>
             </h2>
-
-            {/* Requirements Section - Moved to top */}
-            {selectedGig && (
-              <div className="mb-8 p-6 bg-gradient-to-r from-indigo-50 to-indigo-100 rounded-xl border border-indigo-200 shadow-sm">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-bold text-indigo-900 text-lg flex items-center gap-2">
-                    <span>Requirements for "{selectedGig.title}"</span>
-                  </h3>
-                  <span className="text-sm text-indigo-600 bg-indigo-100 px-3 py-1 rounded-full">
-                    {selectedGig.category}
-                  </span>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {/* Skills */}
-                  {weights.skills > 0 && (
-                    <div className="bg-white/80 p-4 rounded-lg shadow-sm">
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="text-indigo-700 font-semibold text-base">🛠️ Skills</span>
-                      </div>
-                      <ul className="space-y-2">
-                        {[
-                          ...(selectedGig.skills?.professional || []),
-                          ...(selectedGig.skills && Array.isArray((selectedGig.skills as any).technical) ? (selectedGig.skills as any).technical : []),
-                          ...(selectedGig.skills && Array.isArray((selectedGig.skills as any).soft) ? (selectedGig.skills as any).soft : [])
-                        ].map((skill: any, idx: number) => (
-                          <li key={idx} className="flex items-center">
-                            <span className="w-2 h-2 bg-indigo-500 rounded-full mr-2"></span>
-                            <span className="text-indigo-800">{skill.skill}</span>
-                            {skill.level ? (
-                              <span className="ml-2 text-xs text-indigo-600 font-medium bg-indigo-100 px-2 py-0.5 rounded-full">
-                                Level {skill.level}
-                              </span>
-                            ) : null}
-                          </li>
-                        ))}
-                        {[
-                          ...(selectedGig.skills?.professional || []),
-                          ...(selectedGig.skills && Array.isArray((selectedGig.skills as any).technical) ? (selectedGig.skills as any).technical : []),
-                          ...(selectedGig.skills && Array.isArray((selectedGig.skills as any).soft) ? (selectedGig.skills as any).soft : [])
-                        ].length === 0 && (
-                          <li className="text-indigo-400">No skill requirement</li>
-                        )}
-                      </ul>
-                    </div>
-                  )}
-
-                  {/* Languages */}
-                  {weights.languages > 0 && (
-                    <div className="bg-white/80 p-4 rounded-lg shadow-sm">
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="text-indigo-700 font-semibold text-base">🌐 Languages</span>
-                      </div>
-                      <ul className="space-y-2">
-                        {selectedGig.skills && Array.isArray((selectedGig.skills as any).languages) && (selectedGig.skills as any).languages.length > 0
-                          ? (selectedGig.skills as any).languages.map((lang: any, idx: number) => (
-                              <li key={idx} className="flex items-center">
-                                <span className="w-2 h-2 bg-indigo-500 rounded-full mr-2"></span>
-                                <span className="text-indigo-800">{lang.language}</span>
-                                {lang.proficiency ? (
-                                  <span className="ml-2 text-xs text-indigo-600 font-medium bg-indigo-100 px-2 py-0.5 rounded-full">
-                                    {lang.proficiency}
-                                  </span>
-                                ) : null}
-                              </li>
-                            ))
-                          : <li className="text-indigo-400">No language requirement</li>
-                        }
-                      </ul>
-                    </div>
-                  )}
-
-                  {/* Availability */}
-                  {weights.availability > 0 && (
-                    <div className="bg-white/80 p-4 rounded-lg shadow-sm">
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="text-indigo-700 font-semibold text-base">⏰ Availability</span>
-                      </div>
-                      {(selectedGig as any).availability && Array.isArray((selectedGig as any).availability.schedule) && (selectedGig as any).availability.schedule.length > 0 ? (
-                        <ul className="space-y-2">
-                          {(selectedGig as any).availability.schedule.map((slot: any, idx: number) => (
-                            <li key={idx} className="flex items-center">
-                              <span className="w-2 h-2 bg-indigo-500 rounded-full mr-2"></span>
-                              <span className="text-indigo-800">
-                                <span className="font-semibold">{slot.day}:</span>
-                                <span className="ml-2 text-xs text-indigo-600 font-medium bg-indigo-100 px-2 py-0.5 rounded-full">
-                                  {slot.hours?.start || "?"} - {slot.hours?.end || "?"}
-                                </span>
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <div className="text-indigo-400">No availability requirement</div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
 
             {/* Gigs Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
