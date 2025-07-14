@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Rep, Gig, Match, MatchingWeights } from "../types";
+import type { MatchResponse } from "../types/index";
 import {
   getReps,
   getGigs,
@@ -21,31 +22,6 @@ import {
 import axios from "axios";
 import Cookies from "js-cookie";
 import { Toaster, toast } from 'react-hot-toast';
-
-interface MatchResponse {
-  matches: Match[];
-  totalMatches?: number;
-  perfectMatches?: number;
-  partialMatches?: number;
-  noMatches?: number;
-  languageStats?: {
-    perfectMatches: number;
-    partialMatches: number;
-    noMatches: number;
-    totalMatches: number;
-  };
-  skillsStats?: {
-    perfectMatches: number;
-    partialMatches: number;
-    noMatches: number;
-    totalMatches: number;
-    byType: {
-      technical: { perfectMatches: number; partialMatches: number; noMatches: number };
-      professional: { perfectMatches: number; partialMatches: number; noMatches: number };
-      soft: { perfectMatches: number; partialMatches: number; noMatches: number };
-    };
-  };
-}
 
 interface BasicMatchResponse {
   matches: Match[];
@@ -181,21 +157,12 @@ const MatchingDashboard: React.FC = () => {
     const getMatches = async () => {
       if (initialLoading) return;
       try {
-        let response: MatchResponse | BasicMatchResponse;
+        let response: MatchResponse | { matches: Match[] };
         if (activeTab === "gigs" && selectedGig) {
           setLoading(true);
+          // Utiliser la nouvelle structure de réponse
           const gigResponse = await findMatchesForGig(selectedGig._id, weights);
-          console.log("Gig Response Structure:", {
-            matches: gigResponse.matches,
-            totalMatches: gigResponse.totalMatches,
-            perfectMatches: gigResponse.perfectMatches,
-            partialMatches: gigResponse.partialMatches,
-            noMatches: gigResponse.noMatches,
-            languageStats: gigResponse.languageStats,
-            skillsStats: gigResponse.skillsStats
-          });
-          console.log("First Match Structure:", gigResponse.matches[0]);
-          setMatches(gigResponse.matches || []);
+          setMatches(gigResponse.preferedmatches || []);
           setMatchStats({
             totalMatches: gigResponse.totalMatches || 0,
             perfectMatches: gigResponse.perfectMatches || 0,
@@ -223,20 +190,12 @@ const MatchingDashboard: React.FC = () => {
         } else if (activeTab === "reps" && selectedRep) {
           setLoading(true);
           response = await findGigsForRep(selectedRep._id, weights);
-          console.log("Rep Response Structure:", {
-            matches: response.matches
-          });
-          console.log("First Match Structure:", response.matches[0]);
           setMatches(response.matches || []);
           setMatchStats(null);
           setLoading(false);
         } else if (activeTab === "optimal") {
           setLoading(true);
           response = await generateOptimalMatches(weights);
-          console.log("Optimal Response Structure:", {
-            matches: response.matches
-          });
-          console.log("First Match Structure:", response.matches[0]);
           setMatches(response.matches || []);
           setMatchStats(null);
           setLoading(false);
@@ -299,31 +258,16 @@ const MatchingDashboard: React.FC = () => {
 
     console.log("match object:", match);
 
-    // Préparer matchDetails sans skillsMatch si matchingSkills est vide
-    let matchDetails = { ...match };
-    if (
-      !(
-        match.skillsMatch &&
-        match.skillsMatch.details &&
-        Array.isArray(match.skillsMatch.details.matchingSkills) &&
-        match.skillsMatch.details.matchingSkills.length > 0
-      )
-    ) {
-      // Supprimer skillsMatch si matchingSkills est vide ou absent
-      const { skillsMatch, ...rest } = matchDetails;
-      matchDetails = rest;
-    }
-
     const requestData = {
       agentId: match.agentId,
       gigId: selectedGig._id,
-      matchDetails
+      matchDetails: match
     };
     
     console.log('=== DONNÉES À ENVOYER ===');
     console.log('agentId:', requestData.agentId);
     console.log('gigId:', requestData.gigId);
-    console.log('Match complet:', matchDetails);
+    console.log('Match complet:', match);
     console.log('Gig sélectionné:', selectedGig);
     console.log('========================');
     
@@ -815,25 +759,14 @@ const MatchingDashboard: React.FC = () => {
                           )}
                         </td>
                         <td className="px-6 py-4 text-center">
-                          {match.alreadyAssigned ? (
-                            <button
-                              className="inline-flex items-center px-5 py-2.5 bg-gray-300 text-gray-500 rounded-lg font-semibold text-base cursor-not-allowed"
-                              disabled
-                              title="Cet agent est déjà invité à ce gig"
-                            >
-                              <Zap className="w-5 h-5 mr-1" />
-                              Assigné
-                            </button>
-                          ) : (
-                            <button
-                              className="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-blue-500 to-violet-600 text-white rounded-lg shadow-md hover:from-blue-600 hover:to-violet-700 transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-lg font-semibold text-base gap-2 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
-                              onClick={() => handleCreateGigAgent(match)}
-                              title="Inviter cet agent à ce gig"
-                            >
-                              <Zap className="w-5 h-5 mr-1 animate-pulse" />
-                              Invite
-                            </button>
-                          )}
+                          <button
+                            className="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-blue-500 to-violet-600 text-white rounded-lg shadow-md hover:from-blue-600 hover:to-violet-700 transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-lg font-semibold text-base gap-2 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
+                            onClick={() => handleCreateGigAgent(match)}
+                            title="Inviter cet agent à ce gig"
+                          >
+                            <Zap className="w-5 h-5 mr-1 animate-pulse" />
+                            Invite
+                          </button>
                         </td>
                       </tr>
                     ))}
