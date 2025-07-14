@@ -203,9 +203,20 @@ const MatchingDashboard: React.FC = () => {
         let response: MatchResponse | { matches: Match[] };
         if (activeTab === "gigs" && selectedGig) {
           setLoading(true);
+          console.log('=== DÉBUT DE LA RECHERCHE DE MATCHES ===');
+          console.log('Selected Gig:', selectedGig);
+          console.log('Weights:', weights);
+          
           // Utiliser la nouvelle structure de réponse
           const gigResponse = await findMatchesForGig(selectedGig._id, weights);
+          console.log('=== RÉPONSE API COMPLÈTE ===');
+          console.log('Gig Response:', gigResponse);
+          console.log('Preferedmatches:', gigResponse.preferedmatches);
+          console.log('Length of preferedmatches:', gigResponse.preferedmatches?.length);
+          
           setMatches(gigResponse.preferedmatches || []);
+          console.log('Matches state set to:', gigResponse.preferedmatches || []);
+          
           setMatchStats({
             totalMatches: gigResponse.totalMatches || 0,
             perfectMatches: gigResponse.perfectMatches || 0,
@@ -230,6 +241,7 @@ const MatchingDashboard: React.FC = () => {
             }
           });
           setLoading(false);
+          console.log('=== FIN DE LA RECHERCHE DE MATCHES ===');
         } else if (activeTab === "reps" && selectedRep) {
           setLoading(true);
           response = await findGigsForRep(selectedRep._id, weights);
@@ -608,13 +620,87 @@ const MatchingDashboard: React.FC = () => {
                     </nav>
                   </div>
                 </div>
-              </div>
+                          </div>
+          )}
+
+          {/* Debug Section - Temporary */}
+          <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <h3 className="text-lg font-semibold text-yellow-800 mb-2">Debug Info:</h3>
+            <p className="text-sm text-yellow-700">Matches found: {matches?.length || 0}</p>
+            <p className="text-sm text-yellow-700">Matches type: {typeof matches}</p>
+            <p className="text-sm text-yellow-700">Is Array: {Array.isArray(matches)}</p>
+            <p className="text-sm text-yellow-700">Loading: {loading.toString()}</p>
+            <p className="text-sm text-yellow-700">AI Loading: {aiLoading.toString()}</p>
+            <p className="text-sm text-yellow-700">Active Tab: {activeTab}</p>
+            <p className="text-sm text-yellow-700">Selected Gig: {selectedGig?._id || 'None'}</p>
+            {matches && matches.length > 0 && (
+              <pre className="text-xs text-yellow-600 mt-2 overflow-auto max-h-40">
+                {JSON.stringify(matches, null, 2)}
+              </pre>
             )}
           </div>
+
+          {/* Simple Matches Display - Test */}
+          {matches && matches.length > 0 && (
+            <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+              <h3 className="text-lg font-semibold text-green-800 mb-4">Matches Found ({matches.length}):</h3>
+              <div className="space-y-4">
+                {matches.map((match, index) => (
+                  <div key={index} className="p-4 bg-white rounded-lg border border-green-200">
+                    <div className="flex justify-between items-start mb-2">
+                      <h4 className="font-semibold text-gray-900">
+                        {match.agentInfo?.name || 'Unknown Agent'}
+                      </h4>
+                      <span className="text-sm px-2 py-1 bg-blue-100 text-blue-800 rounded">
+                        {match.matchStatus}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-2">
+                      {match.agentInfo?.email || 'No email'}
+                    </p>
+                    <div className="text-xs text-gray-500">
+                      Agent ID: {match.agentId}
+                    </div>
+                    {match.agentInfo?.languages?.length > 0 && (
+                      <div className="mt-2">
+                        <span className="text-xs font-medium text-gray-700">Languages: </span>
+                        {match.agentInfo.languages.map((lang, i) => (
+                          <span key={i} className="text-xs bg-gray-100 px-2 py-1 rounded mr-1">
+                            {lang.language} ({lang.proficiency})
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    {match.skillsMatch?.details?.matchingSkills?.length > 0 && (
+                      <div className="mt-2">
+                        <span className="text-xs font-medium text-gray-700">Skills: </span>
+                        {match.skillsMatch.details.matchingSkills.map((skill, i) => (
+                          <span key={i} className="text-xs bg-green-100 px-2 py-1 rounded mr-1">
+                            {skill.skillName || skill.skill}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
         )}
 
         {/* Results Area */}
         <div ref={resultsTableRef} className={`bg-white rounded-xl shadow-lg p-6 mb-6 relative transform transition-all duration-300 ${slideUp}`}>
+          {(() => {
+            console.log('=== RÉSULTATS AREA DEBUG ===');
+            console.log('Matches state:', matches);
+            console.log('Matches length:', matches.length);
+            console.log('Loading:', loading);
+            console.log('AI Loading:', aiLoading);
+            console.log('Active tab:', activeTab);
+            console.log('Selected gig:', selectedGig);
+            return null;
+          })()}
           {loading && (
             <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-20 rounded-xl">
               <div className="relative">
@@ -630,7 +716,17 @@ const MatchingDashboard: React.FC = () => {
               <Brain className="animate-spin" size={24} />
               <span className="text-lg">AI is analyzing matches...</span>
             </div>
-          ) : matches.length > 0 ? (
+          ) : (() => {
+            console.log('=== AFFICHAGE DES MATCHES ===');
+            console.log('Matches length:', matches.length);
+            console.log('Matches content:', matches);
+            console.log('Loading state:', loading);
+            console.log('Active tab:', activeTab);
+            console.log('Selected gig:', selectedGig);
+            const hasMatches = matches && Array.isArray(matches) && matches.length > 0;
+            console.log('Has matches:', hasMatches);
+            return hasMatches;
+          })() ? (
             <>
               {activeTab === "gigs" && selectedGig && (
                 <div className="mb-8">
@@ -656,7 +752,9 @@ const MatchingDashboard: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
-                    {matches.map((match, index) => (
+                    {matches.map((match, index) => {
+                      console.log(`Match ${index}:`, match);
+                      return (
                       <tr 
                         key={index} 
                         className="hover:bg-indigo-50 transition-all duration-200"
@@ -671,8 +769,15 @@ const MatchingDashboard: React.FC = () => {
                               </div>
                             )}
                             <div>
-                              <div className="font-semibold text-gray-900">{match.agentInfo?.name}</div>
-                              <div className="text-sm text-gray-500">{match.agentInfo?.email}</div>
+                              <div className="font-semibold text-gray-900">
+                                {match.agentInfo?.name || 'Unknown Agent'}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {match.agentInfo?.email || 'No email'}
+                              </div>
+                              <div className="text-xs text-gray-400">
+                                ID: {match.agentId}
+                              </div>
                             </div>
                           </div>
                         </td>
@@ -688,19 +793,27 @@ const MatchingDashboard: React.FC = () => {
                           ) : (
                             <span className="text-gray-400">No languages</span>
                           )}
+                          {/* Debug info */}
+                          <div className="text-xs text-gray-400 mt-1">
+                            Languages count: {match.agentInfo?.languages?.length || 0}
+                          </div>
                         </td>
                         <td className="px-6 py-4">
                           {match.skillsMatch?.details?.matchingSkills?.length > 0 ? (
                             <div className="flex flex-wrap gap-2">
-                              {match.skillsMatch.details.matchingSkills.map((skill: { skill: string; requiredLevel?: number }, i: number) => (
+                              {match.skillsMatch.details.matchingSkills.map((skill: { skill: string; skillName?: string; requiredLevel?: number }, i: number) => (
                                 <span key={i} className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-medium">
-                                  {skill.skill} {skill.requiredLevel && <span>(Level {skill.requiredLevel})</span>}
+                                  {skill.skillName || skill.skill} {skill.requiredLevel && <span>(Level {skill.requiredLevel})</span>}
                                 </span>
                               ))}
                             </div>
                           ) : (
                             <span className="text-gray-400">No skills</span>
                           )}
+                          {/* Debug info */}
+                          <div className="text-xs text-gray-400 mt-1">
+                            Skills count: {match.skillsMatch?.details?.matchingSkills?.length || 0}
+                          </div>
                         </td>
                         <td className="px-6 py-4 text-center">
                           <button
@@ -713,7 +826,8 @@ const MatchingDashboard: React.FC = () => {
                           </button>
                         </td>
                       </tr>
-                    ))}
+                    );
+                    })}
                   </tbody>
                 </table>
               </div>
