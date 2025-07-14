@@ -686,9 +686,9 @@ const MatchingDashboard: React.FC = () => {
                                   {match.agentInfo.languages.map((lang: { language: string; proficiency?: string }, i: number) => {
                                     let levelLabel = '';
                                     if (lang.proficiency) {
-                                      if (["A1", "A2"].includes(lang.proficiency)) levelLabel = 'Débutant';
-                                      else if (["B1", "B2"].includes(lang.proficiency)) levelLabel = 'Intermédiaire';
-                                      else if (["C1", "C2"].includes(lang.proficiency)) levelLabel = 'Avancé';
+                                      if (["A1", "A2"].includes(lang.proficiency)) levelLabel = 'Beginner';
+                                      else if (["B1", "B2"].includes(lang.proficiency)) levelLabel = 'Intermediate';
+                                      else if (["C1", "C2"].includes(lang.proficiency)) levelLabel = 'Advanced';
                                     }
                                     return (
                                       <span key={i} className="px-2 py-1 rounded text-xs text-gray-800 border border-gray-200">
