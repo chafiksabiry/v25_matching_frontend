@@ -96,7 +96,6 @@ const MatchingDashboard: React.FC = () => {
   const [creatingGigAgent, setCreatingGigAgent] = useState(false);
   const [gigAgentSuccess, setGigAgentSuccess] = useState<string | null>(null);
   const [gigAgentError, setGigAgentError] = useState<string | null>(null);
-  const [skillsDetails, setSkillsDetails] = useState<{[key: string]: any}>({});
 
   const handleTabClick = (tab: TabType) => {
     setActiveTab(tab);
@@ -118,47 +117,6 @@ const MatchingDashboard: React.FC = () => {
     setSelectedGig(gig);
     setCurrentPage(1);
     setTimeout(scrollToResults, 100);
-    
-    // Fetch skills details for the selected gig
-    try {
-      const allSkills = [
-        ...(gig.skills?.professional || []),
-        ...(gig.skills?.technical || []),
-        ...(gig.skills?.soft || [])
-      ];
-      
-      if (allSkills.length > 0) {
-        const SKILLS_API_URL = import.meta.env.VITE_SKILLS_API_URL || 'https://api-skills.harx.ai/api';
-        const skillsMap: {[key: string]: any} = {};
-        
-        for (const skill of allSkills) {
-          try {
-            const skillId = skill.skill || skill;
-            let skillDetails;
-            
-            // Try to determine skill type based on the collection or try all types
-            try {
-              skillDetails = await axios.get(`${SKILLS_API_URL}/professional-skills/${skillId}`);
-            } catch {
-              try {
-                skillDetails = await axios.get(`${SKILLS_API_URL}/technical-skills/${skillId}`);
-              } catch {
-                skillDetails = await axios.get(`${SKILLS_API_URL}/soft-skills/${skillId}`);
-              }
-            }
-            
-            skillsMap[skillId] = skillDetails.data;
-          } catch (error) {
-            console.error(`Error fetching skill ${skill.skill || skill}:`, error);
-            skillsMap[skill.skill || skill] = { name: 'Unknown Skill', description: 'Skill not found' };
-          }
-        }
-        
-        setSkillsDetails(skillsMap);
-      }
-    } catch (error) {
-      console.error('Error fetching skills details:', error);
-    }
   };
 
   const paginatedGigs = gigs.slice(
@@ -660,15 +618,16 @@ const MatchingDashboard: React.FC = () => {
                           <th className="px-6 py-4 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Agent</th>
                           <th className="px-6 py-4 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Languages</th>
                           <th className="px-6 py-4 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Skills</th>
+                          <th className="px-6 py-4 text-center text-xs font-bold text-indigo-700 uppercase tracking-wider">Match Status</th>
                           <th className="px-6 py-4 text-center text-xs font-bold text-indigo-700 uppercase tracking-wider">Action</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-200">
                         {matches.map((match, index) => (
-                          <tr 
-                            key={index} 
-                            className="hover:bg-indigo-50 transition-all duration-200"
-                          >
+                          <React.Fragment key={index}>
+                            <tr 
+                              className="hover:bg-indigo-50 transition-all duration-200"
+                            >
                             <td className="px-6 py-4">
                               <div className="flex items-center space-x-4">
                                 {match.agentInfo?.photo ? (
@@ -700,15 +659,29 @@ const MatchingDashboard: React.FC = () => {
                             <td className="px-6 py-4">
                               {match.skillsMatch?.details?.matchingSkills?.length > 0 ? (
                                 <div className="flex flex-wrap gap-2">
-                                  {match.skillsMatch.details.matchingSkills.map((skill: { skill: string; requiredLevel?: number }, i: number) => (
+                                  {match.skillsMatch.details.matchingSkills.map((skill: { skillName: string; requiredLevel?: number; agentLevel?: number; type?: string }, i: number) => (
                                     <span key={i} className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-medium">
-                                      {skill.skill} {skill.requiredLevel && <span>(Level {skill.requiredLevel})</span>}
+                                      {skill.skillName} {skill.requiredLevel && <span>(Level {skill.requiredLevel})</span>}
+                                      {skill.type && <span className="ml-1 text-green-600">({skill.type})</span>}
                                     </span>
                                   ))}
                                 </div>
                               ) : (
                                 <span className="text-gray-400">No skills</span>
                               )}
+                            </td>
+                            <td className="px-6 py-4 text-center">
+                              <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                                (match as any).matchStatus === 'perfect_match' 
+                                  ? 'bg-green-100 text-green-800' 
+                                  : (match as any).matchStatus === 'partial_match'
+                                  ? 'bg-yellow-100 text-yellow-800'
+                                  : 'bg-red-100 text-red-800'
+                              }`}>
+                                {(match as any).matchStatus === 'perfect_match' && 'Perfect Match'}
+                                {(match as any).matchStatus === 'partial_match' && 'Partial Match'}
+                                {(match as any).matchStatus === 'no_match' && 'No Match'}
+                              </span>
                             </td>
                             <td className="px-6 py-4 text-center">
                               <button
@@ -721,6 +694,99 @@ const MatchingDashboard: React.FC = () => {
                               </button>
                             </td>
                           </tr>
+                          {/* Détails du match */}
+                          <tr className="bg-gray-50">
+                            <td colSpan={5} className="px-6 py-4">
+                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                                {/* Language Match */}
+                                <div className="space-y-2">
+                                  <h4 className="font-semibold text-gray-700">Languages</h4>
+                                  <div className="space-y-1">
+                                    {match.languageMatch?.details?.matchingLanguages?.length > 0 && (
+                                      <div className="text-green-600">
+                                        ✓ {match.languageMatch.details.matchingLanguages.length} matching
+                                      </div>
+                                    )}
+                                    {match.languageMatch?.details?.insufficientLanguages?.length > 0 && (
+                                      <div className="text-yellow-600">
+                                        ⚠ {match.languageMatch.details.insufficientLanguages.length} insufficient
+                                      </div>
+                                    )}
+                                    {match.languageMatch?.details?.missingLanguages?.length > 0 && (
+                                      <div className="text-red-600">
+                                        ✗ {match.languageMatch.details.missingLanguages.length} missing
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                                
+                                {/* Skills Match */}
+                                <div className="space-y-2">
+                                  <h4 className="font-semibold text-gray-700">Skills</h4>
+                                  <div className="space-y-1">
+                                    {match.skillsMatch?.details?.matchingSkills?.length > 0 && (
+                                      <div className="text-green-600">
+                                        ✓ {match.skillsMatch.details.matchingSkills.length} matching
+                                      </div>
+                                    )}
+                                    {match.skillsMatch?.details?.insufficientSkills?.length > 0 && (
+                                      <div className="text-yellow-600">
+                                        ⚠ {match.skillsMatch.details.insufficientSkills.length} insufficient
+                                      </div>
+                                    )}
+                                    {match.skillsMatch?.details?.missingSkills?.length > 0 && (
+                                      <div className="text-red-600">
+                                        ✗ {match.skillsMatch.details.missingSkills.length} missing
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                                
+                                {/* Timezone Match */}
+                                <div className="space-y-2">
+                                  <h4 className="font-semibold text-gray-700">Timezone</h4>
+                                  <div className="space-y-1">
+                                    <div className={`${
+                                      match.timezoneMatch?.matchStatus === 'perfect_match' 
+                                        ? 'text-green-600' 
+                                        : match.timezoneMatch?.matchStatus === 'partial_match'
+                                        ? 'text-yellow-600'
+                                        : 'text-red-600'
+                                    }`}>
+                                      {(match.timezoneMatch?.matchStatus === 'perfect_match' && '✓ Perfect') ||
+                                       (match.timezoneMatch?.matchStatus === 'partial_match' && '⚠ Partial') ||
+                                       (match.timezoneMatch?.matchStatus === 'no_match' && '✗ No Match')}
+                                    </div>
+                                    <div className="text-xs text-gray-500">
+                                      {match.timezoneMatch?.details?.reason}
+                                    </div>
+                                  </div>
+                                </div>
+                                
+                                {/* Region Match */}
+                                <div className="space-y-2">
+                                  <h4 className="font-semibold text-gray-700">Region</h4>
+                                  <div className="space-y-1">
+                                    <div className={`${
+                                      match.regionMatch?.matchStatus === 'perfect_match' 
+                                        ? 'text-green-600' 
+                                        : match.regionMatch?.matchStatus === 'partial_match'
+                                        ? 'text-yellow-600'
+                                        : 'text-red-600'
+                                    }`}>
+                                      {(match.regionMatch?.matchStatus === 'perfect_match' && '✓ Perfect') ||
+                                       (match.regionMatch?.matchStatus === 'partial_match' && '⚠ Partial') ||
+                                       (match.regionMatch?.matchStatus === 'no_match' && '✗ No Match')}
+                                    </div>
+                                    <div className="text-xs text-gray-500">
+                                      {match.regionMatch?.details?.reason}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                          </React.Fragment>
                         ))}
                       </tbody>
                     </table>
