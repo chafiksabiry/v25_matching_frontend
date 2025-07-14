@@ -170,6 +170,14 @@ export interface AgentInfo {
     contactCenter: any[];
   };
   experience: any[];
+  timezone?: {
+    timezoneId: string;
+    timezoneName: string;
+    gmtOffset: number;
+    gmtDisplay: string;
+    countryCode: string;
+    countryName: string;
+  };
 }
 
 export interface LanguageMatch {
