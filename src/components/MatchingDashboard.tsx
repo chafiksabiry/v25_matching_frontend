@@ -333,9 +333,16 @@ const MatchingDashboard: React.FC = () => {
                 try {
                   const companyId = Cookies.get("companyId");
                   if (companyId) {
+                    // Marquer le step 10 de la phase 3 comme completed
                     await axios.put(
                       `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/phases/3/steps/10`,
                       { status: "completed" }
+                    );
+                    
+                    // Mettre à jour la phase courante vers la phase 4
+                    await axios.put(
+                      `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/current-phase`,
+                      { phase: 4 }
                     );
                   }
                   window.location.href = "/app11";
