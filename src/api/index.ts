@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Rep, Gig, Match, MatchingWeights } from '../types';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://38.242.208.242:5011/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5011/api';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -38,6 +38,12 @@ export const deleteRep = async (id: string): Promise<void> => {
 // Gig API calls
 export const getGigs = async (): Promise<Gig[]> => {
   const response = await api.get('/gigs');
+  return response.data;
+};
+
+export const getGigsByCompanyId = async (companyId: string): Promise<Gig[]> => {
+  const GIGS_API_URL = import.meta.env.VITE_API_URL_GIGS || 'https://api-gigsmanual.harx.ai/api';
+  const response = await axios.get(`${GIGS_API_URL}/gigs/company/${companyId}`);
   return response.data;
 };
 
@@ -86,13 +92,53 @@ export const deleteMatch = async (id: string): Promise<void> => {
 };
 
 // Matching algorithm API calls
-export const findMatchesForGig = async (
-  gigId: string, 
-  weights: MatchingWeights, 
-  limit: number = 10
-): Promise<Match[]> => {
-  const response = await api.post(`/matches/gig/${gigId}/matches`, { weights, limit });
-  return response.data;
+interface MatchResponse {
+  preferedmatches: Match[];
+  totalMatches: number;
+  perfectMatches: number;
+  partialMatches: number;
+  noMatches: number;
+  languageStats: {
+    perfectMatches: number;
+    partialMatches: number;
+    noMatches: number;
+    totalMatches: number;
+  };
+  skillsStats: {
+    perfectMatches: number;
+    partialMatches: number;
+    noMatches: number;
+    totalMatches: number;
+    byType: {
+      technical: {
+        perfectMatches: number;
+        partialMatches: number;
+        noMatches: number;
+      };
+      professional: {
+        perfectMatches: number;
+        partialMatches: number;
+        noMatches: number;
+      };
+      soft: {
+        perfectMatches: number;
+        partialMatches: number;
+        noMatches: number;
+      };
+    };
+  };
+}
+
+export const findMatchesForGig = async (gigId: string, weights: MatchingWeights): Promise<MatchResponse> => {
+  try {
+    const response = await axios.get<MatchResponse>(`${import.meta.env.VITE_API_URL}/gig/${gigId}`, {
+      data: { weights }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error finding matches for gig:', error);
+    throw error;
+  }
 };
 
 export const findGigsForRep = async (
@@ -100,7 +146,7 @@ export const findGigsForRep = async (
   weights: MatchingWeights, 
   limit: number = 10
 ): Promise<Match[]> => {
-  const response = await api.post(`/matches/rep/${repId}/gigs`, { weights, limit });
+  const response = await api.post(`/matches/rep/${repId}`, { weights, limit });
   return response.data;
 };
 
@@ -108,5 +154,43 @@ export const generateOptimalMatches = async (weights: MatchingWeights): Promise<
   const response = await api.post('/matches/optimize', { weights });
   return response.data;
 };
+
+// Gig-Agent API calls
+interface GigAgentRequest {
+  agentId: string;
+  gigId: string;
+}
+
+interface GigAgentResponse {
+  message: string;
+  gigAgent: any;
+  emailSent: boolean;
+  matchScore: number;
+}
+
+export const createGigAgent = async (data: GigAgentRequest): Promise<GigAgentResponse> => {
+  try {
+    const MATCHING_API_URL = import.meta.env.VITE_MATCHING_API_URL || 'https://api-matching.harx.ai/api';
+    
+    console.log('Creating gig-agent with URL:', `${MATCHING_API_URL}/gig-agents`);
+    console.log('Request data:', data);
+    
+    const response = await axios.post<GigAgentResponse>(`${MATCHING_API_URL}/gig-agents`, data);
+    return response.data;
+  } catch (error: any) {
+    console.error('Error creating gig-agent assignment:', error);
+    if (axios.isAxiosError(error)) {
+      console.error('Response status:', error.response?.status);
+      console.error('Response data:', error.response?.data);
+      console.error('Request URL:', error.config?.url);
+      console.error('Request data:', error.config?.data);
+    } else {
+      console.error('Non-Axios error:', error);
+    }
+    throw error;
+  }
+};
+
+
 
 export default api;
