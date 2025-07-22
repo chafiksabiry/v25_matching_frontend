@@ -10,6 +10,7 @@ import {
   getGigsByCompanyId,
   createGigAgent,
 } from "../api";
+import { getAllSkills, getLanguages, type Skill, type Language } from "../api/skillsApi";
 
 import {
   Activity,
@@ -115,6 +116,12 @@ const MatchingDashboard: React.FC = () => {
   const [gigAgentSuccess, setGigAgentSuccess] = useState<string | null>(null);
   const [gigAgentError, setGigAgentError] = useState<string | null>(null);
   const [expandedMatches, setExpandedMatches] = useState<Set<number>>(new Set());
+  const [skills, setSkills] = useState<{
+    professional: Skill[];
+    technical: Skill[];
+    soft: Skill[];
+  }>({ professional: [], technical: [], soft: [] });
+  const [languages, setLanguages] = useState<Language[]>([]);
 
   const handleTabClick = (tab: TabType) => {
     setActiveTab(tab);
@@ -153,14 +160,20 @@ const MatchingDashboard: React.FC = () => {
       try {
         console.log("Fetching data...");
         const companyId = Cookies.get('companyId') || '685abf28641398dc582f4c95';
-        const [repsData, gigsData] = await Promise.all([
+        const [repsData, gigsData, skillsData, languagesData] = await Promise.all([
           getReps(),
-          companyId ? getGigsByCompanyId(companyId) : getGigs()
+          companyId ? getGigsByCompanyId(companyId) : getGigs(),
+          getAllSkills(),
+          getLanguages()
         ]);
         console.log("=== REPS DATA ===", JSON.stringify(repsData, null, 2));
         console.log("=== GIGS DATA ===", gigsData);
+        console.log("=== SKILLS DATA ===", skillsData);
+        console.log("=== LANGUAGES DATA ===", languagesData);
         setReps(repsData);
         setGigs(gigsData);
+        setSkills(skillsData);
+        setLanguages(languagesData);
       } catch (error) {
         console.error("Error fetching data:", error);
         setError("Failed to fetch data. Please try again.");
@@ -276,6 +289,18 @@ const MatchingDashboard: React.FC = () => {
     reps.find((rep) => rep._id === match.repId);
   const getGigForMatch = (match: Match) =>
     gigs.find((gig) => gig._id === match.gigId);
+
+  // Helper functions to get skill and language names
+  const getSkillNameById = (skillId: string, skillType: 'professional' | 'technical' | 'soft') => {
+    const skillArray = skills[skillType];
+    const skill = skillArray.find(s => s._id === skillId);
+    return skill ? skill.name : skillId;
+  };
+
+  const getLanguageNameByCode = (languageCode: string) => {
+    const language = languages.find(l => l.code === languageCode);
+    return language ? language.name : languageCode;
+  };
 
   // Handle weight change
   const handleWeightChange = (key: keyof MatchingWeights, value: number) => {
@@ -419,6 +444,47 @@ const MatchingDashboard: React.FC = () => {
 
       {/* Main Content */}
       <main className="container mx-auto p-6 space-y-6">
+        {/* Debug Section - Skills and Languages Data */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+            <h3 className="text-lg font-semibold text-yellow-800 mb-2">Debug Info - Skills & Languages</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <h4 className="font-medium text-yellow-700 mb-1">Skills Loaded:</h4>
+                <ul className="text-yellow-600 space-y-1">
+                  <li>Professional: {skills.professional.length} skills</li>
+                  <li>Technical: {skills.technical.length} skills</li>
+                  <li>Soft: {skills.soft.length} skills</li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-medium text-yellow-700 mb-1">Languages Loaded:</h4>
+                <p className="text-yellow-600">{languages.length} languages</p>
+              </div>
+            </div>
+            {skills.professional.length > 0 && (
+              <details className="mt-3">
+                <summary className="cursor-pointer text-yellow-700 font-medium">Sample Professional Skills</summary>
+                <div className="mt-2 text-xs text-yellow-600">
+                  {skills.professional.slice(0, 5).map(skill => (
+                    <div key={skill._id}>{skill.name} - {skill.category}</div>
+                  ))}
+                </div>
+              </details>
+            )}
+            {languages.length > 0 && (
+              <details className="mt-3">
+                <summary className="cursor-pointer text-yellow-700 font-medium">Sample Languages</summary>
+                <div className="mt-2 text-xs text-yellow-600">
+                  {languages.slice(0, 5).map(lang => (
+                    <div key={lang._id}>{lang.name} ({lang.code})</div>
+                  ))}
+                </div>
+              </details>
+            )}
+          </div>
+        )}
+
         {/* Error Message */}
         {error && (
           <div className={`bg-red-100 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-lg shadow-md ${fadeIn}`}>
@@ -751,9 +817,13 @@ const MatchingDashboard: React.FC = () => {
                                       else if (["B1", "B2"].includes(lang.proficiency)) levelLabel = 'Intermediate';
                                       else if (["C1", "C2"].includes(lang.proficiency)) levelLabel = 'Advanced';
                                     }
+                                    
+                                    // Try to get the language name from our languages data
+                                    const languageName = getLanguageNameByCode(lang.language);
+                                    
                                     return (
                                       <span key={i} className="px-2 py-1 rounded text-xs text-gray-800 border border-gray-200">
-                                        {lang.language}
+                                        {languageName}
                                         {lang.proficiency && ` (${lang.proficiency}${levelLabel ? ' - ' + levelLabel : ''})`}
                                       </span>
                                     );
@@ -767,11 +837,18 @@ const MatchingDashboard: React.FC = () => {
                               {/* SKILLS SIMPLIFIÉ */}
                               {match.skillsMatch?.details?.matchingSkills?.length > 0 ? (
                                 <div className="flex flex-wrap gap-2">
-                                  {match.skillsMatch.details.matchingSkills.map((skill: { skillName: string }, i: number) => (
-                                    <span key={i} className="px-2 py-1 rounded text-xs text-gray-800 border border-gray-200">
-                                      {skill.skillName}
-                                    </span>
-                                  ))}
+                                  {match.skillsMatch.details.matchingSkills.map((skill: { skill: string; skillName: string; type: string }, i: number) => {
+                                    // Try to get the skill name from our skills data
+                                    const skillName = skill.type && skill.skill ? 
+                                      getSkillNameById(skill.skill, skill.type as 'professional' | 'technical' | 'soft') : 
+                                      skill.skillName || skill.skill;
+                                    
+                                    return (
+                                      <span key={i} className="px-2 py-1 rounded text-xs text-gray-800 border border-gray-200">
+                                        {skillName}
+                                      </span>
+                                    );
+                                  })}
                                 </div>
                               ) : (
                                 <div className="text-gray-400 text-sm">No matching skills</div>
