@@ -391,13 +391,10 @@ export interface MatchingWeights {
   languages: number;
   availability: number;
   timezone: number;
-  activities: number; // Remplacé "performance" par "activities"
+  activities: number;
   region: number;
   schedule?: number;
 }
-
-// Correction : export explicite de MatchResponse
-export type { MatchResponse };
 
 export interface IndustryMatch {
   details: {
