@@ -33,6 +33,7 @@ export interface Rep {
     yearsOfExperience: string;
     currentRole: string;
     industries: string[];
+    activities: string[]; // Ajout des activités
     keyExpertise: string[];
     notableCompanies: string[];
     profileDescription: string;
@@ -101,6 +102,24 @@ export interface Gig {
   timezone: string;
   targetRegion: string;
   status?: 'open' | 'in-progress' | 'completed' | 'cancelled';
+  // Nouveaux champs pour la structure API
+  skills?: {
+    technical?: Array<{ skill: string; level: number }>;
+    professional?: Array<{ skill: string; level: number }>;
+    soft?: Array<{ skill: string; level: number }>;
+    languages?: Array<{ language: string; proficiency: string }>;
+  };
+  availability?: {
+    schedule?: Array<{ day: string; hours: { start: string; end: string } }>;
+    time_zone?: string;
+    timeZone?: string;
+  };
+  destination_zone?: string;
+  industries?: string[]; // Ajout des industries
+  activities?: string[]; // Ajout des activités
+  seniority?: {
+    yearsExperience: number;
+  };
 }
 
 export type DayOfWeek = 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday';
@@ -121,38 +140,212 @@ export interface Availability {
   flexibility: string[];
 }
 
-export interface Match {
-  _id: string;
-  repId: string;
-  gigId: string;
+// Nouvelle interface pour la structure de réponse de l'API
+export interface AgentInfo {
+  name: string;
+  email: string;
+  photo?: string | null;
+  location: string;
+  phone: string;
+  languages: Array<{
+    _id: string;
+    language: string;
+    languageName: string; // Ajout du nom de la langue
+    proficiency: string;
+    iso639_1: string;
+  }>;
+  professionalSummary?: {
+    yearsOfExperience: number;
+    industries?: Array<{
+      id: string;
+      name: string;
+    }>;
+    activities?: Array<{
+      id: string;
+      name: string;
+    }>;
+  };
+  skills: {
+    technical: Array<{
+      _id: string;
+      skill: string;
+      level: number;
+      name: string;
+    }>;
+    professional: Array<{
+      _id: string;
+      skill: string;
+      level: number;
+      name: string;
+    }>;
+    soft: Array<{
+      _id: string;
+      skill: string;
+      level: number;
+      name: string;
+    }>;
+    contactCenter: any[];
+  };
+  experience: any[];
+  timezone?: {
+    timezoneId: string;
+    timezoneName: string;
+    gmtOffset: number;
+    gmtDisplay: string;
+    countryCode: string;
+    countryName: string;
+  };
+}
+
+export interface LanguageMatch {
+  details: {
+    matchingLanguages: Array<{
+      language: string;
+      requiredLevel: string;
+      agentLevel: string;
+    }>;
+    missingLanguages: string[];
+    insufficientLanguages: Array<{
+      language: string;
+      requiredLevel: string;
+      agentLevel: string;
+    }>;
+    matchStatus: 'perfect_match' | 'partial_match' | 'no_match';
+  };
+}
+
+export interface SkillsMatch {
+  details: {
+    matchingSkills: Array<{
+      skill: string;
+      skillName: string;
+      requiredLevel: number;
+      agentLevel: number;
+      type: 'technical' | 'professional' | 'soft';
+      agentSkillName: string;
+    }>;
+    missingSkills: Array<{
+      skill: string;
+      skillName: string;
+      type: 'technical' | 'professional' | 'soft';
+      requiredLevel: number;
+    }>;
+    insufficientSkills: any[];
+    matchStatus: 'perfect_match' | 'partial_match' | 'no_match';
+  };
+}
+
+export interface TimezoneMatch {
   score: number;
-  title?: string;
-  category?: string;
-  requiredExperience?: number;
-  requiredSkills?: string[];
-  agentInfo?: {
-    name: string;
-    email: string;
+  details: {
+    gigTimezone: string;
+    agentTimezone: string;
+    gigGmtOffset?: number;
+    agentGmtOffset?: number;
+    gmtOffsetDifference?: number;
+    reason: string;
   };
-  languageMatch?: {
-    details: {
-      matchStatus: 'perfect_match' | 'partial_match' | 'no_match';
-      matchingLanguages: Array<{
-        language: string;
-        status: 'perfect_match' | 'partial_match' | 'no_match';
-      }>;
-    };
+  matchStatus: 'perfect_match' | 'partial_match' | 'no_match';
+}
+
+export interface RegionMatch {
+  score: number;
+  details: {
+    gigDestinationZone: string;
+    agentCountryCode: string;
+    reason: string;
   };
-  skillsMatch?: {
-    details: {
-      matchStatus: 'perfect_match' | 'partial_match' | 'no_match';
-      matchingSkills: Array<{
-        skill: string;
-        status: 'perfect_match' | 'partial_match' | 'no_match';
-      }>;
-    };
+  matchStatus: 'perfect_match' | 'partial_match' | 'no_match';
+}
+
+export interface ScheduleMatch {
+  score: number;
+  details: {
+    matchingDays: Array<{
+      day: string;
+      gigHours: { start: string; end: string };
+      agentHours: { start: string; end: string };
+    }>;
+    missingDays: string[];
+    insufficientHours: any[];
   };
-  availability: Availability;
+  matchStatus: 'perfect_match' | 'partial_match' | 'no_match';
+}
+
+export interface Match {
+  _id?: string;
+  repId?: string;
+  gigId?: string;
+  agentId: string;
+  agentInfo: AgentInfo;
+  languageMatch: LanguageMatch;
+  skillsMatch: SkillsMatch;
+  industryMatch: IndustryMatch;
+  activityMatch: ActivityMatch;
+  experienceMatch: ExperienceMatch;
+  timezoneMatch: TimezoneMatch;
+  regionMatch: RegionMatch;
+  scheduleMatch: ScheduleMatch;
+  matchStatus: 'perfect_match' | 'partial_match' | 'no_match';
+  alreadyAssigned?: boolean;
+}
+
+export interface MatchResponse {
+  preferedmatches: Match[];
+  totalMatches: number;
+  perfectMatches: number;
+  partialMatches: number;
+  noMatches: number;
+  languageStats: {
+    perfectMatches: number;
+    partialMatches: number;
+    noMatches: number;
+    totalMatches: number;
+  };
+  skillsStats: {
+    perfectMatches: number;
+    partialMatches: number;
+    noMatches: number;
+    totalMatches: number;
+  };
+  industryStats: {
+    perfectMatches: number;
+    partialMatches: number;
+    neutralMatches: number;
+    noMatches: number;
+    totalMatches: number;
+  };
+  activityStats: {
+    perfectMatches: number;
+    partialMatches: number;
+    neutralMatches: number;
+    noMatches: number;
+    totalMatches: number;
+  };
+  experienceStats: {
+    perfectMatches: number;
+    partialMatches: number;
+    noMatches: number;
+    totalMatches: number;
+  };
+  timezoneStats: {
+    perfectMatches: number;
+    partialMatches: number;
+    noMatches: number;
+    totalMatches: number;
+  };
+  regionStats: {
+    perfectMatches: number;
+    partialMatches: number;
+    noMatches: number;
+    totalMatches: number;
+  };
+  scheduleStats: {
+    perfectMatches: number;
+    partialMatches: number;
+    noMatches: number;
+    totalMatches: number;
+  };
 }
 
 export type Skill = 
@@ -195,9 +388,51 @@ export interface MatchingWeights {
   experience: number;
   skills: number;
   industry: number;
-  language: number;
+  languages: number;
   availability: number;
   timezone: number;
-  performance: number;
+  activities: number;
   region: number;
+  schedule?: number;
+}
+
+export interface IndustryMatch {
+  details: {
+    matchingIndustries: Array<{
+      industry: string;
+      industryName: string;
+      agentIndustryName: string;
+    }>;
+    missingIndustries: Array<{
+      industry: string;
+      industryName: string;
+    }>;
+    matchStatus: 'perfect_match' | 'partial_match' | 'no_match' | 'neutral_match';
+  };
+}
+
+export interface ActivityMatch {
+  details: {
+    matchingActivities: Array<{
+      activity: string;
+      activityName: string;
+      agentActivityName: string;
+    }>;
+    missingActivities: Array<{
+      activity: string;
+      activityName: string;
+    }>;
+    matchStatus: 'perfect_match' | 'partial_match' | 'no_match' | 'neutral_match';
+  };
+}
+
+export interface ExperienceMatch {
+  score: number;
+  details: {
+    gigRequiredExperience: number;
+    agentExperience: number;
+    difference: number;
+    reason: string;
+  };
+  matchStatus: 'perfect_match' | 'partial_match' | 'no_match';
 }
