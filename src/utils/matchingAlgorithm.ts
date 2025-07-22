@@ -1,11 +1,25 @@
-import { Rep, Gig, Match, MatchingWeights, Skill, Industry, Language, Availability } from '../types';
-import { parseISO, isWithinInterval, areIntervalsOverlapping, format } from 'date-fns';
+import { compareSchedules } from './scheduleMatching';
+import { Match, Availability } from '../types';
 
 /**
  * Calculate the matching score between a rep and a gig
  */
-export function calculateMatchScore(rep: Rep, gig: Gig, weights) {
-  // ... function body ...
+export function calculateMatchScore(
+  gigAvailability: Availability,
+  agentAvailability: Availability,
+  weights: {
+    skills: number;
+    languages: number;
+    schedule: number;
+  }
+): number {
+  // Get schedule match result
+  const scheduleMatch = compareSchedules(gigAvailability, agentAvailability);
+
+  // Calculate weighted score
+  const scheduleScore = scheduleMatch.score * weights.schedule;
+
+  return scheduleScore;
 }
 
 export function formatScore(score: number): string {
