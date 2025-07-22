@@ -489,74 +489,7 @@ const MatchingDashboard: React.FC = () => {
 
       {/* Main Content */}
       <main className="container mx-auto p-6 space-y-6">
-        {/* Debug Section - Skills and Languages Data */}
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-          <h3 className="text-lg font-semibold text-yellow-800 mb-2">Debug Info - Skills & Languages</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div>
-              <h4 className="font-medium text-yellow-700 mb-1">Skills Loaded:</h4>
-              <ul className="text-yellow-600 space-y-1">
-                <li>Professional: {skills.professional.length} skills</li>
-                <li>Technical: {skills.technical.length} skills</li>
-                <li>Soft: {skills.soft.length} skills</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-medium text-yellow-700 mb-1">Languages Loaded:</h4>
-              <p className="text-yellow-600">{languages.length} languages</p>
-            </div>
-          </div>
-          {skills.professional.length > 0 && (
-            <details className="mt-3">
-              <summary className="cursor-pointer text-yellow-700 font-medium">Sample Professional Skills</summary>
-              <div className="mt-2 text-xs text-yellow-600">
-                {skills.professional.slice(0, 5).map(skill => (
-                  <div key={skill._id}>{skill.name} - {skill.category}</div>
-                ))}
-              </div>
-            </details>
-          )}
-          {skills.technical.length > 0 && (
-            <details className="mt-3">
-              <summary className="cursor-pointer text-yellow-700 font-medium">Sample Technical Skills</summary>
-              <div className="mt-2 text-xs text-yellow-600">
-                {skills.technical.slice(0, 5).map(skill => (
-                  <div key={skill._id}>{skill.name} - {skill.category}</div>
-                ))}
-              </div>
-            </details>
-          )}
-          {skills.soft.length > 0 && (
-            <details className="mt-3">
-              <summary className="cursor-pointer text-yellow-700 font-medium">Sample Soft Skills</summary>
-              <div className="mt-2 text-xs text-yellow-600">
-                {skills.soft.slice(0, 5).map(skill => (
-                  <div key={skill._id}>{skill.name} - {skill.category}</div>
-                ))}
-              </div>
-            </details>
-          )}
-          {languages.length > 0 && (
-            <details className="mt-3">
-              <summary className="cursor-pointer text-yellow-700 font-medium">Sample Languages</summary>
-              <div className="mt-2 text-xs text-yellow-600">
-                {languages.slice(0, 5).map(lang => (
-                  <div key={lang._id}>{lang.name} ({lang.code}) - ID: {lang._id}</div>
-                ))}
-              </div>
-            </details>
-          )}
-          {matches.length > 0 && matches[0]?.agentInfo?.languages && (
-            <details className="mt-3">
-              <summary className="cursor-pointer text-yellow-700 font-medium">Language IDs in Matching Data</summary>
-              <div className="mt-2 text-xs text-yellow-600">
-                {matches[0].agentInfo.languages.map((lang: any, i: number) => (
-                  <div key={i}>Language ID: {lang.language} - Proficiency: {lang.proficiency}</div>
-                ))}
-              </div>
-            </details>
-          )}
-        </div>
+
 
         {/* Error Message */}
         {error && (
