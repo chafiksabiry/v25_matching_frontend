@@ -179,6 +179,11 @@ const MatchingDashboard: React.FC = () => {
         console.log('=== SETTING SKILLS AND LANGUAGES ===');
         console.log('Skills data:', skillsData);
         console.log('Languages data:', languagesData);
+        
+        // Log sample language IDs from API
+        if (languagesData.length > 0) {
+          console.log('Sample language IDs from API:', languagesData.slice(0, 3).map(l => ({ id: l._id, code: l.code, name: l.name })));
+        }
       } catch (error) {
         console.error("Error fetching data:", error);
         setError("Failed to fetch data. Please try again.");
@@ -311,8 +316,23 @@ const MatchingDashboard: React.FC = () => {
   };
 
   const getLanguageNameByCode = (languageCode: string) => {
-    const language = languages.find(l => l.code === languageCode);
+    // Try to find by code first
+    let language = languages.find(l => l.code === languageCode);
+    
+    // If not found by code, try to find by ID
+    if (!language) {
+      language = languages.find(l => l._id === languageCode);
+    }
+    
+    // If still not found, try to find by name (case insensitive)
+    if (!language) {
+      language = languages.find(l => l.name.toLowerCase() === languageCode.toLowerCase());
+    }
+    
     console.log(`Looking for language ${languageCode}:`, language);
+    console.log(`Available languages codes:`, languages.slice(0, 5).map(l => l.code));
+    console.log(`Available languages IDs:`, languages.slice(0, 5).map(l => l._id));
+    
     return language ? language.name : languageCode;
   };
 
@@ -521,7 +541,17 @@ const MatchingDashboard: React.FC = () => {
               <summary className="cursor-pointer text-yellow-700 font-medium">Sample Languages</summary>
               <div className="mt-2 text-xs text-yellow-600">
                 {languages.slice(0, 5).map(lang => (
-                  <div key={lang._id}>{lang.name} ({lang.code})</div>
+                  <div key={lang._id}>{lang.name} ({lang.code}) - ID: {lang._id}</div>
+                ))}
+              </div>
+            </details>
+          )}
+          {matches.length > 0 && matches[0]?.agentInfo?.languages && (
+            <details className="mt-3">
+              <summary className="cursor-pointer text-yellow-700 font-medium">Language IDs in Matching Data</summary>
+              <div className="mt-2 text-xs text-yellow-600">
+                {matches[0].agentInfo.languages.map((lang: any, i: number) => (
+                  <div key={i}>Language ID: {lang.language} - Proficiency: {lang.proficiency}</div>
                 ))}
               </div>
             </details>
@@ -776,6 +806,9 @@ const MatchingDashboard: React.FC = () => {
             <>
               {console.log('=== RENDERING MATCHES ===', matches)}
               {console.log('=== MATCHES LENGTH IN RENDER ===', matches.length)}
+              {matches.length > 0 && matches[0]?.agentInfo?.languages && 
+                console.log('=== LANGUAGE IDs IN MATCHING DATA ===', matches[0].agentInfo.languages.map((l: any) => l.language))
+              }
               {matches.length > 0 ? (
                 <>
                   {activeTab === "gigs" && selectedGig && (
