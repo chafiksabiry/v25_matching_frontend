@@ -174,6 +174,11 @@ const MatchingDashboard: React.FC = () => {
         setGigs(gigsData);
         setSkills(skillsData);
         setLanguages(languagesData);
+        
+        // Debug: Log available data
+        console.log('=== SETTING SKILLS AND LANGUAGES ===');
+        console.log('Skills data:', skillsData);
+        console.log('Languages data:', languagesData);
       } catch (error) {
         console.error("Error fetching data:", error);
         setError("Failed to fetch data. Please try again.");
@@ -184,6 +189,13 @@ const MatchingDashboard: React.FC = () => {
 
     fetchData();
   }, []);
+
+  // Debug: Log available data when skills or languages change
+  useEffect(() => {
+    if (skills.professional.length > 0 || languages.length > 0) {
+      logAvailableData();
+    }
+  }, [skills, languages]);
 
   // Get matches based on current selection
   useEffect(() => {
@@ -294,12 +306,25 @@ const MatchingDashboard: React.FC = () => {
   const getSkillNameById = (skillId: string, skillType: 'professional' | 'technical' | 'soft') => {
     const skillArray = skills[skillType];
     const skill = skillArray.find(s => s._id === skillId);
+    console.log(`Looking for skill ${skillId} in ${skillType}:`, skill);
     return skill ? skill.name : skillId;
   };
 
   const getLanguageNameByCode = (languageCode: string) => {
     const language = languages.find(l => l.code === languageCode);
+    console.log(`Looking for language ${languageCode}:`, language);
     return language ? language.name : languageCode;
+  };
+
+  // Debug function to log all available skills and languages
+  const logAvailableData = () => {
+    console.log('=== AVAILABLE SKILLS ===');
+    console.log('Professional skills:', skills.professional.length);
+    console.log('Technical skills:', skills.technical.length);
+    console.log('Soft skills:', skills.soft.length);
+    console.log('=== AVAILABLE LANGUAGES ===');
+    console.log('Languages:', languages.length);
+    console.log('Sample languages:', languages.slice(0, 3));
   };
 
   // Handle weight change
@@ -445,45 +470,63 @@ const MatchingDashboard: React.FC = () => {
       {/* Main Content */}
       <main className="container mx-auto p-6 space-y-6">
         {/* Debug Section - Skills and Languages Data */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-            <h3 className="text-lg font-semibold text-yellow-800 mb-2">Debug Info - Skills & Languages</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-              <div>
-                <h4 className="font-medium text-yellow-700 mb-1">Skills Loaded:</h4>
-                <ul className="text-yellow-600 space-y-1">
-                  <li>Professional: {skills.professional.length} skills</li>
-                  <li>Technical: {skills.technical.length} skills</li>
-                  <li>Soft: {skills.soft.length} skills</li>
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-medium text-yellow-700 mb-1">Languages Loaded:</h4>
-                <p className="text-yellow-600">{languages.length} languages</p>
-              </div>
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+          <h3 className="text-lg font-semibold text-yellow-800 mb-2">Debug Info - Skills & Languages</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div>
+              <h4 className="font-medium text-yellow-700 mb-1">Skills Loaded:</h4>
+              <ul className="text-yellow-600 space-y-1">
+                <li>Professional: {skills.professional.length} skills</li>
+                <li>Technical: {skills.technical.length} skills</li>
+                <li>Soft: {skills.soft.length} skills</li>
+              </ul>
             </div>
-            {skills.professional.length > 0 && (
-              <details className="mt-3">
-                <summary className="cursor-pointer text-yellow-700 font-medium">Sample Professional Skills</summary>
-                <div className="mt-2 text-xs text-yellow-600">
-                  {skills.professional.slice(0, 5).map(skill => (
-                    <div key={skill._id}>{skill.name} - {skill.category}</div>
-                  ))}
-                </div>
-              </details>
-            )}
-            {languages.length > 0 && (
-              <details className="mt-3">
-                <summary className="cursor-pointer text-yellow-700 font-medium">Sample Languages</summary>
-                <div className="mt-2 text-xs text-yellow-600">
-                  {languages.slice(0, 5).map(lang => (
-                    <div key={lang._id}>{lang.name} ({lang.code})</div>
-                  ))}
-                </div>
-              </details>
-            )}
+            <div>
+              <h4 className="font-medium text-yellow-700 mb-1">Languages Loaded:</h4>
+              <p className="text-yellow-600">{languages.length} languages</p>
+            </div>
           </div>
-        )}
+          {skills.professional.length > 0 && (
+            <details className="mt-3">
+              <summary className="cursor-pointer text-yellow-700 font-medium">Sample Professional Skills</summary>
+              <div className="mt-2 text-xs text-yellow-600">
+                {skills.professional.slice(0, 5).map(skill => (
+                  <div key={skill._id}>{skill.name} - {skill.category}</div>
+                ))}
+              </div>
+            </details>
+          )}
+          {skills.technical.length > 0 && (
+            <details className="mt-3">
+              <summary className="cursor-pointer text-yellow-700 font-medium">Sample Technical Skills</summary>
+              <div className="mt-2 text-xs text-yellow-600">
+                {skills.technical.slice(0, 5).map(skill => (
+                  <div key={skill._id}>{skill.name} - {skill.category}</div>
+                ))}
+              </div>
+            </details>
+          )}
+          {skills.soft.length > 0 && (
+            <details className="mt-3">
+              <summary className="cursor-pointer text-yellow-700 font-medium">Sample Soft Skills</summary>
+              <div className="mt-2 text-xs text-yellow-600">
+                {skills.soft.slice(0, 5).map(skill => (
+                  <div key={skill._id}>{skill.name} - {skill.category}</div>
+                ))}
+              </div>
+            </details>
+          )}
+          {languages.length > 0 && (
+            <details className="mt-3">
+              <summary className="cursor-pointer text-yellow-700 font-medium">Sample Languages</summary>
+              <div className="mt-2 text-xs text-yellow-600">
+                {languages.slice(0, 5).map(lang => (
+                  <div key={lang._id}>{lang.name} ({lang.code})</div>
+                ))}
+              </div>
+            </details>
+          )}
+        </div>
 
         {/* Error Message */}
         {error && (
@@ -821,8 +864,11 @@ const MatchingDashboard: React.FC = () => {
                                     // Try to get the language name from our languages data
                                     const languageName = getLanguageNameByCode(lang.language);
                                     
+                                    // Debug: Log language lookup
+                                    console.log(`Language lookup: ${lang.language} -> ${languageName}`);
+                                    
                                     return (
-                                      <span key={i} className="px-2 py-1 rounded text-xs text-gray-800 border border-gray-200">
+                                      <span key={i} className="px-2 py-1 rounded text-xs bg-blue-50 text-blue-800 border border-blue-200">
                                         {languageName}
                                         {lang.proficiency && ` (${lang.proficiency}${levelLabel ? ' - ' + levelLabel : ''})`}
                                       </span>
@@ -843,9 +889,29 @@ const MatchingDashboard: React.FC = () => {
                                       getSkillNameById(skill.skill, skill.type as 'professional' | 'technical' | 'soft') : 
                                       skill.skillName || skill.skill;
                                     
+                                    // Determine color based on skill type
+                                    let bgColor = 'bg-gray-100';
+                                    let textColor = 'text-gray-800';
+                                    let borderColor = 'border-gray-200';
+                                    
+                                    if (skill.type === 'professional') {
+                                      bgColor = 'bg-blue-100';
+                                      textColor = 'text-blue-800';
+                                      borderColor = 'border-blue-200';
+                                    } else if (skill.type === 'technical') {
+                                      bgColor = 'bg-green-100';
+                                      textColor = 'text-green-800';
+                                      borderColor = 'border-green-200';
+                                    } else if (skill.type === 'soft') {
+                                      bgColor = 'bg-purple-100';
+                                      textColor = 'text-purple-800';
+                                      borderColor = 'border-purple-200';
+                                    }
+                                    
                                     return (
-                                      <span key={i} className="px-2 py-1 rounded text-xs text-gray-800 border border-gray-200">
+                                      <span key={i} className={`px-2 py-1 rounded text-xs ${bgColor} ${textColor} border ${borderColor}`}>
                                         {skillName}
+                                        {skill.type && <span className="text-xs opacity-75 ml-1">({skill.type})</span>}
                                       </span>
                                     );
                                   })}
