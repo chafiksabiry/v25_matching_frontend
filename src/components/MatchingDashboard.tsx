@@ -24,19 +24,16 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { Toaster, toast } from 'react-hot-toast';
 
-interface BasicMatchResponse {
-  matches: Match[];
-}
 
 const defaultMatchingWeights: MatchingWeights = {
-  experience: 0.15,
-  skills: 0.2,
+  experience: 0.20,
+  skills: 0.20,
   industry: 0.15,
-  languages: 0.1,
-  availability: 0.1,
-  timezone: 0.05,
-  performance: 0.2,
-  region: 0.05,
+  languages: 0.15,
+  availability: 0.10,
+  timezone: 0.10,
+  activities: 0.10,
+  region: 0.10,
 };
 
 type TabType = "gigs" | "reps" | "optimal";
@@ -68,23 +65,44 @@ const MatchingDashboard: React.FC = () => {
       partialMatches: number;
       noMatches: number;
       totalMatches: number;
-      byType: {
-        technical: {
-          perfectMatches: number;
-          partialMatches: number;
-          noMatches: number;
-        };
-        professional: {
-          perfectMatches: number;
-          partialMatches: number;
-          noMatches: number;
-        };
-        soft: {
-          perfectMatches: number;
-          partialMatches: number;
-          noMatches: number;
-        };
-      };
+    };
+    industryStats: {
+      perfectMatches: number;
+      partialMatches: number;
+      neutralMatches: number;
+      noMatches: number;
+      totalMatches: number;
+    };
+    activityStats: {
+      perfectMatches: number;
+      partialMatches: number;
+      neutralMatches: number;
+      noMatches: number;
+      totalMatches: number;
+    };
+    experienceStats: {
+      perfectMatches: number;
+      partialMatches: number;
+      noMatches: number;
+      totalMatches: number;
+    };
+    timezoneStats: {
+      perfectMatches: number;
+      partialMatches: number;
+      noMatches: number;
+      totalMatches: number;
+    };
+    regionStats: {
+      perfectMatches: number;
+      partialMatches: number;
+      noMatches: number;
+      totalMatches: number;
+    };
+    scheduleStats: {
+      perfectMatches: number;
+      partialMatches: number;
+      noMatches: number;
+      totalMatches: number;
     };
   } | null>(null);
   const [loading, setLoading] = useState(false);
@@ -159,11 +177,11 @@ const MatchingDashboard: React.FC = () => {
     const getMatches = async () => {
       if (initialLoading) return;
       try {
-        let response: MatchResponse | { matches: Match[] };
+        let response: any;
         if (activeTab === "gigs" && selectedGig) {
           setLoading(true);
           // Utiliser la nouvelle structure de réponse
-          const gigResponse = await findMatchesForGig(selectedGig._id, weights);
+          const gigResponse = await findMatchesForGig(selectedGig._id || '', weights);
           console.log('=== GIG RESPONSE ===', gigResponse);
           console.log('=== PREFEREDMATCHES ===', gigResponse.preferedmatches);
           console.log('=== MATCHES LENGTH ===', gigResponse.preferedmatches?.length);
@@ -184,25 +202,58 @@ const MatchingDashboard: React.FC = () => {
               perfectMatches: 0,
               partialMatches: 0,
               noMatches: 0,
-              totalMatches: 0,
-              byType: {
-                technical: { perfectMatches: 0, partialMatches: 0, noMatches: 0 },
-                professional: { perfectMatches: 0, partialMatches: 0, noMatches: 0 },
-                soft: { perfectMatches: 0, partialMatches: 0, noMatches: 0 }
-              }
+              totalMatches: 0
+            },
+            industryStats: (gigResponse as any).industryStats || {
+              perfectMatches: 0,
+              partialMatches: 0,
+              neutralMatches: 0,
+              noMatches: 0,
+              totalMatches: 0
+            },
+            activityStats: (gigResponse as any).activityStats || {
+              perfectMatches: 0,
+              partialMatches: 0,
+              neutralMatches: 0,
+              noMatches: 0,
+              totalMatches: 0
+            },
+            experienceStats: (gigResponse as any).experienceStats || {
+              perfectMatches: 0,
+              partialMatches: 0,
+              noMatches: 0,
+              totalMatches: 0
+            },
+            timezoneStats: (gigResponse as any).timezoneStats || {
+              perfectMatches: 0,
+              partialMatches: 0,
+              noMatches: 0,
+              totalMatches: 0
+            },
+            regionStats: (gigResponse as any).regionStats || {
+              perfectMatches: 0,
+              partialMatches: 0,
+              noMatches: 0,
+              totalMatches: 0
+            },
+            scheduleStats: (gigResponse as any).scheduleStats || {
+              perfectMatches: 0,
+              partialMatches: 0,
+              noMatches: 0,
+              totalMatches: 0
             }
           });
           setLoading(false);
         } else if (activeTab === "reps" && selectedRep) {
           setLoading(true);
-          response = await findGigsForRep(selectedRep._id, weights);
-          setMatches(response.matches || []);
+          response = await findGigsForRep(selectedRep._id || '', weights);
+          setMatches(response.preferedmatches || response.matches || []);
           setMatchStats(null);
           setLoading(false);
         } else if (activeTab === "optimal") {
           setLoading(true);
           response = await generateOptimalMatches(weights);
-          setMatches(response.matches || []);
+          setMatches(response.preferedmatches || response.matches || []);
           setMatchStats(null);
           setLoading(false);
         } else {
@@ -279,7 +330,7 @@ const MatchingDashboard: React.FC = () => {
 
     const requestData = {
       agentId: match.agentId,
-      gigId: selectedGig._id,
+      gigId: selectedGig._id || '',
       matchDetails: match
     };
     
@@ -638,6 +689,9 @@ const MatchingDashboard: React.FC = () => {
                           <th className="px-6 py-4 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Personal Info</th>
                           <th className="px-6 py-4 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Languages</th>
                           <th className="px-6 py-4 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Skills</th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Industries</th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Activities</th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Experience</th>
                           <th className="px-6 py-4 text-center text-xs font-bold text-indigo-700 uppercase tracking-wider">Action</th>
                         </tr>
                       </thead>
@@ -721,6 +775,59 @@ const MatchingDashboard: React.FC = () => {
                                 </div>
                               ) : (
                                 <div className="text-gray-400 text-sm">No matching skills</div>
+                              )}
+                            </td>
+                            <td className="px-6 py-4">
+                              {/* INDUSTRIES */}
+                              {match.industryMatch?.details?.matchingIndustries?.length > 0 ? (
+                                <div className="flex flex-wrap gap-2">
+                                  {match.industryMatch.details.matchingIndustries.map((industry: { industryName: string }, i: number) => (
+                                    <span key={i} className="px-2 py-1 rounded text-xs text-green-800 bg-green-100 border border-green-200">
+                                      {industry.industryName}
+                                    </span>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="text-gray-400 text-sm">No matching industries</div>
+                              )}
+                            </td>
+                            <td className="px-6 py-4">
+                              {/* ACTIVITIES */}
+                              {match.activityMatch?.details?.matchingActivities?.length > 0 ? (
+                                <div className="flex flex-wrap gap-2">
+                                  {match.activityMatch.details.matchingActivities.map((activity: { activityName: string }, i: number) => (
+                                    <span key={i} className="px-2 py-1 rounded text-xs text-purple-800 bg-purple-100 border border-purple-200">
+                                      {activity.activityName}
+                                    </span>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="text-gray-400 text-sm">No matching activities</div>
+                              )}
+                            </td>
+                            <td className="px-6 py-4">
+                              {/* EXPERIENCE */}
+                              {match.experienceMatch ? (
+                                <div className="flex flex-col gap-1">
+                                  <div className="text-sm font-medium text-gray-900">
+                                    {match.experienceMatch.details.agentExperience} years
+                                  </div>
+                                  <div className="text-xs text-gray-600">
+                                    Required: {match.experienceMatch.details.gigRequiredExperience} years
+                                  </div>
+                                  <div className={`text-xs px-2 py-1 rounded ${
+                                    match.experienceMatch.matchStatus === 'perfect_match' 
+                                      ? 'bg-green-100 text-green-800' 
+                                      : match.experienceMatch.matchStatus === 'partial_match'
+                                      ? 'bg-yellow-100 text-yellow-800'
+                                      : 'bg-red-100 text-red-800'
+                                  }`}>
+                                    {match.experienceMatch.matchStatus === 'perfect_match' ? '✓ Perfect' : 
+                                     match.experienceMatch.matchStatus === 'partial_match' ? '~ Partial' : '✗ No Match'}
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="text-gray-400 text-sm">No experience data</div>
                               )}
                             </td>
                             <td className="px-6 py-4 text-center">
