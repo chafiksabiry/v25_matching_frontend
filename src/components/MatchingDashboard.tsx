@@ -175,15 +175,7 @@ const MatchingDashboard: React.FC = () => {
         setSkills(skillsData);
         setLanguages(languagesData);
         
-        // Debug: Log available data
-        console.log('=== SETTING SKILLS AND LANGUAGES ===');
-        console.log('Skills data:', skillsData);
-        console.log('Languages data:', languagesData);
-        
-        // Log sample language IDs from API
-        if (languagesData.length > 0) {
-          console.log('Sample language IDs from API:', languagesData.slice(0, 3).map(l => ({ id: l._id, code: l.code, name: l.name })));
-        }
+
       } catch (error) {
         console.error("Error fetching data:", error);
         setError("Failed to fetch data. Please try again.");
@@ -195,12 +187,7 @@ const MatchingDashboard: React.FC = () => {
     fetchData();
   }, []);
 
-  // Debug: Log available data when skills or languages change
-  useEffect(() => {
-    if (skills.professional.length > 0 || languages.length > 0) {
-      logAvailableData();
-    }
-  }, [skills, languages]);
+
 
   // Get matches based on current selection
   useEffect(() => {
@@ -336,16 +323,7 @@ const MatchingDashboard: React.FC = () => {
     return language ? language.name : languageCode;
   };
 
-  // Debug function to log all available skills and languages
-  const logAvailableData = () => {
-    console.log('=== AVAILABLE SKILLS ===');
-    console.log('Professional skills:', skills.professional.length);
-    console.log('Technical skills:', skills.technical.length);
-    console.log('Soft skills:', skills.soft.length);
-    console.log('=== AVAILABLE LANGUAGES ===');
-    console.log('Languages:', languages.length);
-    console.log('Sample languages:', languages.slice(0, 3));
-  };
+
 
   // Handle weight change
   const handleWeightChange = (key: keyof MatchingWeights, value: number) => {
