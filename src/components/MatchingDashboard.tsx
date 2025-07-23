@@ -633,7 +633,7 @@ const MatchingDashboard: React.FC = () => {
                   <div className="space-y-2 text-sm text-gray-600">
                     <div className="flex items-center space-x-2">
                       <Clock size={16} className="text-gray-400" />
-                      <p>Required Experience: {gig.requiredExperience}+ years</p>
+                      <p>Required Experience: {gig.seniority?.yearsExperience}</p>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Activity size={16} className="text-gray-400" />
