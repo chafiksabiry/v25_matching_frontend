@@ -126,6 +126,7 @@ const MatchingDashboard: React.FC = () => {
   const [languages, setLanguages] = useState<Language[]>([]);
   const [shouldAutoSearch, setShouldAutoSearch] = useState(false);
   const [hasClickedSave, setHasClickedSave] = useState(false);
+  const [gigHasSavedWeights, setGigHasSavedWeights] = useState(false);
 
   const handleTabClick = (tab: TabType) => {
     setActiveTab(tab);
@@ -155,12 +156,13 @@ const MatchingDashboard: React.FC = () => {
     // Reset save state when selecting a new gig
     setHasClickedSave(false);
     
-    // Reset weights to defaults first
+    // Reset weights to defaults - NO automatic loading of saved weights
     setWeights(defaultMatchingWeights);
     setGigHasWeights(false);
     
-    // Then try to load saved weights for the selected gig
-    await loadWeightsForGig(gig._id || '');
+    // Check if gig has saved weights (without loading them)
+    const hasSavedWeights = await checkGigHasWeights(gig._id || '');
+    setGigHasSavedWeights(hasSavedWeights);
     
     // Clear previous matches when selecting a new gig
     setMatches([]);
@@ -382,7 +384,17 @@ const MatchingDashboard: React.FC = () => {
     }
   };
 
-  // Load weights for selected gig
+  // Check if gig has saved weights (without loading them)
+  const checkGigHasWeights = async (gigId: string) => {
+    try {
+      await getGigWeights(gigId);
+      return true;
+    } catch (error: any) {
+      return false;
+    }
+  };
+
+  // Load weights for selected gig (manual action)
   const loadWeightsForGig = async (gigId: string) => {
     try {
       const gigWeights = await getGigWeights(gigId);
@@ -660,7 +672,21 @@ const MatchingDashboard: React.FC = () => {
               Note: These weights determine how much each factor contributes to the overall matching score.
             </p>
             {selectedGig && (
-              <div className="mt-4 flex justify-center">
+              <div className="mt-4 flex flex-col items-center space-y-3">
+                {/* Load Saved Weights Button - only show if gig has saved weights */}
+                {gigHasSavedWeights && !gigHasWeights && (
+                  <button
+                    onClick={() => loadWeightsForGig(selectedGig._id || '')}
+                    className="text-sm bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition-all duration-200 flex items-center space-x-2 shadow-lg"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    <span>Load Saved Weights</span>
+                  </button>
+                )}
+                
+                {/* Main Save/Update Button */}
                 <button
                   onClick={saveWeightsForGig}
                   className="text-sm bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg transition-all duration-200 flex items-center space-x-2 shadow-lg"
