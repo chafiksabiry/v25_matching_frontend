@@ -10,7 +10,7 @@ import {
   createGigAgent,
 } from "../api";
 import { getAllSkills, getLanguages, type Skill, type Language } from "../api/skillsApi";
-import GigMatchingWeightsManager from "./GigMatchingWeightsManager";
+import { saveGigWeights, getGigWeights, resetGigWeights } from "../api/gigWeightsApi";
 
 import {
   Activity,
@@ -143,6 +143,10 @@ const MatchingDashboard: React.FC = () => {
   const handleGigSelect = async (gig: any) => {
     setSelectedGig(gig);
     setCurrentPage(1);
+    
+    // Load weights for the selected gig
+    await loadWeightsForGig(gig._id || '');
+    
     setTimeout(scrollToResults, 100);
   };
 
@@ -331,6 +335,36 @@ const MatchingDashboard: React.FC = () => {
   // Reset weights to default
   const resetWeights = () => {
     setWeights(defaultMatchingWeights);
+  };
+
+  // Save weights for selected gig
+  const saveWeightsForGig = async () => {
+    if (!selectedGig) {
+      console.error('No gig selected');
+      return;
+    }
+
+    try {
+      await saveGigWeights(selectedGig._id || '', weights);
+      console.log('Weights saved successfully for gig:', selectedGig._id);
+      // Optionally trigger a new search with updated weights
+      if (matches.length > 0) {
+        handleGigSelect(selectedGig);
+      }
+    } catch (error) {
+      console.error('Error saving weights:', error);
+    }
+  };
+
+  // Load weights for selected gig
+  const loadWeightsForGig = async (gigId: string) => {
+    try {
+      const gigWeights = await getGigWeights(gigId);
+      setWeights(gigWeights.matchingWeights);
+    } catch (error) {
+      console.error('Error loading weights for gig:', error);
+      // Keep default weights if loading fails
+    }
   };
 
   // Add custom animation classes
@@ -563,6 +597,17 @@ const MatchingDashboard: React.FC = () => {
                   </svg>
                   <span>Reset to Default</span>
                 </button>
+                {selectedGig && (
+                  <button
+                    onClick={saveWeightsForGig}
+                    className="text-sm bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-all duration-200 flex items-center space-x-2"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>Apply to Gig</span>
+                  </button>
+                )}
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -747,24 +792,7 @@ const MatchingDashboard: React.FC = () => {
               </div>
             )}
 
-            {/* Gig Matching Weights Manager */}
-            {selectedGig && (
-              <div className="mt-6">
-                <GigMatchingWeightsManager
-                  gigId={selectedGig._id || ''}
-                  onWeightsUpdated={(weights) => {
-                    console.log('Weights updated:', weights);
-                    // Optionally trigger a new search with updated weights
-                    if (matches.length > 0) {
-                      handleGigSelect(selectedGig);
-                    }
-                  }}
-                  onError={(error) => {
-                    console.error('Weights error:', error);
-                  }}
-                />
-              </div>
-            )}
+
           </div>
         )}
 

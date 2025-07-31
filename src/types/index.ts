@@ -437,33 +437,3 @@ export interface ExperienceMatch {
   matchStatus: 'perfect_match' | 'partial_match' | 'no_match';
 }
 
-// Types pour GigMatchingWeights
-export interface GigMatchingWeights {
-  _id?: string;
-  gigId: string;
-  categoryWeights: {
-    skills: number;
-    activities: number;
-    industries: number;
-    languages: number;
-    destination: number;
-    seniority: number;
-  };
-  metadata?: {
-    createdAt: Date;
-    updatedAt: Date;
-    description?: string;
-  };
-}
-
-export interface GigWithWeights {
-  gig: Gig;
-  weights: {
-    skills: number;
-    activities: number;
-    industries: number;
-    languages: number;
-    destination: number;
-    seniority: number;
-  };
-}
