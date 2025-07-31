@@ -150,12 +150,12 @@ const MatchingDashboard: React.FC = () => {
     setWeights(defaultMatchingWeights);
     setGigHasWeights(false);
     
-    // Check if gig has saved weights and load them
+    // Check if gig has saved weights and load them if they exist
     try {
-      const savedWeights = await getGigWeights(gig._id || '');
-      setWeights(savedWeights.matchingWeights);
+      const existingWeights = await getGigWeights(gig._id || '');
+      setWeights(existingWeights.matchingWeights);
       setGigHasWeights(true);
-      console.log('Loaded saved weights for gig:', gig._id);
+      console.log('Loaded existing weights for gig:', gig._id);
     } catch (error) {
       console.log('No saved weights found for gig:', gig._id);
       setGigHasWeights(false);
@@ -654,7 +654,7 @@ const MatchingDashboard: React.FC = () => {
                   onClick={saveWeightsForGig}
                   className={`text-sm px-6 py-3 rounded-lg transition-all duration-200 flex items-center space-x-2 shadow-lg ${
                     gigHasWeights 
-                      ? 'bg-orange-600 hover:bg-orange-700 text-white' 
+                      ? 'bg-green-600 hover:bg-green-700 text-white' 
                       : 'bg-indigo-600 hover:bg-indigo-700 text-white'
                   }`}
                 >
@@ -740,8 +740,8 @@ const MatchingDashboard: React.FC = () => {
                     </h3>
                     <ol className="text-sm text-blue-700 space-y-1">
                       <li>1. ✅ <strong>Gig selected:</strong> {selectedGig.title}</li>
-                      <li>2. ⚙️ <strong>Configure weights</strong> using the "Adjust Weights" button above {gigHasWeights && "(weights loaded)"}</li>
-                      <li>3. 🔍 <strong>Click "{gigHasWeights ? 'Update' : 'Save'} weights & Search"</strong> to find matching reps</li>
+                      <li>2. ⚙️ <strong>Configure weights</strong> using the "Adjust Weights" button above</li>
+                      <li>3. 🔍 <strong>Click "Save weights & Search"</strong> to find matching reps</li>
                     </ol>
                   </div>
                 </div>
