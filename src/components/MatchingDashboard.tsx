@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { Rep, Gig, Match, MatchingWeights } from "../types";
-import type { MatchResponse } from "../types/index";
 import {
   getReps,
   getGigs,
@@ -23,7 +22,7 @@ import {
 } from "lucide-react";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { Toaster, toast } from 'react-hot-toast';
+import { Toaster } from 'react-hot-toast';
 
 
 const defaultMatchingWeights: MatchingWeights = {
@@ -175,15 +174,7 @@ const MatchingDashboard: React.FC = () => {
         setSkills(skillsData);
         setLanguages(languagesData);
         
-        // Debug: Log available data
-        console.log('=== SETTING SKILLS AND LANGUAGES ===');
-        console.log('Skills data:', skillsData);
-        console.log('Languages data:', languagesData);
-        
-        // Log sample language IDs from API
-        if (languagesData.length > 0) {
-          console.log('Sample language IDs from API:', languagesData.slice(0, 3).map(l => ({ id: l._id, code: l.code, name: l.name })));
-        }
+
       } catch (error) {
         console.error("Error fetching data:", error);
         setError("Failed to fetch data. Please try again.");
@@ -195,12 +186,7 @@ const MatchingDashboard: React.FC = () => {
     fetchData();
   }, []);
 
-  // Debug: Log available data when skills or languages change
-  useEffect(() => {
-    if (skills.professional.length > 0 || languages.length > 0) {
-      logAvailableData();
-    }
-  }, [skills, languages]);
+
 
   // Get matches based on current selection
   useEffect(() => {
@@ -301,12 +287,6 @@ const MatchingDashboard: React.FC = () => {
     getMatches();
   }, [activeTab, selectedGig, selectedRep, weights, reps]);
 
-  // Get rep or gig details for a match
-  const getRepForMatch = (match: Match) =>
-    reps.find((rep) => rep._id === match.repId);
-  const getGigForMatch = (match: Match) =>
-    gigs.find((gig) => gig._id === match.gigId);
-
   // Helper functions to get skill and language names
   const getSkillNameById = (skillId: string, skillType: 'professional' | 'technical' | 'soft') => {
     const skillArray = skills[skillType];
@@ -336,16 +316,7 @@ const MatchingDashboard: React.FC = () => {
     return language ? language.name : languageCode;
   };
 
-  // Debug function to log all available skills and languages
-  const logAvailableData = () => {
-    console.log('=== AVAILABLE SKILLS ===');
-    console.log('Professional skills:', skills.professional.length);
-    console.log('Technical skills:', skills.technical.length);
-    console.log('Soft skills:', skills.soft.length);
-    console.log('=== AVAILABLE LANGUAGES ===');
-    console.log('Languages:', languages.length);
-    console.log('Sample languages:', languages.slice(0, 3));
-  };
+
 
   // Handle weight change
   const handleWeightChange = (key: keyof MatchingWeights, value: number) => {
@@ -363,20 +334,8 @@ const MatchingDashboard: React.FC = () => {
   // Add custom animation classes
   const fadeIn = "animate-[fadeIn_0.5s_ease-in-out]";
   const slideUp = "animate-[slideUp_0.3s_ease-out]";
-  const pulse = "animate-[pulse_2s_infinite]";
 
   // Toggle match details visibility
-  const toggleMatchDetails = (index: number) => {
-    setExpandedMatches(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(index)) {
-        newSet.delete(index);
-      } else {
-        newSet.add(index);
-      }
-      return newSet;
-    });
-  };
 
   // Add this function to handle gig-agent creation
   const handleCreateGigAgent = async (match: Match) => {
@@ -451,24 +410,109 @@ const MatchingDashboard: React.FC = () => {
           <div className="flex items-center space-x-4">
             <button
               onClick={async () => {
+                // Ajouter des console logs et alerts avant le back to onboarding
+                console.log("=== BACK TO ONBOARDING TRIGGERED ===");
+                console.log("Current URL:", window.location.href);
+                console.log("Current timestamp:", new Date().toISOString());
+                console.log("User agent:", navigator.userAgent);
+                
+                // Alert pour informer l'utilisateur
+                alert("🔄 Redirection vers l'onboarding en cours...\n\nVeuillez patienter pendant que nous mettons à jour votre progression.");
+                
                 try {
                   const companyId = Cookies.get("companyId");
-                  if (companyId) {
-                    // Marquer le step 10 de la phase 3 comme completed
-                    await axios.put(
+                  console.log("Company ID:", companyId);
+                  console.log("Company API URL:", import.meta.env.VITE_COMPANY_API_URL);
+                  
+                  // Alert pour les informations de debug
+                  if (!companyId) {
+                    console.warn("No companyId found in cookies, proceeding without updating onboarding");
+                    alert("⚠️ Aucun companyId trouvé dans les cookies.\nRedirection directe vers l'onboarding.");
+                    window.location.href = "/app11";
+                    return;
+                  }
+
+                  if (!import.meta.env.VITE_COMPANY_API_URL) {
+                    console.error("VITE_COMPANY_API_URL is not defined");
+                    alert("❌ VITE_COMPANY_API_URL n'est pas défini.\nRedirection directe vers l'onboarding.");
+                    window.location.href = "/app11";
+                    return;
+                  }
+
+                  // Marquer le step 10 de la phase 4 comme completed
+                  console.log("Updating step 10 status...");
+                  console.log("Step URL:", `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/phases/3/steps/10`);
+                  console.log("Step request data:", { status: "completed" });
+                  alert("📝 Mise à jour du statut de l'étape 10...");
+                  
+                  let stepUpdated = false;
+                  
+                  // Essayer d'abord phase 3, step 10
+                  try {
+                    const stepResponse = await axios.put(
                       `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/phases/3/steps/10`,
                       { status: "completed" }
                     );
+                    console.log("Step update response (phase 3):", stepResponse.data);
+                    alert("✅ Étape 10 (phase 3) mise à jour avec succès!");
+                    stepUpdated = true;
+                  } catch (stepError: any) {
+                    console.error("Step update error (phase 3):", stepError);
+                    console.error("Step error response:", stepError.response?.data);
+                    console.error("Step error status:", stepError.response?.status);
                     
-                    // Mettre à jour la phase courante vers la phase 4
-                    await axios.put(
+                    // Essayer phase 4, step 10
+                    try {
+                      console.log("Trying phase 4, step 10...");
+                      const stepResponse2 = await axios.put(
+                        `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/phases/4/steps/10`,
+                        { status: "completed" }
+                      );
+                      console.log("Step update response (phase 4):", stepResponse2.data);
+                      alert("✅ Étape 10 (phase 4) mise à jour avec succès!");
+                      stepUpdated = true;
+                    } catch (stepError2: any) {
+                      console.error("Step update error (phase 4):", stepError2);
+                      console.error("Step error response (phase 4):", stepError2.response?.data);
+                      alert(`⚠️ Erreur lors de la mise à jour de l'étape 10:\n\nPhase 3: ${stepError.response?.data?.message || stepError.message}\nPhase 4: ${stepError2.response?.data?.message || stepError2.message}\n\nContinuation...`);
+                    }
+                  }
+                  
+                  // Mettre à jour la phase courante vers la phase 4 (si pas déjà en phase 4)
+                  console.log("Updating current phase...");
+                  console.log("Phase URL:", `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/current-phase`);
+                  console.log("Phase request data:", { phase: 4 });
+                  alert("🔄 Mise à jour de la phase courante...");
+                  
+                  try {
+                    const phaseResponse = await axios.put(
                       `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/current-phase`,
                       { phase: 4 }
                     );
+                    console.log("Phase update response:", phaseResponse.data);
+                    alert("✅ Phase mise à jour avec succès!");
+                  } catch (phaseError: any) {
+                    console.error("Phase update error:", phaseError);
+                    console.error("Phase error response:", phaseError.response?.data);
+                    console.error("Phase error status:", phaseError.response?.status);
+                    alert(`⚠️ Erreur lors de la mise à jour de la phase:\n\n${phaseError.response?.data?.message || phaseError.message}\n\nContinuation...`);
                   }
+                  
+                  console.log("Onboarding progress updated successfully");
+                  alert("✅ Progression de l'onboarding mise à jour avec succès!\n\nRedirection vers l'onboarding...");
                   window.location.href = "/app11";
-                } catch (error) {
+                } catch (error: any) {
                   console.error("Error updating onboarding progress:", error);
+                  console.error("Error details:", {
+                    message: error?.message || "Unknown error",
+                    response: error?.response?.data,
+                    status: error?.response?.status
+                  });
+                  
+                  // Alert pour l'erreur
+                  alert(`❌ Erreur lors de la mise à jour de l'onboarding:\n\n${error?.message || "Erreur inconnue"}\n\nRedirection en cours malgré l'erreur...`);
+                  
+                  // Continue to redirect even if API calls fail
                   window.location.href = "/app11";
                 }
               }}
@@ -655,7 +699,7 @@ const MatchingDashboard: React.FC = () => {
                   <div className="space-y-2 text-sm text-gray-600">
                     <div className="flex items-center space-x-2">
                       <Clock size={16} className="text-gray-400" />
-                      <p>Required Experience: {gig.requiredExperience}+ years</p>
+                      <p>Required Experience: {gig.seniority?.yearsExperience}</p>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Activity size={16} className="text-gray-400" />
