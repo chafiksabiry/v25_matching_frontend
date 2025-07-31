@@ -120,7 +120,6 @@ const MatchingDashboard: React.FC = () => {
   }>({ professional: [], technical: [], soft: [] });
   const [languages, setLanguages] = useState<Language[]>([]);
   const [shouldAutoSearch, setShouldAutoSearch] = useState(false);
-  const [gigSaved, setGigSaved] = useState(false);
 
   const handleTabClick = (tab: TabType) => {
     setActiveTab(tab);
@@ -146,9 +145,6 @@ const MatchingDashboard: React.FC = () => {
     
     // Disable auto search when selecting a gig
     setShouldAutoSearch(false);
-    
-    // Reset gig saved state
-    setGigSaved(false);
     
     // Reset weights to defaults first
     setWeights(defaultMatchingWeights);
@@ -287,32 +283,10 @@ const MatchingDashboard: React.FC = () => {
     setWeights(defaultMatchingWeights);
   };
 
-  // Save gig first
-  const saveGig = async () => {
-    if (!selectedGig) {
-      console.error('No gig selected');
-      return;
-    }
-
-    try {
-      // Here you would typically save the gig to your backend
-      // For now, we'll just mark it as saved
-      console.log('Gig saved successfully:', selectedGig._id);
-      setGigSaved(true);
-    } catch (error) {
-      console.error('Error saving gig:', error);
-    }
-  };
-
-  // Save weights for selected gig
+  // Save weights for selected gig and search
   const saveWeightsForGig = async () => {
     if (!selectedGig) {
       console.error('No gig selected');
-      return;
-    }
-
-    if (!gigSaved) {
-      console.error('Gig must be saved first');
       return;
     }
 
@@ -670,12 +644,7 @@ const MatchingDashboard: React.FC = () => {
               <div className="mt-4 flex justify-center">
                 <button
                   onClick={saveWeightsForGig}
-                  disabled={!gigSaved}
-                  className={`text-sm px-6 py-3 rounded-lg transition-all duration-200 flex items-center space-x-2 shadow-lg ${
-                    gigSaved
-                      ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
-                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  }`}
+                  className="text-sm px-6 py-3 rounded-lg transition-all duration-200 flex items-center space-x-2 shadow-lg bg-indigo-600 hover:bg-indigo-700 text-white"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
@@ -759,37 +728,9 @@ const MatchingDashboard: React.FC = () => {
                     </h3>
                     <ol className="text-sm text-blue-700 space-y-1">
                       <li>1. ✅ <strong>Gig selected:</strong> {selectedGig.title}</li>
-                      <li>2. 💾 <strong>Save gig first</strong> using the "Save Gig" button below</li>
-                      <li>3. ⚙️ <strong>Configure weights</strong> using the "Adjust Weights" button above</li>
-                      <li>4. 🔍 <strong>Click "Save weights & Search"</strong> to find matching reps</li>
+                      <li>2. ⚙️ <strong>Configure weights</strong> using the "Adjust Weights" button above</li>
+                      <li>3. 🔍 <strong>Click "Save weights & Search"</strong> to find matching reps</li>
                     </ol>
-                  </div>
-                  <div className="flex-shrink-0">
-                    <button
-                      onClick={saveGig}
-                      disabled={gigSaved}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                        gigSaved
-                          ? 'bg-green-100 text-green-800 border border-green-200 cursor-not-allowed'
-                          : 'bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg transform hover:-translate-y-0.5'
-                      }`}
-                    >
-                      {gigSaved ? (
-                        <span className="flex items-center space-x-2">
-                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                          </svg>
-                          <span>Gig Saved</span>
-                        </span>
-                      ) : (
-                        <span className="flex items-center space-x-2">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-                          </svg>
-                          <span>Save Gig</span>
-                        </span>
-                      )}
-                    </button>
                   </div>
                 </div>
               </div>
