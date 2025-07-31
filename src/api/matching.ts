@@ -59,12 +59,13 @@ export const findMatchesForGig = async (gigId: string, weights: MatchingWeights)
           noMatches: 0,
           totalMatches: 0
         },
-        scheduleStats: response.data.scheduleStats || {
+        availabilityStats: response.data.availabilityStats || {
           perfectMatches: 0,
           partialMatches: 0,
           noMatches: 0,
           totalMatches: 0
-        }
+        },
+
       };
     }
   } catch (error) {
