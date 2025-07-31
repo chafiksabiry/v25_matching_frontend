@@ -151,6 +151,8 @@ const MatchingDashboard: React.FC = () => {
     // Disable auto search when selecting a gig
     setShouldAutoSearch(false);
     
+
+    
     // Reset weights to defaults first
     setWeights(defaultMatchingWeights);
     setGigHasWeights(false);
@@ -288,12 +290,16 @@ const MatchingDashboard: React.FC = () => {
     setWeights(defaultMatchingWeights);
   };
 
+
+
   // Save weights for selected gig
   const saveWeightsForGig = async () => {
     if (!selectedGig) {
       console.error('No gig selected');
       return;
     }
+
+
 
     try {
       await saveGigWeights(selectedGig._id || '', weights);
@@ -732,14 +738,14 @@ const MatchingDashboard: React.FC = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <h3 className="text-sm font-medium text-blue-800 mb-1">
                       {gigHasWeights ? "Edit and Save Weights" : "Save Weights"}
                     </h3>
                     <ol className="text-sm text-blue-700 space-y-1">
                       <li>1. ✅ <strong>Gig selected:</strong> {selectedGig.title}</li>
-                      <li>2. ⚙️ <strong>Configure weights</strong> using the "Adjust Weights" button above</li>
-                      <li>3. 💾 <strong>Click "Save weights & Search"</strong> to find matching reps</li>
+                      <li>2. ⚙️ <strong>Configure weights</strong> using the "Adjust Weights" button above (optional)</li>
+                      <li>3. 🔍 <strong>Click "Save weights & Search"</strong> to find matching reps</li>
                     </ol>
                   </div>
                 </div>
