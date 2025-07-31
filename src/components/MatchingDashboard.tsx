@@ -124,10 +124,13 @@ const MatchingDashboard: React.FC = () => {
     soft: Skill[];
   }>({ professional: [], technical: [], soft: [] });
   const [languages, setLanguages] = useState<Language[]>([]);
+  const [shouldAutoSearch, setShouldAutoSearch] = useState(false);
 
   const handleTabClick = (tab: TabType) => {
     setActiveTab(tab);
     setCurrentPage(1);
+    // Enable auto search for other tabs (reps and optimal)
+    setShouldAutoSearch(tab !== "gigs");
   };
 
   const resultsTableRef = React.useRef<HTMLDivElement>(null);
@@ -144,6 +147,9 @@ const MatchingDashboard: React.FC = () => {
   const handleGigSelect = async (gig: any) => {
     setSelectedGig(gig);
     setCurrentPage(1);
+    
+    // Disable auto search when selecting a gig
+    setShouldAutoSearch(false);
     
     // Reset weights to defaults first
     setWeights(defaultMatchingWeights);
@@ -209,13 +215,13 @@ const MatchingDashboard: React.FC = () => {
       if (initialLoading) return;
       try {
         let response: any;
-        if (activeTab === "reps" && selectedRep) {
+        if (activeTab === "reps" && selectedRep && shouldAutoSearch) {
           setLoading(true);
           response = await findGigsForRep(selectedRep._id || '', weights);
           setMatches(response.preferedmatches || response.matches || []);
           setMatchStats(null);
           setLoading(false);
-        } else if (activeTab === "optimal") {
+        } else if (activeTab === "optimal" && shouldAutoSearch) {
           setLoading(true);
           response = await generateOptimalMatches(weights);
           setMatches(response.preferedmatches || response.matches || []);
@@ -236,7 +242,7 @@ const MatchingDashboard: React.FC = () => {
       }
     };
     getMatches();
-  }, [activeTab, selectedRep, weights, reps, initialLoading]);
+  }, [activeTab, selectedRep, weights, reps, initialLoading, shouldAutoSearch]);
 
   // Helper functions to get skill and language names
   const getSkillNameById = (skillId: string, skillType: 'professional' | 'technical' | 'soft') => {
@@ -294,7 +300,8 @@ const MatchingDashboard: React.FC = () => {
       console.log('Weights saved successfully for gig:', selectedGig._id);
       setGigHasWeights(true);
       
-      // Trigger search with updated weights after saving
+      // Enable auto search and trigger search with updated weights after saving
+      setShouldAutoSearch(true);
       setLoading(true);
       const gigResponse = await findMatchesForGig(selectedGig._id || '', weights);
       console.log('=== GIG RESPONSE AFTER SAVE ===', gigResponse);
@@ -726,7 +733,9 @@ const MatchingDashboard: React.FC = () => {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-sm font-medium text-blue-800 mb-1">Next Steps:</h3>
+                    <h3 className="text-sm font-medium text-blue-800 mb-1">
+                      {gigHasWeights ? "Edit and Save Weights" : "Save Weights"}
+                    </h3>
                     <ol className="text-sm text-blue-700 space-y-1">
                       <li>1. ✅ <strong>Gig selected:</strong> {selectedGig.title}</li>
                       <li>2. ⚙️ <strong>Configure weights</strong> using the "Adjust Weights" button above</li>
