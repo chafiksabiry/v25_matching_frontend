@@ -125,6 +125,7 @@ const MatchingDashboard: React.FC = () => {
   }>({ professional: [], technical: [], soft: [] });
   const [languages, setLanguages] = useState<Language[]>([]);
   const [shouldAutoSearch, setShouldAutoSearch] = useState(false);
+  const [hasClickedSave, setHasClickedSave] = useState(false);
 
   const handleTabClick = (tab: TabType) => {
     setActiveTab(tab);
@@ -151,7 +152,8 @@ const MatchingDashboard: React.FC = () => {
     // Disable auto search when selecting a gig
     setShouldAutoSearch(false);
     
-
+    // Reset save state when selecting a new gig
+    setHasClickedSave(false);
     
     // Reset weights to defaults first
     setWeights(defaultMatchingWeights);
@@ -305,6 +307,7 @@ const MatchingDashboard: React.FC = () => {
       await saveGigWeights(selectedGig._id || '', weights);
       console.log('Weights saved successfully for gig:', selectedGig._id);
       setGigHasWeights(true);
+      setHasClickedSave(true);
       
       // Enable auto search and trigger search with updated weights after saving
       setShouldAutoSearch(true);
@@ -666,7 +669,7 @@ const MatchingDashboard: React.FC = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                   </svg>
                   <span>
-                    {gigHasWeights ? `Update weights & Search for ${selectedGig.title}` : `Save weights & Search for ${selectedGig.title}`}
+                    {hasClickedSave ? `Update weights & Search for ${selectedGig.title}` : `Save weights & Search for ${selectedGig.title}`}
                   </span>
                 </button>
               </div>
