@@ -258,7 +258,7 @@ export interface RegionMatch {
   matchStatus: 'perfect_match' | 'partial_match' | 'no_match';
 }
 
-export interface ScheduleMatch {
+export interface AvailabilityMatch {
   score: number;
   details: {
     matchingDays: Array<{
@@ -271,6 +271,8 @@ export interface ScheduleMatch {
   };
   matchStatus: 'perfect_match' | 'partial_match' | 'no_match';
 }
+
+
 
 export interface Match {
   _id?: string;
@@ -285,7 +287,7 @@ export interface Match {
   experienceMatch: ExperienceMatch;
   timezoneMatch: TimezoneMatch;
   regionMatch: RegionMatch;
-  scheduleMatch: ScheduleMatch;
+  availabilityMatch: AvailabilityMatch;
   matchStatus: 'perfect_match' | 'partial_match' | 'no_match';
   alreadyAssigned?: boolean;
 }
@@ -340,7 +342,7 @@ export interface MatchResponse {
     noMatches: number;
     totalMatches: number;
   };
-  scheduleStats: {
+  availabilityStats: {
     perfectMatches: number;
     partialMatches: number;
     noMatches: number;
@@ -393,7 +395,6 @@ export interface MatchingWeights {
   timezone: number;
   activities: number;
   region: number;
-  schedule?: number;
 }
 
 export interface IndustryMatch {

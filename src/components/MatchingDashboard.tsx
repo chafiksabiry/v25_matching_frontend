@@ -28,8 +28,8 @@ import { Toaster } from 'react-hot-toast';
 
 
 const defaultMatchingWeights: MatchingWeights = {
-  experience: 0.20,
-  skills: 0.20,
+  experience: 0.25,
+  skills: 0.25,
   industry: 0.15,
   languages: 0.15,
   availability: 0.10,
@@ -101,12 +101,7 @@ const MatchingDashboard: React.FC = () => {
       noMatches: number;
       totalMatches: number;
     };
-    scheduleStats: {
-      perfectMatches: number;
-      partialMatches: number;
-      noMatches: number;
-      totalMatches: number;
-    };
+
   } | null>(null);
   const [loading, setLoading] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
@@ -125,8 +120,7 @@ const MatchingDashboard: React.FC = () => {
   }>({ professional: [], technical: [], soft: [] });
   const [languages, setLanguages] = useState<Language[]>([]);
   const [shouldAutoSearch, setShouldAutoSearch] = useState(false);
-  const [hasClickedSave, setHasClickedSave] = useState(false);
-  const [gigHasSavedWeights, setGigHasSavedWeights] = useState(false);
+  const [gigSaved, setGigSaved] = useState(false);
 
   const handleTabClick = (tab: TabType) => {
     setActiveTab(tab);
@@ -153,16 +147,15 @@ const MatchingDashboard: React.FC = () => {
     // Disable auto search when selecting a gig
     setShouldAutoSearch(false);
     
-    // Reset save state when selecting a new gig
-    setHasClickedSave(false);
+    // Reset gig saved state
+    setGigSaved(false);
     
-    // Reset weights to defaults - NO automatic loading of saved weights
+    // Reset weights to defaults first
     setWeights(defaultMatchingWeights);
     setGigHasWeights(false);
     
-    // Check if gig has saved weights (without loading them)
-    const hasSavedWeights = await checkGigHasWeights(gig._id || '');
-    setGigHasSavedWeights(hasSavedWeights);
+    // Then try to load saved weights for the selected gig
+    await loadWeightsForGig(gig._id || '');
     
     // Clear previous matches when selecting a new gig
     setMatches([]);
@@ -294,7 +287,22 @@ const MatchingDashboard: React.FC = () => {
     setWeights(defaultMatchingWeights);
   };
 
+  // Save gig first
+  const saveGig = async () => {
+    if (!selectedGig) {
+      console.error('No gig selected');
+      return;
+    }
 
+    try {
+      // Here you would typically save the gig to your backend
+      // For now, we'll just mark it as saved
+      console.log('Gig saved successfully:', selectedGig._id);
+      setGigSaved(true);
+    } catch (error) {
+      console.error('Error saving gig:', error);
+    }
+  };
 
   // Save weights for selected gig
   const saveWeightsForGig = async () => {
@@ -303,13 +311,15 @@ const MatchingDashboard: React.FC = () => {
       return;
     }
 
-
+    if (!gigSaved) {
+      console.error('Gig must be saved first');
+      return;
+    }
 
     try {
       await saveGigWeights(selectedGig._id || '', weights);
       console.log('Weights saved successfully for gig:', selectedGig._id);
       setGigHasWeights(true);
-      setHasClickedSave(true);
       
       // Enable auto search and trigger search with updated weights after saving
       setShouldAutoSearch(true);
@@ -367,12 +377,7 @@ const MatchingDashboard: React.FC = () => {
           noMatches: 0,
           totalMatches: 0
         },
-        scheduleStats: (gigResponse as any).scheduleStats || {
-          perfectMatches: 0,
-          partialMatches: 0,
-          noMatches: 0,
-          totalMatches: 0
-        }
+        
       });
       setLoading(false);
       
@@ -384,17 +389,7 @@ const MatchingDashboard: React.FC = () => {
     }
   };
 
-  // Check if gig has saved weights (without loading them)
-  const checkGigHasWeights = async (gigId: string) => {
-    try {
-      await getGigWeights(gigId);
-      return true;
-    } catch (error: any) {
-      return false;
-    }
-  };
-
-  // Load weights for selected gig (manual action)
+  // Load weights for selected gig
   const loadWeightsForGig = async (gigId: string) => {
     try {
       const gigWeights = await getGigWeights(gigId);
@@ -672,30 +667,21 @@ const MatchingDashboard: React.FC = () => {
               Note: These weights determine how much each factor contributes to the overall matching score.
             </p>
             {selectedGig && (
-              <div className="mt-4 flex flex-col items-center space-y-3">
-                {/* Load Saved Weights Button - only show if gig has saved weights */}
-                {gigHasSavedWeights && !gigHasWeights && (
-                  <button
-                    onClick={() => loadWeightsForGig(selectedGig._id || '')}
-                    className="text-sm bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition-all duration-200 flex items-center space-x-2 shadow-lg"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                    </svg>
-                    <span>Load Saved Weights</span>
-                  </button>
-                )}
-                
-                {/* Main Save/Update Button */}
+              <div className="mt-4 flex justify-center">
                 <button
                   onClick={saveWeightsForGig}
-                  className="text-sm bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg transition-all duration-200 flex items-center space-x-2 shadow-lg"
+                  disabled={!gigSaved}
+                  className={`text-sm px-6 py-3 rounded-lg transition-all duration-200 flex items-center space-x-2 shadow-lg ${
+                    gigSaved
+                      ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  }`}
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                   </svg>
                   <span>
-                    {hasClickedSave ? `Update weights & Search for ${selectedGig.title}` : `Save weights & Search for ${selectedGig.title}`}
+                    {gigHasWeights ? `Update weights & Search for ${selectedGig.title}` : `Save weights & Search for ${selectedGig.title}`}
                   </span>
                 </button>
               </div>
@@ -773,9 +759,37 @@ const MatchingDashboard: React.FC = () => {
                     </h3>
                     <ol className="text-sm text-blue-700 space-y-1">
                       <li>1. ✅ <strong>Gig selected:</strong> {selectedGig.title}</li>
-                      <li>2. ⚙️ <strong>Configure weights</strong> using the "Adjust Weights" button above (optional)</li>
-                      <li>3. 🔍 <strong>Click "Save weights & Search"</strong> to find matching reps</li>
+                      <li>2. 💾 <strong>Save gig first</strong> using the "Save Gig" button below</li>
+                      <li>3. ⚙️ <strong>Configure weights</strong> using the "Adjust Weights" button above</li>
+                      <li>4. 🔍 <strong>Click "Save weights & Search"</strong> to find matching reps</li>
                     </ol>
+                  </div>
+                  <div className="flex-shrink-0">
+                    <button
+                      onClick={saveGig}
+                      disabled={gigSaved}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                        gigSaved
+                          ? 'bg-green-100 text-green-800 border border-green-200 cursor-not-allowed'
+                          : 'bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg transform hover:-translate-y-0.5'
+                      }`}
+                    >
+                      {gigSaved ? (
+                        <span className="flex items-center space-x-2">
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                          </svg>
+                          <span>Gig Saved</span>
+                        </span>
+                      ) : (
+                        <span className="flex items-center space-x-2">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                          </svg>
+                          <span>Save Gig</span>
+                        </span>
+                      )}
+                    </button>
                   </div>
                 </div>
               </div>
@@ -928,6 +942,7 @@ const MatchingDashboard: React.FC = () => {
                           <th className="px-6 py-4 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Skills</th>
                           <th className="px-6 py-4 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Industries</th>
                           <th className="px-6 py-4 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Activities</th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Availability</th>
                           <th className="px-6 py-4 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Experience</th>
                           <th className="px-6 py-4 text-center text-xs font-bold text-indigo-700 uppercase tracking-wider">Action</th>
                         </tr>
@@ -1074,6 +1089,31 @@ const MatchingDashboard: React.FC = () => {
                                 </div>
                               ) : (
                                 <div className="text-gray-400 text-sm">No matching activities</div>
+                              )}
+                            </td>
+                            <td className="px-6 py-4">
+                              {/* AVAILABILITY */}
+                              {match.availabilityMatch ? (
+                                <div className="flex flex-col gap-1">
+                                  <div className="text-sm font-medium text-gray-900">
+                                    {match.availabilityMatch.details.matchingDays.length} days match
+                                  </div>
+                                  <div className="text-xs text-gray-600">
+                                    Score: {(match.availabilityMatch.score * 100).toFixed(1)}%
+                                  </div>
+                                  <div className={`text-xs px-2 py-1 rounded ${
+                                    match.availabilityMatch.matchStatus === 'perfect_match' 
+                                      ? 'bg-green-100 text-green-800' 
+                                      : match.availabilityMatch.matchStatus === 'partial_match'
+                                      ? 'bg-yellow-100 text-yellow-800'
+                                      : 'bg-red-100 text-red-800'
+                                  }`}>
+                                    {match.availabilityMatch.matchStatus === 'perfect_match' ? '✓ Perfect' : 
+                                     match.availabilityMatch.matchStatus === 'partial_match' ? '~ Partial' : '✗ No Match'}
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="text-gray-400 text-sm">No availability data</div>
                               )}
                             </td>
                             <td className="px-6 py-4">
