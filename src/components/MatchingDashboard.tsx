@@ -293,20 +293,39 @@ const MatchingDashboard: React.FC = () => {
 
   // Save weights for selected gig and search
   const saveWeightsForGig = async () => {
+    console.log('🚨 SAVE WEIGHTS FOR GIG CALLED');
+    console.log('Stack trace:', new Error().stack);
+    
     if (!selectedGig) {
       console.error('No gig selected');
       return;
     }
 
     console.log('🔄 MANUAL SAVE TRIGGERED - User clicked save button');
+    
+    // Check if gig already has saved weights
     try {
-      await saveGigWeights(selectedGig._id || '', weights);
-      console.log('✅ Weights saved successfully for gig:', selectedGig._id);
+      const existingWeights = await getGigWeights(selectedGig._id || '');
+      console.log('⚠️ Gig already has saved weights, skipping save operation');
       setGigHasWeights(true);
-      
-      // Enable auto search and trigger search with updated weights after saving
-      setShouldAutoSearch(true);
-      setLoading(true);
+    } catch (error) {
+      // No existing weights found, proceed with saving
+      console.log('✅ No existing weights found, saving new weights');
+      try {
+        await saveGigWeights(selectedGig._id || '', weights);
+        console.log('✅ Weights saved successfully for gig:', selectedGig._id);
+        setGigHasWeights(true);
+      } catch (saveError) {
+        console.error('❌ Error saving weights:', saveError);
+        return;
+      }
+    }
+    
+    // Enable auto search and trigger search with updated weights after saving
+    setShouldAutoSearch(true);
+    setLoading(true);
+    
+    try {
       const gigResponse = await findMatchesForGig(selectedGig._id || '', weights);
       console.log('=== GIG RESPONSE AFTER SAVE ===', gigResponse);
       
@@ -359,15 +378,14 @@ const MatchingDashboard: React.FC = () => {
           partialMatches: 0,
           noMatches: 0,
           totalMatches: 0
-        },
-        
+        }
       });
       setLoading(false);
       
       // Scroll to results after search
       setTimeout(scrollToResults, 100);
     } catch (error) {
-      console.error('Error saving weights:', error);
+      console.error('Error in search after save:', error);
       setLoading(false);
     }
   };
@@ -652,7 +670,11 @@ const MatchingDashboard: React.FC = () => {
             {selectedGig && (
               <div className="mt-4 flex justify-center">
                 <button
-                  onClick={saveWeightsForGig}
+                  onClick={(e) => {
+                    console.log('🎯 BUTTON CLICKED - User manually clicked save button');
+                    console.log('Event:', e);
+                    saveWeightsForGig();
+                  }}
                   className="text-sm px-6 py-3 rounded-lg transition-all duration-200 flex items-center space-x-2 shadow-lg bg-indigo-600 hover:bg-indigo-700 text-white"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
