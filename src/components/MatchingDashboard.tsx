@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { Rep, Gig, Match, MatchingWeights } from "../types";
-import type { MatchResponse } from "../types/index";
 import {
   getReps,
   getGigs,
@@ -23,7 +22,7 @@ import {
 } from "lucide-react";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { Toaster, toast } from 'react-hot-toast';
+import { Toaster } from 'react-hot-toast';
 
 
 const defaultMatchingWeights: MatchingWeights = {
@@ -288,12 +287,6 @@ const MatchingDashboard: React.FC = () => {
     getMatches();
   }, [activeTab, selectedGig, selectedRep, weights, reps]);
 
-  // Get rep or gig details for a match
-  const getRepForMatch = (match: Match) =>
-    reps.find((rep) => rep._id === match.repId);
-  const getGigForMatch = (match: Match) =>
-    gigs.find((gig) => gig._id === match.gigId);
-
   // Helper functions to get skill and language names
   const getSkillNameById = (skillId: string, skillType: 'professional' | 'technical' | 'soft') => {
     const skillArray = skills[skillType];
@@ -341,20 +334,8 @@ const MatchingDashboard: React.FC = () => {
   // Add custom animation classes
   const fadeIn = "animate-[fadeIn_0.5s_ease-in-out]";
   const slideUp = "animate-[slideUp_0.3s_ease-out]";
-  const pulse = "animate-[pulse_2s_infinite]";
 
   // Toggle match details visibility
-  const toggleMatchDetails = (index: number) => {
-    setExpandedMatches(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(index)) {
-        newSet.delete(index);
-      } else {
-        newSet.add(index);
-      }
-      return newSet;
-    });
-  };
 
   // Add this function to handle gig-agent creation
   const handleCreateGigAgent = async (match: Match) => {
@@ -431,22 +412,47 @@ const MatchingDashboard: React.FC = () => {
               onClick={async () => {
                 try {
                   const companyId = Cookies.get("companyId");
-                  if (companyId) {
-                    // Marquer le step 10 de la phase 3 comme completed
-                    await axios.put(
-                      `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/phases/3/steps/10`,
-                      { status: "completed" }
-                    );
-                    
-                    // Mettre à jour la phase courante vers la phase 4
-                    await axios.put(
-                      `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/current-phase`,
-                      { phase: 4 }
-                    );
+                  console.log("Company ID:", companyId);
+                  console.log("Company API URL:", import.meta.env.VITE_COMPANY_API_URL);
+                  
+                  if (!companyId) {
+                    console.warn("No companyId found in cookies, proceeding without updating onboarding");
+                    window.location.href = "/app11";
+                    return;
                   }
+
+                  if (!import.meta.env.VITE_COMPANY_API_URL) {
+                    console.error("VITE_COMPANY_API_URL is not defined");
+                    window.location.href = "/app11";
+                    return;
+                  }
+
+                  // Marquer le step 10 de la phase 3 comme completed
+                  console.log("Updating step 10 status...");
+                  const stepResponse = await axios.put(
+                    `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/phases/3/steps/10`,
+                    { status: "completed" }
+                  );
+                  console.log("Step update response:", stepResponse.data);
+                  
+                  // Mettre à jour la phase courante vers la phase 4
+                  console.log("Updating current phase...");
+                  const phaseResponse = await axios.put(
+                    `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/current-phase`,
+                    { phase: 4 }
+                  );
+                  console.log("Phase update response:", phaseResponse.data);
+                  
+                  console.log("Onboarding progress updated successfully");
                   window.location.href = "/app11";
-                } catch (error) {
+                } catch (error: any) {
                   console.error("Error updating onboarding progress:", error);
+                  console.error("Error details:", {
+                    message: error?.message || "Unknown error",
+                    response: error?.response?.data,
+                    status: error?.response?.status
+                  });
+                  // Continue to redirect even if API calls fail
                   window.location.href = "/app11";
                 }
               }}
