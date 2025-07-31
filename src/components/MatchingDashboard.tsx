@@ -145,8 +145,16 @@ const MatchingDashboard: React.FC = () => {
     setSelectedGig(gig);
     setCurrentPage(1);
     
-    // Load weights for the selected gig
+    // Reset weights to defaults first
+    setWeights(defaultMatchingWeights);
+    setGigHasWeights(false);
+    
+    // Then try to load saved weights for the selected gig
     await loadWeightsForGig(gig._id || '');
+    
+    // Clear previous matches when selecting a new gig
+    setMatches([]);
+    setMatchStats(null);
     
     setTimeout(scrollToResults, 100);
   };
@@ -201,73 +209,7 @@ const MatchingDashboard: React.FC = () => {
       if (initialLoading) return;
       try {
         let response: any;
-        if (activeTab === "gigs" && selectedGig) {
-          setLoading(true);
-          // Utiliser la nouvelle structure de réponse
-          const gigResponse = await findMatchesForGig(selectedGig._id || '', weights);
-          console.log('=== GIG RESPONSE ===', gigResponse);
-          console.log('=== PREFEREDMATCHES ===', gigResponse.preferedmatches);
-          console.log('=== MATCHES LENGTH ===', gigResponse.preferedmatches?.length);
-          
-          setMatches(gigResponse.matches || gigResponse.preferedmatches || []);
-          setMatchStats({
-            totalMatches: gigResponse.totalMatches || 0,
-            perfectMatches: gigResponse.perfectMatches || 0,
-            partialMatches: gigResponse.partialMatches || 0,
-            noMatches: gigResponse.noMatches || 0,
-            languageStats: gigResponse.languageStats || {
-              perfectMatches: 0,
-              partialMatches: 0,
-              noMatches: 0,
-              totalMatches: 0
-            },
-            skillsStats: gigResponse.skillsStats || {
-              perfectMatches: 0,
-              partialMatches: 0,
-              noMatches: 0,
-              totalMatches: 0
-            },
-            industryStats: (gigResponse as any).industryStats || {
-              perfectMatches: 0,
-              partialMatches: 0,
-              neutralMatches: 0,
-              noMatches: 0,
-              totalMatches: 0
-            },
-            activityStats: (gigResponse as any).activityStats || {
-              perfectMatches: 0,
-              partialMatches: 0,
-              neutralMatches: 0,
-              noMatches: 0,
-              totalMatches: 0
-            },
-            experienceStats: (gigResponse as any).experienceStats || {
-              perfectMatches: 0,
-              partialMatches: 0,
-              noMatches: 0,
-              totalMatches: 0
-            },
-            timezoneStats: (gigResponse as any).timezoneStats || {
-              perfectMatches: 0,
-              partialMatches: 0,
-              noMatches: 0,
-              totalMatches: 0
-            },
-            regionStats: (gigResponse as any).regionStats || {
-              perfectMatches: 0,
-              partialMatches: 0,
-              noMatches: 0,
-              totalMatches: 0
-            },
-            scheduleStats: (gigResponse as any).scheduleStats || {
-              perfectMatches: 0,
-              partialMatches: 0,
-              noMatches: 0,
-              totalMatches: 0
-            }
-          });
-          setLoading(false);
-        } else if (activeTab === "reps" && selectedRep) {
+        if (activeTab === "reps" && selectedRep) {
           setLoading(true);
           response = await findGigsForRep(selectedRep._id || '', weights);
           setMatches(response.preferedmatches || response.matches || []);
@@ -279,10 +221,12 @@ const MatchingDashboard: React.FC = () => {
           setMatches(response.preferedmatches || response.matches || []);
           setMatchStats(null);
           setLoading(false);
-        } else {
+        } else if (activeTab === "gigs" && !selectedGig) {
+          // Clear matches when no gig is selected
           setMatches([]);
           setMatchStats(null);
         }
+        // Note: For gigs tab, matches are now only loaded when save button is clicked
       } catch (error) {
         console.error("Error getting matches:", error);
         setError("Failed to get matches. Please try again.");
@@ -292,7 +236,7 @@ const MatchingDashboard: React.FC = () => {
       }
     };
     getMatches();
-  }, [activeTab, selectedGig, selectedRep, weights, reps]);
+  }, [activeTab, selectedRep, weights, reps, initialLoading]);
 
   // Helper functions to get skill and language names
   const getSkillNameById = (skillId: string, skillType: 'professional' | 'technical' | 'soft') => {
@@ -349,12 +293,76 @@ const MatchingDashboard: React.FC = () => {
       await saveGigWeights(selectedGig._id || '', weights);
       console.log('Weights saved successfully for gig:', selectedGig._id);
       setGigHasWeights(true);
-      // Optionally trigger a new search with updated weights
-      if (matches.length > 0) {
-        handleGigSelect(selectedGig);
-      }
+      
+      // Trigger search with updated weights after saving
+      setLoading(true);
+      const gigResponse = await findMatchesForGig(selectedGig._id || '', weights);
+      console.log('=== GIG RESPONSE AFTER SAVE ===', gigResponse);
+      
+      setMatches(gigResponse.matches || gigResponse.preferedmatches || []);
+      setMatchStats({
+        totalMatches: gigResponse.totalMatches || 0,
+        perfectMatches: gigResponse.perfectMatches || 0,
+        partialMatches: gigResponse.partialMatches || 0,
+        noMatches: gigResponse.noMatches || 0,
+        languageStats: gigResponse.languageStats || {
+          perfectMatches: 0,
+          partialMatches: 0,
+          noMatches: 0,
+          totalMatches: 0
+        },
+        skillsStats: gigResponse.skillsStats || {
+          perfectMatches: 0,
+          partialMatches: 0,
+          noMatches: 0,
+          totalMatches: 0
+        },
+        industryStats: (gigResponse as any).industryStats || {
+          perfectMatches: 0,
+          partialMatches: 0,
+          neutralMatches: 0,
+          noMatches: 0,
+          totalMatches: 0
+        },
+        activityStats: (gigResponse as any).activityStats || {
+          perfectMatches: 0,
+          partialMatches: 0,
+          neutralMatches: 0,
+          noMatches: 0,
+          totalMatches: 0
+        },
+        experienceStats: (gigResponse as any).experienceStats || {
+          perfectMatches: 0,
+          partialMatches: 0,
+          noMatches: 0,
+          totalMatches: 0
+        },
+        timezoneStats: (gigResponse as any).timezoneStats || {
+          perfectMatches: 0,
+          partialMatches: 0,
+          noMatches: 0,
+          totalMatches: 0
+        },
+        regionStats: (gigResponse as any).regionStats || {
+          perfectMatches: 0,
+          partialMatches: 0,
+          noMatches: 0,
+          totalMatches: 0
+        },
+        scheduleStats: (gigResponse as any).scheduleStats || {
+          perfectMatches: 0,
+          partialMatches: 0,
+          noMatches: 0,
+          totalMatches: 0
+        }
+      });
+      setLoading(false);
+      
+      // Scroll to results after search
+      setTimeout(scrollToResults, 100);
     } catch (error) {
       console.error('Error saving weights:', error);
+      setLoading(false);
     }
   };
 
@@ -364,9 +372,10 @@ const MatchingDashboard: React.FC = () => {
       const gigWeights = await getGigWeights(gigId);
       setWeights(gigWeights.matchingWeights);
       setGigHasWeights(true);
-    } catch (error) {
-      console.error('Error loading weights for gig:', error);
-      // Keep default weights if loading fails
+      console.log('Loaded existing weights for gig:', gigId);
+    } catch (error: any) {
+      console.log('No saved weights found for gig:', gigId, error?.response?.status);
+      // Keep default weights if loading fails (404 means no saved weights)
       setGigHasWeights(false);
     }
   };
@@ -644,7 +653,7 @@ const MatchingDashboard: React.FC = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                   </svg>
                   <span>
-                    {gigHasWeights ? `Update ${selectedGig.title}` : `Save to ${selectedGig.title}`}
+                    {gigHasWeights ? `Update weights & Search for ${selectedGig.title}` : `Save weights & Search for ${selectedGig.title}`}
                   </span>
                 </button>
               </div>
@@ -706,6 +715,27 @@ const MatchingDashboard: React.FC = () => {
               <Briefcase size={24} className="text-indigo-600" />
               <span>Select a Gig to Find Matching Reps</span>
             </h2>
+            
+            {/* Instructions */}
+            {selectedGig && (
+              <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-start space-x-3">
+                  <div className="flex-shrink-0">
+                    <svg className="w-5 h-5 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium text-blue-800 mb-1">Next Steps:</h3>
+                    <ol className="text-sm text-blue-700 space-y-1">
+                      <li>1. ✅ <strong>Gig selected:</strong> {selectedGig.title}</li>
+                      <li>2. ⚙️ <strong>Configure weights</strong> using the "Adjust Weights" button above</li>
+                      <li>3. 💾 <strong>Click "Save weights & Search"</strong> to find matching reps</li>
+                    </ol>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Gigs Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
