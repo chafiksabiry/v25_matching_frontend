@@ -410,33 +410,47 @@ const MatchingDashboard: React.FC = () => {
           <div className="flex items-center space-x-4">
             <button
               onClick={async () => {
+                // Ajouter des console logs et alerts avant le back to onboarding
+                console.log("=== BACK TO ONBOARDING TRIGGERED ===");
+                console.log("Current URL:", window.location.href);
+                console.log("Current timestamp:", new Date().toISOString());
+                console.log("User agent:", navigator.userAgent);
+                
+                // Alert pour informer l'utilisateur
+                alert("🔄 Redirection vers l'onboarding en cours...\n\nVeuillez patienter pendant que nous mettons à jour votre progression.");
+                
                 try {
                   const companyId = Cookies.get("companyId");
                   console.log("Company ID:", companyId);
                   console.log("Company API URL:", import.meta.env.VITE_COMPANY_API_URL);
                   
+                  // Alert pour les informations de debug
                   if (!companyId) {
                     console.warn("No companyId found in cookies, proceeding without updating onboarding");
+                    alert("⚠️ Aucun companyId trouvé dans les cookies.\nRedirection directe vers l'onboarding.");
                     window.location.href = "/app11";
                     return;
                   }
 
                   if (!import.meta.env.VITE_COMPANY_API_URL) {
                     console.error("VITE_COMPANY_API_URL is not defined");
+                    alert("❌ VITE_COMPANY_API_URL n'est pas défini.\nRedirection directe vers l'onboarding.");
                     window.location.href = "/app11";
                     return;
                   }
 
                   // Marquer le step 10 de la phase 4 comme completed
                   console.log("Updating step 10 status...");
+                  alert("📝 Mise à jour du statut de l'étape 10...");
                   const stepResponse = await axios.put(
-                    `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/phases/4/steps/10`,
+                    `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/phases/3/steps/10`,
                     { status: "completed" }
                   );
                   console.log("Step update response:", stepResponse.data);
                   
                   // Mettre à jour la phase courante vers la phase 4 (si pas déjà en phase 4)
                   console.log("Updating current phase...");
+                  alert("🔄 Mise à jour de la phase courante...");
                   const phaseResponse = await axios.put(
                     `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/current-phase`,
                     { phase: 4 }
@@ -444,6 +458,7 @@ const MatchingDashboard: React.FC = () => {
                   console.log("Phase update response:", phaseResponse.data);
                   
                   console.log("Onboarding progress updated successfully");
+                  alert("✅ Progression de l'onboarding mise à jour avec succès!\n\nRedirection vers l'onboarding...");
                   window.location.href = "/app11";
                 } catch (error: any) {
                   console.error("Error updating onboarding progress:", error);
@@ -452,6 +467,10 @@ const MatchingDashboard: React.FC = () => {
                     response: error?.response?.data,
                     status: error?.response?.status
                   });
+                  
+                  // Alert pour l'erreur
+                  alert(`❌ Erreur lors de la mise à jour de l'onboarding:\n\n${error?.message || "Erreur inconnue"}\n\nRedirection en cours malgré l'erreur...`);
+                  
                   // Continue to redirect even if API calls fail
                   window.location.href = "/app11";
                 }
