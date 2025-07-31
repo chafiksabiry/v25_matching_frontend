@@ -759,16 +759,14 @@ const MatchingDashboard: React.FC = () => {
                     </svg>
                   </div>
                   <div className="flex-1">
-                    <h3 className={`text-sm font-medium mb-1 ${
+                    <p className={`text-sm font-medium ${
                       gigHasWeights ? 'text-green-800' : 'text-blue-800'
                     }`}>
-                      {gigHasWeights ? "Update Weights & Search" : "Save Weights & Search"}
-                    </h3>
-                    <ol className="text-sm text-blue-700 space-y-1">
-                      <li>1. ✅ <strong>Gig selected:</strong> {selectedGig.title}</li>
-                      <li>2. ⚙️ <strong>Configure weights</strong> using the "Adjust Weights" button above</li>
-                      <li>3. 🔍 <strong>Click "Save weights & Search"</strong> to find matching reps</li>
-                    </ol>
+                      {gigHasWeights 
+                        ? `Click "Adjust Weights" to update weights for ${selectedGig.title}, then click "Update weights & Search"`
+                        : `Click "Adjust Weights" to configure weights for ${selectedGig.title}, then click "Save weights & Search"`
+                      }
+                    </p>
                   </div>
                 </div>
               </div>
