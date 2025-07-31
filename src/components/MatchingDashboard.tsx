@@ -441,21 +441,62 @@ const MatchingDashboard: React.FC = () => {
 
                   // Marquer le step 10 de la phase 4 comme completed
                   console.log("Updating step 10 status...");
+                  console.log("Step URL:", `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/phases/3/steps/10`);
+                  console.log("Step request data:", { status: "completed" });
                   alert("📝 Mise à jour du statut de l'étape 10...");
-                  const stepResponse = await axios.put(
-                    `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/phases/3/steps/10`,
-                    { status: "completed" }
-                  );
-                  console.log("Step update response:", stepResponse.data);
+                  
+                  let stepUpdated = false;
+                  
+                  // Essayer d'abord phase 3, step 10
+                  try {
+                    const stepResponse = await axios.put(
+                      `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/phases/3/steps/10`,
+                      { status: "completed" }
+                    );
+                    console.log("Step update response (phase 3):", stepResponse.data);
+                    alert("✅ Étape 10 (phase 3) mise à jour avec succès!");
+                    stepUpdated = true;
+                  } catch (stepError: any) {
+                    console.error("Step update error (phase 3):", stepError);
+                    console.error("Step error response:", stepError.response?.data);
+                    console.error("Step error status:", stepError.response?.status);
+                    
+                    // Essayer phase 4, step 10
+                    try {
+                      console.log("Trying phase 4, step 10...");
+                      const stepResponse2 = await axios.put(
+                        `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/phases/4/steps/10`,
+                        { status: "completed" }
+                      );
+                      console.log("Step update response (phase 4):", stepResponse2.data);
+                      alert("✅ Étape 10 (phase 4) mise à jour avec succès!");
+                      stepUpdated = true;
+                    } catch (stepError2: any) {
+                      console.error("Step update error (phase 4):", stepError2);
+                      console.error("Step error response (phase 4):", stepError2.response?.data);
+                      alert(`⚠️ Erreur lors de la mise à jour de l'étape 10:\n\nPhase 3: ${stepError.response?.data?.message || stepError.message}\nPhase 4: ${stepError2.response?.data?.message || stepError2.message}\n\nContinuation...`);
+                    }
+                  }
                   
                   // Mettre à jour la phase courante vers la phase 4 (si pas déjà en phase 4)
                   console.log("Updating current phase...");
+                  console.log("Phase URL:", `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/current-phase`);
+                  console.log("Phase request data:", { phase: 4 });
                   alert("🔄 Mise à jour de la phase courante...");
-                  const phaseResponse = await axios.put(
-                    `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/current-phase`,
-                    { phase: 4 }
-                  );
-                  console.log("Phase update response:", phaseResponse.data);
+                  
+                  try {
+                    const phaseResponse = await axios.put(
+                      `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/current-phase`,
+                      { phase: 4 }
+                    );
+                    console.log("Phase update response:", phaseResponse.data);
+                    alert("✅ Phase mise à jour avec succès!");
+                  } catch (phaseError: any) {
+                    console.error("Phase update error:", phaseError);
+                    console.error("Phase error response:", phaseError.response?.data);
+                    console.error("Phase error status:", phaseError.response?.status);
+                    alert(`⚠️ Erreur lors de la mise à jour de la phase:\n\n${phaseError.response?.data?.message || phaseError.message}\n\nContinuation...`);
+                  }
                   
                   console.log("Onboarding progress updated successfully");
                   alert("✅ Progression de l'onboarding mise à jour avec succès!\n\nRedirection vers l'onboarding...");
