@@ -140,6 +140,7 @@ const MatchingDashboard: React.FC = () => {
   };
 
   const handleGigSelect = async (gig: any) => {
+    console.log('🎯 GIG SELECTED:', gig.title, 'ID:', gig._id);
     setSelectedGig(gig);
     setCurrentPage(1);
     
@@ -154,9 +155,9 @@ const MatchingDashboard: React.FC = () => {
     try {
       const savedWeights = await getGigWeights(gig._id || '');
       setGigHasWeights(true);
-      console.log('Gig has saved weights:', gig._id);
+      console.log('✅ Gig has saved weights:', gig._id);
     } catch (error) {
-      console.log('No saved weights found for gig:', gig._id);
+      console.log('❌ No saved weights found for gig:', gig._id);
       setGigHasWeights(false);
     }
     
@@ -297,9 +298,10 @@ const MatchingDashboard: React.FC = () => {
       return;
     }
 
+    console.log('🔄 MANUAL SAVE TRIGGERED - User clicked save button');
     try {
       await saveGigWeights(selectedGig._id || '', weights);
-      console.log('Weights saved successfully for gig:', selectedGig._id);
+      console.log('✅ Weights saved successfully for gig:', selectedGig._id);
       setGigHasWeights(true);
       
       // Enable auto search and trigger search with updated weights after saving
