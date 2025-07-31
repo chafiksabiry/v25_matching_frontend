@@ -150,6 +150,17 @@ const MatchingDashboard: React.FC = () => {
     setWeights(defaultMatchingWeights);
     setGigHasWeights(false);
     
+    // Check if gig has saved weights and load them
+    try {
+      const savedWeights = await getGigWeights(gig._id || '');
+      setWeights(savedWeights.matchingWeights);
+      setGigHasWeights(true);
+      console.log('Loaded saved weights for gig:', gig._id);
+    } catch (error) {
+      console.log('No saved weights found for gig:', gig._id);
+      setGigHasWeights(false);
+    }
+    
     // Clear previous matches when selecting a new gig
     setMatches([]);
     setMatchStats(null);
@@ -288,18 +299,6 @@ const MatchingDashboard: React.FC = () => {
     }
 
     try {
-      // Check if weights already exist for this gig
-      let hasExistingWeights = false;
-      try {
-        const existingWeights = await getGigWeights(selectedGig._id || '');
-        hasExistingWeights = true;
-        // Load existing weights into the form
-        setWeights(existingWeights.matchingWeights);
-      } catch (error) {
-        // No existing weights found
-        hasExistingWeights = false;
-      }
-
       await saveGigWeights(selectedGig._id || '', weights);
       console.log('Weights saved successfully for gig:', selectedGig._id);
       setGigHasWeights(true);
@@ -653,13 +652,17 @@ const MatchingDashboard: React.FC = () => {
               <div className="mt-4 flex justify-center">
                 <button
                   onClick={saveWeightsForGig}
-                  className="text-sm px-6 py-3 rounded-lg transition-all duration-200 flex items-center space-x-2 shadow-lg bg-indigo-600 hover:bg-indigo-700 text-white"
+                  className={`text-sm px-6 py-3 rounded-lg transition-all duration-200 flex items-center space-x-2 shadow-lg ${
+                    gigHasWeights 
+                      ? 'bg-green-600 hover:bg-green-700 text-white' 
+                      : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                  }`}
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                   </svg>
                   <span>
-                    Save weights & Search for {selectedGig.title}
+                    {gigHasWeights ? `Update weights & Search for ${selectedGig.title}` : `Save weights & Search for ${selectedGig.title}`}
                   </span>
                 </button>
               </div>
@@ -733,7 +736,7 @@ const MatchingDashboard: React.FC = () => {
                   </div>
                   <div className="flex-1">
                     <h3 className="text-sm font-medium text-blue-800 mb-1">
-                      Save Weights & Search
+                      {gigHasWeights ? "Update Weights & Search" : "Save Weights & Search"}
                     </h3>
                     <ol className="text-sm text-blue-700 space-y-1">
                       <li>1. ✅ <strong>Gig selected:</strong> {selectedGig.title}</li>
