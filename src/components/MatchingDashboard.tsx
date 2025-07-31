@@ -10,8 +10,7 @@ import {
   createGigAgent,
 } from "../api";
 import { getAllSkills, getLanguages, type Skill, type Language } from "../api/skillsApi";
-import GigCriteriaManager from "./GigCriteriaManager";
-import GigCriteriaSearch from "./GigCriteriaSearch";
+import GigMatchingWeightsManager from "./GigMatchingWeightsManager";
 
 import {
   Activity,
@@ -39,7 +38,7 @@ const defaultMatchingWeights: MatchingWeights = {
   region: 0.10,
 };
 
-type TabType = "gigs" | "reps" | "optimal" | "criteria";
+type TabType = "gigs" | "reps" | "optimal";
 
 const MatchingDashboard: React.FC = () => {
   const [reps, setReps] = useState<Rep[]>([]);
@@ -643,19 +642,7 @@ const MatchingDashboard: React.FC = () => {
                 <span>Optimal Matching</span>
               </div>
             </button>
-            <button
-              className={`flex-1 py-4 px-6 text-center font-medium transition-all duration-200 ${
-                activeTab === "criteria"
-                  ? "bg-indigo-600 text-white shadow-lg"
-                  : "text-gray-600 hover:text-indigo-600 hover:bg-indigo-50"
-              }`}
-              onClick={() => handleTabClick("criteria")}
-            >
-              <div className="flex items-center justify-center space-x-2">
-                <Search size={18} />
-                <span>Gig Criteria</span>
-              </div>
-            </button>
+
           </div>
         </div>
 
@@ -759,65 +746,29 @@ const MatchingDashboard: React.FC = () => {
                 </div>
               </div>
             )}
-          </div>
-        )}
 
-        {/* Criteria Management Area */}
-        {activeTab === "criteria" && !loading && (
-          <div className={`bg-white rounded-xl shadow-lg p-6 mb-6 transform transition-all duration-300 ${slideUp}`}>
-            <h2 className="text-xl font-semibold text-gray-800 mb-6 flex items-center space-x-2">
-              <Search size={24} className="text-indigo-600" />
-              <span>Gig Criteria Management</span>
-            </h2>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Gig Criteria Manager */}
-              <div>
-                <h3 className="text-lg font-medium text-gray-800 mb-4">Manage Gig Criteria</h3>
-                {selectedGig ? (
-                  <GigCriteriaManager
-                    gigId={selectedGig._id || ''}
-                    onCriteriaUpdated={(criteria) => {
-                      console.log('Criteria updated:', criteria);
-                    }}
-                    onError={(error) => {
-                      console.error('Criteria error:', error);
-                    }}
-                  />
-                ) : (
-                  <div className="bg-gray-50 rounded-lg p-6 text-center">
-                    <p className="text-gray-600 mb-4">Select a gig to manage its criteria</p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {gigs.slice(0, 6).map((gig) => (
-                        <div
-                          key={`criteria-gig-${gig._id}`}
-                          className="border rounded-lg p-4 cursor-pointer hover:border-indigo-600 hover:shadow-md transition-all duration-200"
-                          onClick={() => handleGigSelect(gig)}
-                        >
-                          <h4 className="font-medium text-sm">{gig.title}</h4>
-                          <p className="text-xs text-gray-500">{gig.companyName}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Gig Criteria Search */}
-              <div>
-                <h3 className="text-lg font-medium text-gray-800 mb-4">Search by Criteria</h3>
-                <GigCriteriaSearch
-                  onSearchResults={(results) => {
-                    console.log('Search results:', results);
+            {/* Gig Matching Weights Manager */}
+            {selectedGig && (
+              <div className="mt-6">
+                <GigMatchingWeightsManager
+                  gigId={selectedGig._id || ''}
+                  onWeightsUpdated={(weights) => {
+                    console.log('Weights updated:', weights);
+                    // Optionally trigger a new search with updated weights
+                    if (matches.length > 0) {
+                      handleGigSelect(selectedGig);
+                    }
                   }}
                   onError={(error) => {
-                    console.error('Search error:', error);
+                    console.error('Weights error:', error);
                   }}
                 />
               </div>
-            </div>
+            )}
           </div>
         )}
+
+
 
         {/* Results Area */}
         <div ref={resultsTableRef} className={`bg-white rounded-xl shadow-lg p-6 mb-6 relative transform transition-all duration-300 ${slideUp}`}>
