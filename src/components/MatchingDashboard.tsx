@@ -427,15 +427,15 @@ const MatchingDashboard: React.FC = () => {
                     return;
                   }
 
-                  // Marquer le step 10 de la phase 3 comme completed
+                  // Marquer le step 10 de la phase 4 comme completed
                   console.log("Updating step 10 status...");
                   const stepResponse = await axios.put(
-                    `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/phases/3/steps/10`,
+                    `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/phases/4/steps/10`,
                     { status: "completed" }
                   );
                   console.log("Step update response:", stepResponse.data);
                   
-                  // Mettre à jour la phase courante vers la phase 4
+                  // Mettre à jour la phase courante vers la phase 4 (si pas déjà en phase 4)
                   console.log("Updating current phase...");
                   const phaseResponse = await axios.put(
                     `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/current-phase`,
