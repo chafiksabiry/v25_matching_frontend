@@ -150,9 +150,6 @@ const MatchingDashboard: React.FC = () => {
     setWeights(defaultMatchingWeights);
     setGigHasWeights(false);
     
-    // Then try to load saved weights for the selected gig
-    await loadWeightsForGig(gig._id || '');
-    
     // Clear previous matches when selecting a new gig
     setMatches([]);
     setMatchStats(null);
@@ -291,6 +288,15 @@ const MatchingDashboard: React.FC = () => {
     }
 
     try {
+      // Check if weights already exist for this gig
+      try {
+        const existingWeights = await getGigWeights(selectedGig._id || '');
+        setGigHasWeights(true);
+      } catch (error) {
+        // No existing weights found
+        setGigHasWeights(false);
+      }
+
       await saveGigWeights(selectedGig._id || '', weights);
       console.log('Weights saved successfully for gig:', selectedGig._id);
       setGigHasWeights(true);
@@ -650,7 +656,7 @@ const MatchingDashboard: React.FC = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                   </svg>
                   <span>
-                    {gigHasWeights ? `Update weights & Search for ${selectedGig.title}` : `Save weights & Search for ${selectedGig.title}`}
+                    Save weights & Search for {selectedGig.title}
                   </span>
                 </button>
               </div>
@@ -724,7 +730,7 @@ const MatchingDashboard: React.FC = () => {
                   </div>
                   <div className="flex-1">
                     <h3 className="text-sm font-medium text-blue-800 mb-1">
-                      {gigHasWeights ? "Edit and Save Weights" : "Save Weights"}
+                      Save Weights & Search
                     </h3>
                     <ol className="text-sm text-blue-700 space-y-1">
                       <li>1. ✅ <strong>Gig selected:</strong> {selectedGig.title}</li>
