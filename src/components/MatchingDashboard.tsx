@@ -151,11 +151,12 @@ const MatchingDashboard: React.FC = () => {
     setWeights(defaultMatchingWeights);
     setGigHasWeights(false);
     
-    // Check if gig has saved weights (VISUAL CHECK ONLY - no loading)
+    // Check if gig has saved weights and load them into Adjust Weights
     try {
       const savedWeights = await getGigWeights(gig._id || '');
+      setWeights(savedWeights.matchingWeights);
       setGigHasWeights(true);
-      console.log('✅ Gig has saved weights:', gig._id);
+      console.log('✅ Gig has saved weights, loaded into Adjust Weights:', gig._id);
     } catch (error) {
       console.log('❌ No saved weights found for gig:', gig._id);
       setGigHasWeights(false);
@@ -675,7 +676,11 @@ const MatchingDashboard: React.FC = () => {
                     console.log('Event:', e);
                     saveWeightsForGig();
                   }}
-                  className="text-sm px-6 py-3 rounded-lg transition-all duration-200 flex items-center space-x-2 shadow-lg bg-indigo-600 hover:bg-indigo-700 text-white"
+                  className={`text-sm px-6 py-3 rounded-lg transition-all duration-200 flex items-center space-x-2 shadow-lg ${
+                    gigHasWeights 
+                      ? 'bg-green-600 hover:bg-green-700 text-white' 
+                      : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                  }`}
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
@@ -754,7 +759,9 @@ const MatchingDashboard: React.FC = () => {
                     </svg>
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-sm font-medium text-blue-800 mb-1">
+                    <h3 className={`text-sm font-medium mb-1 ${
+                      gigHasWeights ? 'text-green-800' : 'text-blue-800'
+                    }`}>
                       {gigHasWeights ? "Update Weights & Search" : "Save Weights & Search"}
                     </h3>
                     <ol className="text-sm text-blue-700 space-y-1">
