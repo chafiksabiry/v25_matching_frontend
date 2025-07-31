@@ -7,11 +7,6 @@ export interface GigWeights {
   _id?: string;
   gigId: string;
   matchingWeights: MatchingWeights;
-  metadata?: {
-    createdAt: Date;
-    updatedAt: Date;
-    description?: string;
-  };
 }
 
 // Save matching weights for a gig
