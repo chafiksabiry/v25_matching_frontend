@@ -10,6 +10,8 @@ import {
   createGigAgent,
 } from "../api";
 import { getAllSkills, getLanguages, type Skill, type Language } from "../api/skillsApi";
+import GigCriteriaManager from "./GigCriteriaManager";
+import GigCriteriaSearch from "./GigCriteriaSearch";
 
 import {
   Activity,
@@ -19,6 +21,7 @@ import {
   Settings,
   Clock,
   Brain,
+  Search,
 } from "lucide-react";
 import axios from "axios";
 import Cookies from "js-cookie";
@@ -36,7 +39,7 @@ const defaultMatchingWeights: MatchingWeights = {
   region: 0.10,
 };
 
-type TabType = "gigs" | "reps" | "optimal";
+type TabType = "gigs" | "reps" | "optimal" | "criteria";
 
 const MatchingDashboard: React.FC = () => {
   const [reps, setReps] = useState<Rep[]>([]);
@@ -410,31 +413,26 @@ const MatchingDashboard: React.FC = () => {
           <div className="flex items-center space-x-4">
             <button
               onClick={async () => {
-                // Ajouter des console logs et alerts avant le back to onboarding
+                // Ajouter des console logs avant le back to onboarding
                 console.log("=== BACK TO ONBOARDING TRIGGERED ===");
                 console.log("Current URL:", window.location.href);
                 console.log("Current timestamp:", new Date().toISOString());
                 console.log("User agent:", navigator.userAgent);
-                
-                // Alert pour informer l'utilisateur
-                alert("🔄 Redirection vers l'onboarding en cours...\n\nVeuillez patienter pendant que nous mettons à jour votre progression.");
                 
                 try {
                   const companyId = Cookies.get("companyId");
                   console.log("Company ID:", companyId);
                   console.log("Company API URL:", import.meta.env.VITE_COMPANY_API_URL);
                   
-                  // Alert pour les informations de debug
+                  // Debug logs
                   if (!companyId) {
                     console.warn("No companyId found in cookies, proceeding without updating onboarding");
-                    alert("⚠️ Aucun companyId trouvé dans les cookies.\nRedirection directe vers l'onboarding.");
                     window.location.href = "/app11";
                     return;
                   }
 
                   if (!import.meta.env.VITE_COMPANY_API_URL) {
                     console.error("VITE_COMPANY_API_URL is not defined");
-                    alert("❌ VITE_COMPANY_API_URL n'est pas défini.\nRedirection directe vers l'onboarding.");
                     window.location.href = "/app11";
                     return;
                   }
@@ -443,7 +441,6 @@ const MatchingDashboard: React.FC = () => {
                   console.log("Updating step 10 status...");
                   console.log("Step URL:", `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/phases/3/steps/10`);
                   console.log("Step request data:", { status: "completed" });
-                  alert("📝 Mise à jour du statut de l'étape 10...");
                   
                   let stepUpdated = false;
                   
@@ -454,7 +451,6 @@ const MatchingDashboard: React.FC = () => {
                       { status: "completed" }
                     );
                     console.log("Step update response (phase 3):", stepResponse.data);
-                    alert("✅ Étape 10 (phase 3) mise à jour avec succès!");
                     stepUpdated = true;
                   } catch (stepError: any) {
                     console.error("Step update error (phase 3):", stepError);
@@ -466,15 +462,13 @@ const MatchingDashboard: React.FC = () => {
                       console.log("Trying phase 4, step 10...");
                       const stepResponse2 = await axios.put(
                         `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/phases/4/steps/10`,
-                        { status: "completed" }
+                        { status: "completed",  }
                       );
                       console.log("Step update response (phase 4):", stepResponse2.data);
-                      alert("✅ Étape 10 (phase 4) mise à jour avec succès!");
                       stepUpdated = true;
                     } catch (stepError2: any) {
                       console.error("Step update error (phase 4):", stepError2);
                       console.error("Step error response (phase 4):", stepError2.response?.data);
-                      alert(`⚠️ Erreur lors de la mise à jour de l'étape 10:\n\nPhase 3: ${stepError.response?.data?.message || stepError.message}\nPhase 4: ${stepError2.response?.data?.message || stepError2.message}\n\nContinuation...`);
                     }
                   }
                   
@@ -482,7 +476,6 @@ const MatchingDashboard: React.FC = () => {
                   console.log("Updating current phase...");
                   console.log("Phase URL:", `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/current-phase`);
                   console.log("Phase request data:", { phase: 4 });
-                  alert("🔄 Mise à jour de la phase courante...");
                   
                   try {
                     const phaseResponse = await axios.put(
@@ -490,16 +483,13 @@ const MatchingDashboard: React.FC = () => {
                       { phase: 4 }
                     );
                     console.log("Phase update response:", phaseResponse.data);
-                    alert("✅ Phase mise à jour avec succès!");
                   } catch (phaseError: any) {
                     console.error("Phase update error:", phaseError);
                     console.error("Phase error response:", phaseError.response?.data);
                     console.error("Phase error status:", phaseError.response?.status);
-                    alert(`⚠️ Erreur lors de la mise à jour de la phase:\n\n${phaseError.response?.data?.message || phaseError.message}\n\nContinuation...`);
                   }
                   
                   console.log("Onboarding progress updated successfully");
-                  alert("✅ Progression de l'onboarding mise à jour avec succès!\n\nRedirection vers l'onboarding...");
                   window.location.href = "/app11";
                 } catch (error: any) {
                   console.error("Error updating onboarding progress:", error);
@@ -508,9 +498,6 @@ const MatchingDashboard: React.FC = () => {
                     response: error?.response?.data,
                     status: error?.response?.status
                   });
-                  
-                  // Alert pour l'erreur
-                  alert(`❌ Erreur lors de la mise à jour de l'onboarding:\n\n${error?.message || "Erreur inconnue"}\n\nRedirection en cours malgré l'erreur...`);
                   
                   // Continue to redirect even if API calls fail
                   window.location.href = "/app11";
@@ -656,6 +643,19 @@ const MatchingDashboard: React.FC = () => {
                 <span>Optimal Matching</span>
               </div>
             </button>
+            <button
+              className={`flex-1 py-4 px-6 text-center font-medium transition-all duration-200 ${
+                activeTab === "criteria"
+                  ? "bg-indigo-600 text-white shadow-lg"
+                  : "text-gray-600 hover:text-indigo-600 hover:bg-indigo-50"
+              }`}
+              onClick={() => handleTabClick("criteria")}
+            >
+              <div className="flex items-center justify-center space-x-2">
+                <Search size={18} />
+                <span>Gig Criteria</span>
+              </div>
+            </button>
           </div>
         </div>
 
@@ -759,6 +759,63 @@ const MatchingDashboard: React.FC = () => {
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Criteria Management Area */}
+        {activeTab === "criteria" && !loading && (
+          <div className={`bg-white rounded-xl shadow-lg p-6 mb-6 transform transition-all duration-300 ${slideUp}`}>
+            <h2 className="text-xl font-semibold text-gray-800 mb-6 flex items-center space-x-2">
+              <Search size={24} className="text-indigo-600" />
+              <span>Gig Criteria Management</span>
+            </h2>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Gig Criteria Manager */}
+              <div>
+                <h3 className="text-lg font-medium text-gray-800 mb-4">Manage Gig Criteria</h3>
+                {selectedGig ? (
+                  <GigCriteriaManager
+                    gigId={selectedGig._id || ''}
+                    onCriteriaUpdated={(criteria) => {
+                      console.log('Criteria updated:', criteria);
+                    }}
+                    onError={(error) => {
+                      console.error('Criteria error:', error);
+                    }}
+                  />
+                ) : (
+                  <div className="bg-gray-50 rounded-lg p-6 text-center">
+                    <p className="text-gray-600 mb-4">Select a gig to manage its criteria</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {gigs.slice(0, 6).map((gig) => (
+                        <div
+                          key={`criteria-gig-${gig._id}`}
+                          className="border rounded-lg p-4 cursor-pointer hover:border-indigo-600 hover:shadow-md transition-all duration-200"
+                          onClick={() => handleGigSelect(gig)}
+                        >
+                          <h4 className="font-medium text-sm">{gig.title}</h4>
+                          <p className="text-xs text-gray-500">{gig.companyName}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Gig Criteria Search */}
+              <div>
+                <h3 className="text-lg font-medium text-gray-800 mb-4">Search by Criteria</h3>
+                <GigCriteriaSearch
+                  onSearchResults={(results) => {
+                    console.log('Search results:', results);
+                  }}
+                  onError={(error) => {
+                    console.error('Search error:', error);
+                  }}
+                />
+              </div>
+            </div>
           </div>
         )}
 
