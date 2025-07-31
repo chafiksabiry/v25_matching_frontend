@@ -150,12 +150,12 @@ const MatchingDashboard: React.FC = () => {
     setWeights(defaultMatchingWeights);
     setGigHasWeights(false);
     
-    // Check if gig has saved weights and load them if they exist
+    // Check if gig has saved weights and load them
     try {
-      const existingWeights = await getGigWeights(gig._id || '');
-      setWeights(existingWeights.matchingWeights);
+      const savedWeights = await getGigWeights(gig._id || '');
+      setWeights(savedWeights.matchingWeights);
       setGigHasWeights(true);
-      console.log('Loaded existing weights for gig:', gig._id);
+      console.log('Loaded saved weights for gig:', gig._id);
     } catch (error) {
       console.log('No saved weights found for gig:', gig._id);
       setGigHasWeights(false);

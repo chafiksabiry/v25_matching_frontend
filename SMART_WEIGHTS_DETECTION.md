@@ -1,99 +1,89 @@
 # Détection intelligente des poids sauvegardés
 
-## ✅ **Nouvelle logique implémentée**
+## ✅ **Fonctionnalité implémentée**
 
-### **Comportement lors de la sélection d'un gig :**
+Le système vérifie maintenant automatiquement si un gig a des poids sauvegardés et adapte l'interface en conséquence.
 
-1. **Vérification automatique** : Le système vérifie si le gig a des poids sauvegardés
-2. **Si des poids existent** : Les charge et les affiche dans "Adjust Weights"
-3. **Si aucun poids** : Utilise les poids par défaut
-4. **Pas de sauvegarde automatique** : Seulement quand vous cliquez sur le bouton
+## 🔧 **Comportement du système**
 
-## 🔧 **Modifications techniques**
-
-### **1. Vérification lors de la sélection :**
+### **1. Vérification automatique lors de la sélection :**
 ```typescript
 const handleGigSelect = async (gig: any) => {
-  // Reset to defaults first
-  setWeights(defaultMatchingWeights);
-  setGigHasWeights(false);
-  
-  // Check if gig has saved weights and load them if they exist
+  // ...
+  // Check if gig has saved weights and load them
   try {
-    const existingWeights = await getGigWeights(gig._id || '');
-    setWeights(existingWeights.matchingWeights);
+    const savedWeights = await getGigWeights(gig._id || '');
+    setWeights(savedWeights.matchingWeights);
     setGigHasWeights(true);
-    console.log('Loaded existing weights for gig:', gig._id);
   } catch (error) {
-    console.log('No saved weights found for gig:', gig._id);
     setGigHasWeights(false);
   }
   // ...
 };
 ```
 
-### **2. Bouton adaptatif :**
+### **2. Affichage des poids sauvegardés :**
+- ✅ Si le gig a des poids sauvegardés → Ils sont chargés dans "Adjust Weights"
+- ✅ Si le gig n'a pas de poids → Utilise les poids par défaut
+
+### **3. Bouton adaptatif :**
+
+#### **Si le gig a des poids sauvegardés :**
 ```typescript
-// Couleur et texte adaptatifs
-<button
-  className={`... ${
-    gigHasWeights 
-      ? 'bg-green-600 hover:bg-green-700' // Vert pour Update
-      : 'bg-indigo-600 hover:bg-indigo-700' // Bleu pour Save
-  }`}
->
-  <span>
-    {gigHasWeights 
-      ? `Update weights & Search for ${selectedGig.title}` 
-      : `Save weights & Search for ${selectedGig.title}`
-    }
-  </span>
-</button>
+// Bouton vert
+className="bg-green-600 hover:bg-green-700 text-white"
+// Texte
+"Update weights & Search for [Gig Name]"
 ```
 
-### **3. Instructions adaptatives :**
+#### **Si le gig n'a pas de poids sauvegardés :**
 ```typescript
-<h3>
-  {gigHasWeights ? "Update Weights & Search" : "Save Weights & Search"}
-</h3>
+// Bouton bleu
+className="bg-indigo-600 hover:bg-indigo-700 text-white"
+// Texte
+"Save weights & Search for [Gig Name]"
 ```
 
-## 🎯 **Comportements selon le cas**
+### **4. Instructions adaptatives :**
+```typescript
+// Titre dynamique
+{gigHasWeights ? "Update Weights & Search" : "Save Weights & Search"}
+```
 
-### **Cas 1 : Gig avec poids sauvegardés**
-- ✅ **Poids chargés** : Les poids sauvegardés s'affichent dans "Adjust Weights"
-- ✅ **Bouton vert** : "Update weights & Search for [Gig Name]"
-- ✅ **Instructions** : "Update Weights & Search"
-- ✅ **Action** : Met à jour les poids existants
+## 🎯 **Workflow utilisateur**
 
-### **Cas 2 : Gig sans poids sauvegardés**
-- ✅ **Poids par défaut** : Les poids par défaut s'affichent dans "Adjust Weights"
-- ✅ **Bouton bleu** : "Save weights & Search for [Gig Name]"
-- ✅ **Instructions** : "Save Weights & Search"
-- ✅ **Action** : Crée de nouveaux poids
+### **Scénario 1 : Gig avec poids sauvegardés**
+1. **Sélectionner un gig** → Les poids sauvegardés sont chargés automatiquement
+2. **Voir les poids dans "Adjust Weights"** → Les valeurs sauvegardées sont affichées
+3. **Bouton vert "Update weights & Search"** → Indique qu'il y a des poids existants
+4. **Modifier les poids si nécessaire** → Ajuster selon les besoins
+5. **Cliquer sur le bouton** → Sauvegarde les modifications et recherche
 
-## 🚀 **Workflow utilisateur**
+### **Scénario 2 : Gig sans poids sauvegardés**
+1. **Sélectionner un gig** → Les poids par défaut sont affichés
+2. **Voir les poids par défaut dans "Adjust Weights"** → Valeurs standard
+3. **Bouton bleu "Save weights & Search"** → Indique qu'il n'y a pas de poids existants
+4. **Configurer les poids** → Définir les valeurs souhaitées
+5. **Cliquer sur le bouton** → Sauvegarde les nouveaux poids et recherche
 
-### **Pour un gig avec poids existants :**
-1. Sélectionnez le gig
-2. Les poids sauvegardés s'affichent automatiquement
-3. Le bouton devient vert avec "Update weights & Search"
-4. Modifiez les poids si nécessaire
-5. Cliquez sur le bouton pour mettre à jour et rechercher
+## 🚀 **Avantages**
 
-### **Pour un gig sans poids existants :**
-1. Sélectionnez le gig
-2. Les poids par défaut s'affichent
-3. Le bouton reste bleu avec "Save weights & Search"
-4. Modifiez les poids si nécessaire
-5. Cliquez sur le bouton pour sauvegarder et rechercher
+### **Pour l'utilisateur :**
+- ✅ **Feedback visuel clair** → Couleur du bouton indique le statut
+- ✅ **Poids pré-remplis** → Pas besoin de reconfigurer si déjà sauvegardés
+- ✅ **Workflow intuitif** → "Update" vs "Save" selon le contexte
+- ✅ **Pas de sauvegarde automatique** → Contrôle total par l'utilisateur
 
-## ✅ **Avantages**
+### **Pour le système :**
+- ✅ **Détection intelligente** → Vérifie automatiquement les poids existants
+- ✅ **Interface adaptative** → S'adapte au statut des données
+- ✅ **Expérience cohérente** → Comportement prévisible
 
-- ✅ **Détection intelligente** : Le système sait si des poids existent
-- ✅ **Interface adaptative** : Couleurs et textes adaptés au contexte
-- ✅ **Pas de sauvegarde automatique** : Contrôle total par l'utilisateur
-- ✅ **Expérience utilisateur optimisée** : Feedback visuel clair
-- ✅ **Poids préservés** : Les poids sauvegardés sont réutilisés
+## 🎨 **Indicateurs visuels**
 
-Le système est maintenant intelligent et s'adapte au contexte ! 🎉 
+| Statut | Couleur du bouton | Texte | Signification |
+|--------|-------------------|-------|---------------|
+| **Nouveau gig** | 🔵 Bleu | "Save weights & Search" | Pas de poids sauvegardés |
+| **Gig existant** | 🟢 Vert | "Update weights & Search" | Poids déjà sauvegardés |
+
+Le système est maintenant intelligent et s'adapte automatiquement au statut des données ! 🎉 
