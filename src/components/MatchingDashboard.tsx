@@ -10,6 +10,7 @@ import {
   createGigAgent,
 } from "../api";
 import { getAllSkills, getLanguages, type Skill, type Language } from "../api/skillsApi";
+import { saveGigWeights, getGigWeights, resetGigWeights } from "../api/gigWeightsApi";
 
 import {
   Activity,
@@ -19,6 +20,7 @@ import {
   Settings,
   Clock,
   Brain,
+  Search,
 } from "lucide-react";
 import axios from "axios";
 import Cookies from "js-cookie";
@@ -26,8 +28,8 @@ import { Toaster } from 'react-hot-toast';
 
 
 const defaultMatchingWeights: MatchingWeights = {
-  experience: 0.20,
-  skills: 0.20,
+  experience: 0.25,
+  skills: 0.25,
   industry: 0.15,
   languages: 0.15,
   availability: 0.10,
@@ -49,6 +51,7 @@ const MatchingDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>("gigs");
   const [showWeights, setShowWeights] = useState(false);
   const [matches, setMatches] = useState<Match[]>([]);
+  const [gigHasWeights, setGigHasWeights] = useState(false);
   const [matchStats, setMatchStats] = useState<{
     totalMatches: number;
     perfectMatches: number;
@@ -98,12 +101,7 @@ const MatchingDashboard: React.FC = () => {
       noMatches: number;
       totalMatches: number;
     };
-    scheduleStats: {
-      perfectMatches: number;
-      partialMatches: number;
-      noMatches: number;
-      totalMatches: number;
-    };
+
   } | null>(null);
   const [loading, setLoading] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
@@ -121,10 +119,13 @@ const MatchingDashboard: React.FC = () => {
     soft: Skill[];
   }>({ professional: [], technical: [], soft: [] });
   const [languages, setLanguages] = useState<Language[]>([]);
+  const [shouldAutoSearch, setShouldAutoSearch] = useState(false);
 
   const handleTabClick = (tab: TabType) => {
     setActiveTab(tab);
     setCurrentPage(1);
+    // Enable auto search for other tabs (reps and optimal)
+    setShouldAutoSearch(tab !== "gigs");
   };
 
   const resultsTableRef = React.useRef<HTMLDivElement>(null);
@@ -139,8 +140,32 @@ const MatchingDashboard: React.FC = () => {
   };
 
   const handleGigSelect = async (gig: any) => {
+    console.log('🎯 GIG SELECTED:', gig.title, 'ID:', gig._id);
     setSelectedGig(gig);
     setCurrentPage(1);
+    
+    // Disable auto search when selecting a gig
+    setShouldAutoSearch(false);
+    
+    // Reset weights to defaults first
+    setWeights(defaultMatchingWeights);
+    setGigHasWeights(false);
+    
+    // Check if gig has saved weights and load them into Adjust Weights
+    try {
+      const savedWeights = await getGigWeights(gig._id || '');
+      setWeights(savedWeights.matchingWeights);
+      setGigHasWeights(true);
+      console.log('✅ Gig has saved weights, loaded into Adjust Weights:', gig._id);
+    } catch (error) {
+      console.log('❌ No saved weights found for gig:', gig._id);
+      setGigHasWeights(false);
+    }
+    
+    // Clear previous matches when selecting a new gig
+    setMatches([]);
+    setMatchStats(null);
+    
     setTimeout(scrollToResults, 100);
   };
 
@@ -194,88 +219,24 @@ const MatchingDashboard: React.FC = () => {
       if (initialLoading) return;
       try {
         let response: any;
-        if (activeTab === "gigs" && selectedGig) {
-          setLoading(true);
-          // Utiliser la nouvelle structure de réponse
-          const gigResponse = await findMatchesForGig(selectedGig._id || '', weights);
-          console.log('=== GIG RESPONSE ===', gigResponse);
-          console.log('=== PREFEREDMATCHES ===', gigResponse.preferedmatches);
-          console.log('=== MATCHES LENGTH ===', gigResponse.preferedmatches?.length);
-          
-          setMatches(gigResponse.matches || gigResponse.preferedmatches || []);
-          setMatchStats({
-            totalMatches: gigResponse.totalMatches || 0,
-            perfectMatches: gigResponse.perfectMatches || 0,
-            partialMatches: gigResponse.partialMatches || 0,
-            noMatches: gigResponse.noMatches || 0,
-            languageStats: gigResponse.languageStats || {
-              perfectMatches: 0,
-              partialMatches: 0,
-              noMatches: 0,
-              totalMatches: 0
-            },
-            skillsStats: gigResponse.skillsStats || {
-              perfectMatches: 0,
-              partialMatches: 0,
-              noMatches: 0,
-              totalMatches: 0
-            },
-            industryStats: (gigResponse as any).industryStats || {
-              perfectMatches: 0,
-              partialMatches: 0,
-              neutralMatches: 0,
-              noMatches: 0,
-              totalMatches: 0
-            },
-            activityStats: (gigResponse as any).activityStats || {
-              perfectMatches: 0,
-              partialMatches: 0,
-              neutralMatches: 0,
-              noMatches: 0,
-              totalMatches: 0
-            },
-            experienceStats: (gigResponse as any).experienceStats || {
-              perfectMatches: 0,
-              partialMatches: 0,
-              noMatches: 0,
-              totalMatches: 0
-            },
-            timezoneStats: (gigResponse as any).timezoneStats || {
-              perfectMatches: 0,
-              partialMatches: 0,
-              noMatches: 0,
-              totalMatches: 0
-            },
-            regionStats: (gigResponse as any).regionStats || {
-              perfectMatches: 0,
-              partialMatches: 0,
-              noMatches: 0,
-              totalMatches: 0
-            },
-            scheduleStats: (gigResponse as any).scheduleStats || {
-              perfectMatches: 0,
-              partialMatches: 0,
-              noMatches: 0,
-              totalMatches: 0
-            }
-          });
-          setLoading(false);
-        } else if (activeTab === "reps" && selectedRep) {
+        if (activeTab === "reps" && selectedRep && shouldAutoSearch) {
           setLoading(true);
           response = await findGigsForRep(selectedRep._id || '', weights);
           setMatches(response.preferedmatches || response.matches || []);
           setMatchStats(null);
           setLoading(false);
-        } else if (activeTab === "optimal") {
+        } else if (activeTab === "optimal" && shouldAutoSearch) {
           setLoading(true);
           response = await generateOptimalMatches(weights);
           setMatches(response.preferedmatches || response.matches || []);
           setMatchStats(null);
           setLoading(false);
-        } else {
+        } else if (activeTab === "gigs" && !selectedGig) {
+          // Clear matches when no gig is selected
           setMatches([]);
           setMatchStats(null);
         }
+        // Note: For gigs tab, matches are now only loaded when save button is clicked
       } catch (error) {
         console.error("Error getting matches:", error);
         setError("Failed to get matches. Please try again.");
@@ -285,7 +246,7 @@ const MatchingDashboard: React.FC = () => {
       }
     };
     getMatches();
-  }, [activeTab, selectedGig, selectedRep, weights, reps]);
+  }, [activeTab, selectedRep, weights, reps, initialLoading, shouldAutoSearch]);
 
   // Helper functions to get skill and language names
   const getSkillNameById = (skillId: string, skillType: 'professional' | 'technical' | 'soft') => {
@@ -329,6 +290,119 @@ const MatchingDashboard: React.FC = () => {
   // Reset weights to default
   const resetWeights = () => {
     setWeights(defaultMatchingWeights);
+  };
+
+  // Save weights for selected gig and search
+  const saveWeightsForGig = async () => {
+    console.log('🚨 SAVE WEIGHTS FOR GIG CALLED');
+    console.log('Stack trace:', new Error().stack);
+    
+    if (!selectedGig) {
+      console.error('No gig selected');
+      return;
+    }
+
+    console.log('🔄 MANUAL SAVE TRIGGERED - User clicked save button');
+    
+    // Check if gig already has saved weights
+    try {
+      const existingWeights = await getGigWeights(selectedGig._id || '');
+      console.log('⚠️ Gig already has saved weights, skipping save operation');
+      setGigHasWeights(true);
+    } catch (error) {
+      // No existing weights found, proceed with saving
+      console.log('✅ No existing weights found, saving new weights');
+      try {
+        await saveGigWeights(selectedGig._id || '', weights);
+        console.log('✅ Weights saved successfully for gig:', selectedGig._id);
+        setGigHasWeights(true);
+      } catch (saveError) {
+        console.error('❌ Error saving weights:', saveError);
+        return;
+      }
+    }
+    
+    // Enable auto search and trigger search with updated weights after saving
+    setShouldAutoSearch(true);
+    setLoading(true);
+    
+    try {
+      const gigResponse = await findMatchesForGig(selectedGig._id || '', weights);
+      console.log('=== GIG RESPONSE AFTER SAVE ===', gigResponse);
+      
+      setMatches(gigResponse.matches || gigResponse.preferedmatches || []);
+      setMatchStats({
+        totalMatches: gigResponse.totalMatches || 0,
+        perfectMatches: gigResponse.perfectMatches || 0,
+        partialMatches: gigResponse.partialMatches || 0,
+        noMatches: gigResponse.noMatches || 0,
+        languageStats: gigResponse.languageStats || {
+          perfectMatches: 0,
+          partialMatches: 0,
+          noMatches: 0,
+          totalMatches: 0
+        },
+        skillsStats: gigResponse.skillsStats || {
+          perfectMatches: 0,
+          partialMatches: 0,
+          noMatches: 0,
+          totalMatches: 0
+        },
+        industryStats: (gigResponse as any).industryStats || {
+          perfectMatches: 0,
+          partialMatches: 0,
+          neutralMatches: 0,
+          noMatches: 0,
+          totalMatches: 0
+        },
+        activityStats: (gigResponse as any).activityStats || {
+          perfectMatches: 0,
+          partialMatches: 0,
+          neutralMatches: 0,
+          noMatches: 0,
+          totalMatches: 0
+        },
+        experienceStats: (gigResponse as any).experienceStats || {
+          perfectMatches: 0,
+          partialMatches: 0,
+          noMatches: 0,
+          totalMatches: 0
+        },
+        timezoneStats: (gigResponse as any).timezoneStats || {
+          perfectMatches: 0,
+          partialMatches: 0,
+          noMatches: 0,
+          totalMatches: 0
+        },
+        regionStats: (gigResponse as any).regionStats || {
+          perfectMatches: 0,
+          partialMatches: 0,
+          noMatches: 0,
+          totalMatches: 0
+        }
+      });
+      setLoading(false);
+      
+      // Scroll to results after search
+      setTimeout(scrollToResults, 100);
+    } catch (error) {
+      console.error('Error in search after save:', error);
+      setLoading(false);
+    }
+  };
+
+  // Load weights for selected gig
+  const loadWeightsForGig = async (gigId: string) => {
+    try {
+      const gigWeights = await getGigWeights(gigId);
+      setWeights(gigWeights.matchingWeights);
+      setGigHasWeights(true);
+      console.log('Loaded existing weights for gig:', gigId);
+    } catch (error: any) {
+      console.log('No saved weights found for gig:', gigId, error?.response?.status);
+      // Keep default weights if loading fails (404 means no saved weights)
+      setGigHasWeights(false);
+    }
   };
 
   // Add custom animation classes
@@ -410,31 +484,26 @@ const MatchingDashboard: React.FC = () => {
           <div className="flex items-center space-x-4">
             <button
               onClick={async () => {
-                // Ajouter des console logs et alerts avant le back to onboarding
+                // Ajouter des console logs avant le back to onboarding
                 console.log("=== BACK TO ONBOARDING TRIGGERED ===");
                 console.log("Current URL:", window.location.href);
                 console.log("Current timestamp:", new Date().toISOString());
                 console.log("User agent:", navigator.userAgent);
-                
-                // Alert pour informer l'utilisateur
-                alert("🔄 Redirection vers l'onboarding en cours...\n\nVeuillez patienter pendant que nous mettons à jour votre progression.");
                 
                 try {
                   const companyId = Cookies.get("companyId");
                   console.log("Company ID:", companyId);
                   console.log("Company API URL:", import.meta.env.VITE_COMPANY_API_URL);
                   
-                  // Alert pour les informations de debug
+                  // Debug logs
                   if (!companyId) {
                     console.warn("No companyId found in cookies, proceeding without updating onboarding");
-                    alert("⚠️ Aucun companyId trouvé dans les cookies.\nRedirection directe vers l'onboarding.");
                     window.location.href = "/app11";
                     return;
                   }
 
                   if (!import.meta.env.VITE_COMPANY_API_URL) {
                     console.error("VITE_COMPANY_API_URL is not defined");
-                    alert("❌ VITE_COMPANY_API_URL n'est pas défini.\nRedirection directe vers l'onboarding.");
                     window.location.href = "/app11";
                     return;
                   }
@@ -443,7 +512,6 @@ const MatchingDashboard: React.FC = () => {
                   console.log("Updating step 10 status...");
                   console.log("Step URL:", `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/phases/3/steps/10`);
                   console.log("Step request data:", { status: "completed" });
-                  alert("📝 Mise à jour du statut de l'étape 10...");
                   
                   let stepUpdated = false;
                   
@@ -454,7 +522,6 @@ const MatchingDashboard: React.FC = () => {
                       { status: "completed" }
                     );
                     console.log("Step update response (phase 3):", stepResponse.data);
-                    alert("✅ Étape 10 (phase 3) mise à jour avec succès!");
                     stepUpdated = true;
                   } catch (stepError: any) {
                     console.error("Step update error (phase 3):", stepError);
@@ -466,15 +533,13 @@ const MatchingDashboard: React.FC = () => {
                       console.log("Trying phase 4, step 10...");
                       const stepResponse2 = await axios.put(
                         `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/phases/4/steps/10`,
-                        { status: "completed" }
+                        { status: "completed",  }
                       );
                       console.log("Step update response (phase 4):", stepResponse2.data);
-                      alert("✅ Étape 10 (phase 4) mise à jour avec succès!");
                       stepUpdated = true;
                     } catch (stepError2: any) {
                       console.error("Step update error (phase 4):", stepError2);
                       console.error("Step error response (phase 4):", stepError2.response?.data);
-                      alert(`⚠️ Erreur lors de la mise à jour de l'étape 10:\n\nPhase 3: ${stepError.response?.data?.message || stepError.message}\nPhase 4: ${stepError2.response?.data?.message || stepError2.message}\n\nContinuation...`);
                     }
                   }
                   
@@ -482,7 +547,6 @@ const MatchingDashboard: React.FC = () => {
                   console.log("Updating current phase...");
                   console.log("Phase URL:", `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/current-phase`);
                   console.log("Phase request data:", { phase: 4 });
-                  alert("🔄 Mise à jour de la phase courante...");
                   
                   try {
                     const phaseResponse = await axios.put(
@@ -490,16 +554,13 @@ const MatchingDashboard: React.FC = () => {
                       { phase: 4 }
                     );
                     console.log("Phase update response:", phaseResponse.data);
-                    alert("✅ Phase mise à jour avec succès!");
                   } catch (phaseError: any) {
                     console.error("Phase update error:", phaseError);
                     console.error("Phase error response:", phaseError.response?.data);
                     console.error("Phase error status:", phaseError.response?.status);
-                    alert(`⚠️ Erreur lors de la mise à jour de la phase:\n\n${phaseError.response?.data?.message || phaseError.message}\n\nContinuation...`);
                   }
                   
                   console.log("Onboarding progress updated successfully");
-                  alert("✅ Progression de l'onboarding mise à jour avec succès!\n\nRedirection vers l'onboarding...");
                   window.location.href = "/app11";
                 } catch (error: any) {
                   console.error("Error updating onboarding progress:", error);
@@ -508,9 +569,6 @@ const MatchingDashboard: React.FC = () => {
                     response: error?.response?.data,
                     status: error?.response?.status
                   });
-                  
-                  // Alert pour l'erreur
-                  alert(`❌ Erreur lors de la mise à jour de l'onboarding:\n\n${error?.message || "Erreur inconnue"}\n\nRedirection en cours malgré l'erreur...`);
                   
                   // Continue to redirect even if API calls fail
                   window.location.href = "/app11";
@@ -610,6 +668,29 @@ const MatchingDashboard: React.FC = () => {
             <p className="text-xs text-gray-500 mt-4 italic">
               Note: These weights determine how much each factor contributes to the overall matching score.
             </p>
+            {selectedGig && (
+              <div className="mt-4 flex justify-center">
+                <button
+                  onClick={(e) => {
+                    console.log('🎯 BUTTON CLICKED - User manually clicked save button');
+                    console.log('Event:', e);
+                    saveWeightsForGig();
+                  }}
+                  className={`text-sm px-6 py-3 rounded-lg transition-all duration-200 flex items-center space-x-2 shadow-lg ${
+                    gigHasWeights 
+                      ? 'bg-green-600 hover:bg-green-700 text-white' 
+                      : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                  }`}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>
+                    {gigHasWeights ? `Update weights & Search for ${selectedGig.title}` : `Save weights & Search for ${selectedGig.title}`}
+                  </span>
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -656,6 +737,7 @@ const MatchingDashboard: React.FC = () => {
                 <span>Optimal Matching</span>
               </div>
             </button>
+
           </div>
         </div>
 
@@ -666,6 +748,29 @@ const MatchingDashboard: React.FC = () => {
               <Briefcase size={24} className="text-indigo-600" />
               <span>Select a Gig to Find Matching Reps</span>
             </h2>
+            
+            {/* Instructions */}
+            {selectedGig && (
+              <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-start space-x-3">
+                  <div className="flex-shrink-0">
+                    <svg className="w-5 h-5 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <p className={`text-sm font-medium ${
+                      gigHasWeights ? 'text-green-800' : 'text-blue-800'
+                    }`}>
+                      {gigHasWeights 
+                        ? `Click "Adjust Weights" to update weights for ${selectedGig.title}, then click "Update weights & Search"`
+                        : `Click "Adjust Weights" to configure weights for ${selectedGig.title}, then click "Save weights & Search"`
+                      }
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Gigs Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -759,8 +864,12 @@ const MatchingDashboard: React.FC = () => {
                 </div>
               </div>
             )}
+
+
           </div>
         )}
+
+
 
         {/* Results Area */}
         <div ref={resultsTableRef} className={`bg-white rounded-xl shadow-lg p-6 mb-6 relative transform transition-all duration-300 ${slideUp}`}>
@@ -810,6 +919,7 @@ const MatchingDashboard: React.FC = () => {
                           <th className="px-6 py-4 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Skills</th>
                           <th className="px-6 py-4 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Industries</th>
                           <th className="px-6 py-4 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Activities</th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Availability</th>
                           <th className="px-6 py-4 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Experience</th>
                           <th className="px-6 py-4 text-center text-xs font-bold text-indigo-700 uppercase tracking-wider">Action</th>
                         </tr>
@@ -956,6 +1066,31 @@ const MatchingDashboard: React.FC = () => {
                                 </div>
                               ) : (
                                 <div className="text-gray-400 text-sm">No matching activities</div>
+                              )}
+                            </td>
+                            <td className="px-6 py-4">
+                              {/* AVAILABILITY */}
+                              {match.availabilityMatch ? (
+                                <div className="flex flex-col gap-1">
+                                  <div className="text-sm font-medium text-gray-900">
+                                    {match.availabilityMatch.details.matchingDays.length} days match
+                                  </div>
+                                  <div className="text-xs text-gray-600">
+                                    Score: {(match.availabilityMatch.score * 100).toFixed(1)}%
+                                  </div>
+                                  <div className={`text-xs px-2 py-1 rounded ${
+                                    match.availabilityMatch.matchStatus === 'perfect_match' 
+                                      ? 'bg-green-100 text-green-800' 
+                                      : match.availabilityMatch.matchStatus === 'partial_match'
+                                      ? 'bg-yellow-100 text-yellow-800'
+                                      : 'bg-red-100 text-red-800'
+                                  }`}>
+                                    {match.availabilityMatch.matchStatus === 'perfect_match' ? '✓ Perfect' : 
+                                     match.availabilityMatch.matchStatus === 'partial_match' ? '~ Partial' : '✗ No Match'}
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="text-gray-400 text-sm">No availability data</div>
                               )}
                             </td>
                             <td className="px-6 py-4">
