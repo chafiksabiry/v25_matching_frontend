@@ -436,3 +436,83 @@ export interface ExperienceMatch {
   };
   matchStatus: 'perfect_match' | 'partial_match' | 'no_match';
 }
+
+// Types pour GigCriteria
+export interface GigCriteriaSkill {
+  skillCode: string;
+  level: number;
+  weight: number;
+}
+
+export interface GigCriteriaLanguage {
+  languageCode: string;
+  proficiency: string;
+  weight: number;
+}
+
+export interface GigCriteriaIndustry {
+  industryCode: string;
+  weight: number;
+}
+
+export interface GigCriteriaActivity {
+  activityCode: string;
+  weight: number;
+}
+
+export interface GigCriteriaDestination {
+  destinationCode: string;
+  weight: number;
+}
+
+export interface GigCriteriaSeniority {
+  seniorityCode: string;
+  weight: number;
+}
+
+export interface GigCriteriaCodes {
+  professionalSkills: GigCriteriaSkill[];
+  technicalSkills: GigCriteriaSkill[];
+  softSkills: GigCriteriaSkill[];
+  languages: GigCriteriaLanguage[];
+  industries: GigCriteriaIndustry[];
+  activities: GigCriteriaActivity[];
+  destinationCode: GigCriteriaDestination;
+  seniorityCode: GigCriteriaSeniority;
+}
+
+export interface GigCriteriaMetadata {
+  createdAt: Date;
+  updatedAt: Date;
+  version: string;
+  description?: string;
+}
+
+export interface GigCriteria {
+  _id?: string;
+  gigId: string;
+  criteriaCodes: GigCriteriaCodes;
+  metadata: GigCriteriaMetadata;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface GigCriteriaSearchRequest {
+  criteriaCodes: Partial<GigCriteriaCodes>;
+  weights?: {
+    professionalSkills?: number;
+    technicalSkills?: number;
+    softSkills?: number;
+    languages?: number;
+    industries?: number;
+    activities?: number;
+    destination?: number;
+    seniority?: number;
+  };
+}
+
+export interface GigCriteriaSearchResult {
+  gigCriteria: GigCriteria;
+  gig: Gig;
+  matchScore?: number;
+}
