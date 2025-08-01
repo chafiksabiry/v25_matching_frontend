@@ -134,6 +134,7 @@ const MatchingDashboard: React.FC = () => {
   }>({ professional: [], technical: [], soft: [] });
   const [languages, setLanguages] = useState<Language[]>([]);
   const [shouldAutoSearch, setShouldAutoSearch] = useState(false);
+  const [searchTrigger, setSearchTrigger] = useState(0);
   const [invitedAgents, setInvitedAgents] = useState<Set<string>>(new Set());
 
   const handleTabClick = (tab: TabType) => {
@@ -193,6 +194,7 @@ const MatchingDashboard: React.FC = () => {
     
     // Enable auto search to trigger automatic search
     setShouldAutoSearch(true);
+    setSearchTrigger(prev => prev + 1);
     
     setTimeout(scrollToResults, 100);
   };
@@ -329,7 +331,7 @@ const MatchingDashboard: React.FC = () => {
       }
     };
     getMatches();
-  }, [activeTab, selectedRep, selectedGig, weights, reps, initialLoading, shouldAutoSearch]);
+  }, [activeTab, selectedRep, selectedGig, weights, reps, initialLoading, shouldAutoSearch, searchTrigger]);
 
   // Fetch invited agents when matches are loaded for a gig
   useEffect(() => {
@@ -391,6 +393,7 @@ const MatchingDashboard: React.FC = () => {
     // Auto-search when weights change if a gig is selected
     if (selectedGig && activeTab === "gigs") {
       setShouldAutoSearch(true);
+      setSearchTrigger(prev => prev + 1);
     }
   };
 
