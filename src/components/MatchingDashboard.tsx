@@ -159,8 +159,7 @@ const MatchingDashboard: React.FC = () => {
     setSelectedGig(gig);
     setCurrentPage(1);
     
-    // Reset weights to defaults first
-    setWeights(defaultMatchingWeights);
+    // Don't reset weights to defaults - keep current weights
     setGigHasWeights(false);
     
     let savedWeights = null;
@@ -174,8 +173,7 @@ const MatchingDashboard: React.FC = () => {
     } catch (error) {
       console.log('❌ No saved weights found for gig:', gig._id);
       setGigHasWeights(false);
-      // Keep default weights for immediate use
-      setWeights(defaultMatchingWeights);
+      // Keep current weights instead of resetting to defaults
     }
     
     // Clear previous matches when selecting a new gig
