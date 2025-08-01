@@ -290,6 +290,7 @@ export interface Match {
   availabilityMatch: AvailabilityMatch;
   matchStatus: 'perfect_match' | 'partial_match' | 'no_match';
   alreadyAssigned?: boolean;
+  isInvited?: boolean;
 }
 
 export interface MatchResponse {

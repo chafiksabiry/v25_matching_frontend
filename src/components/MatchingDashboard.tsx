@@ -576,6 +576,15 @@ const MatchingDashboard: React.FC = () => {
       // Add agent to invited list
       setInvitedAgents(prev => new Set([...prev, match.agentId]));
       
+      // Update the match object to mark it as invited
+      setMatches(prevMatches => 
+        prevMatches.map(m => 
+          m.agentId === match.agentId 
+            ? { ...m, isInvited: true }
+            : m
+        )
+      );
+      
       // Close the modal after successful creation
       setTimeout(() => {
         setGigAgentSuccess(null);
@@ -1246,23 +1255,28 @@ const MatchingDashboard: React.FC = () => {
                               )}
                             </td>
                             <td className="px-6 py-4 text-center">
-                              {invitedAgents.has(match.agentId) ? (
-                                <div className="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg shadow-md font-semibold text-base gap-2">
-                                  <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                                  </svg>
-                                  Invited
-                                </div>
-                              ) : (
-                                <button
-                                  className="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-blue-500 to-violet-600 text-white rounded-lg shadow-md hover:from-blue-600 hover:to-violet-700 transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-lg font-semibold text-base gap-2 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
-                                  onClick={() => handleCreateGigAgent(match)}
-                                  title="Inviter cet agent à ce gig"
-                                >
-                                  <Zap className="w-5 h-5 mr-1 animate-pulse" />
-                                  Invite
-                                </button>
-                              )}
+                              {(() => {
+                                // Utiliser l'information isInvited du backend si disponible, sinon utiliser le state local
+                                const isInvited = match.isInvited !== undefined ? match.isInvited : invitedAgents.has(match.agentId);
+                                console.log(`🔍 Agent ${match.agentId} invited status:`, isInvited, 'From backend:', match.isInvited, 'From local state:', invitedAgents.has(match.agentId));
+                                return isInvited ? (
+                                  <div className="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg shadow-md font-semibold text-base gap-2">
+                                    <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    Invited
+                                  </div>
+                                ) : (
+                                  <button
+                                    className="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-blue-500 to-violet-600 text-white rounded-lg shadow-md hover:from-blue-600 hover:to-violet-700 transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-lg font-semibold text-base gap-2 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
+                                    onClick={() => handleCreateGigAgent(match)}
+                                    title="Inviter cet agent à ce gig"
+                                  >
+                                    <Zap className="w-5 h-5 mr-1 animate-pulse" />
+                                    Invite
+                                  </button>
+                                );
+                              })()}
                             </td>
                           </tr>
                           </React.Fragment>
