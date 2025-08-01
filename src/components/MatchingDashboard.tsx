@@ -42,8 +42,8 @@ import { Toaster } from 'react-hot-toast';
 
 
 const defaultMatchingWeights: MatchingWeights = {
-  experience: 0.25,
-  skills: 0.25,
+  experience: 0.20,
+  skills: 0.20,
   industry: 0.15,
   languages: 0.15,
   availability: 0.10,
@@ -174,6 +174,8 @@ const MatchingDashboard: React.FC = () => {
     } catch (error) {
       console.log('❌ No saved weights found for gig:', gig._id);
       setGigHasWeights(false);
+      // Keep default weights for immediate use
+      setWeights(defaultMatchingWeights);
     }
     
     // Clear previous matches when selecting a new gig
@@ -191,7 +193,7 @@ const MatchingDashboard: React.FC = () => {
       setInvitedAgents(new Set<string>());
     }
     
-    // Automatically search for matches with current weights
+    // Automatically search for matches with current weights (default or saved)
     setLoading(true);
     try {
       // Use saved weights if available, otherwise use default weights
@@ -416,25 +418,17 @@ const MatchingDashboard: React.FC = () => {
 
     console.log('🔄 MANUAL SAVE TRIGGERED - User clicked save button');
     
-    // Check if gig already has saved weights
+    // Always try to save weights first (create or update)
     try {
-      const existingWeights = await getGigWeights(selectedGig._id || '');
-      console.log('⚠️ Gig already has saved weights, skipping save operation');
+      await saveGigWeights(selectedGig._id || '', weights);
+      console.log('✅ Weights saved successfully for gig:', selectedGig._id);
       setGigHasWeights(true);
-    } catch (error) {
-      // No existing weights found, proceed with saving
-      console.log('✅ No existing weights found, saving new weights');
-      try {
-        await saveGigWeights(selectedGig._id || '', weights);
-        console.log('✅ Weights saved successfully for gig:', selectedGig._id);
-        setGigHasWeights(true);
-      } catch (saveError) {
-        console.error('❌ Error saving weights:', saveError);
-        return;
-      }
+    } catch (saveError) {
+      console.error('❌ Error saving weights:', saveError);
+      // Continue with search even if saving fails
     }
     
-    // Enable auto search and trigger search with updated weights after saving
+    // Enable auto search and trigger search with current weights
     setShouldAutoSearch(true);
     setLoading(true);
     
@@ -526,6 +520,93 @@ const MatchingDashboard: React.FC = () => {
       console.log('No saved weights found for gig:', gigId, error?.response?.status);
       // Keep default weights if loading fails (404 means no saved weights)
       setGigHasWeights(false);
+    }
+  };
+
+  // Search with current weights without saving
+  const searchWithCurrentWeights = async () => {
+    if (!selectedGig) {
+      console.error('No gig selected');
+      return;
+    }
+
+    console.log('🔍 SEARCH WITH CURRENT WEIGHTS - User clicked search button');
+    setLoading(true);
+    
+    try {
+      const gigResponse = await findMatchesForGig(selectedGig._id || '', weights);
+      console.log('=== GIG RESPONSE AFTER SEARCH ===', gigResponse);
+      
+      setMatches(gigResponse.preferedmatches || gigResponse.matches || []);
+      setMatchStats({
+        totalMatches: gigResponse.totalMatches || 0,
+        perfectMatches: gigResponse.perfectMatches || 0,
+        partialMatches: gigResponse.partialMatches || 0,
+        noMatches: gigResponse.noMatches || 0,
+        languageStats: gigResponse.languageStats || {
+          perfectMatches: 0,
+          partialMatches: 0,
+          noMatches: 0,
+          totalMatches: 0
+        },
+        skillsStats: gigResponse.skillsStats || {
+          perfectMatches: 0,
+          partialMatches: 0,
+          noMatches: 0,
+          totalMatches: 0
+        },
+        industryStats: (gigResponse as any).industryStats || {
+          perfectMatches: 0,
+          partialMatches: 0,
+          neutralMatches: 0,
+          noMatches: 0,
+          totalMatches: 0
+        },
+        activityStats: (gigResponse as any).activityStats || {
+          perfectMatches: 0,
+          partialMatches: 0,
+          neutralMatches: 0,
+          noMatches: 0,
+          totalMatches: 0
+        },
+        experienceStats: (gigResponse as any).experienceStats || {
+          perfectMatches: 0,
+          partialMatches: 0,
+          noMatches: 0,
+          totalMatches: 0
+        },
+        timezoneStats: (gigResponse as any).timezoneStats || {
+          perfectMatches: 0,
+          partialMatches: 0,
+          noMatches: 0,
+          totalMatches: 0
+        },
+        regionStats: (gigResponse as any).regionStats || {
+          perfectMatches: 0,
+          partialMatches: 0,
+          noMatches: 0,
+          totalMatches: 0
+        }
+      });
+      
+      // Fetch invited agents after getting matches
+      try {
+        const gigAgents = await getGigAgentsForGig(selectedGig._id || '');
+        const invitedAgentIds = new Set<string>(gigAgents.map((ga: any) => ga.agentId as string));
+        setInvitedAgents(invitedAgentIds);
+        console.log('📧 Invited agents for gig (after search):', invitedAgentIds);
+      } catch (error) {
+        console.error('Error fetching invited agents after search:', error);
+        setInvitedAgents(new Set<string>());
+      }
+      
+      setLoading(false);
+      
+      // Scroll to results after search
+      setTimeout(scrollToResults, 100);
+    } catch (error) {
+      console.error('Error in search with current weights:', error);
+      setLoading(false);
     }
   };
 
@@ -805,7 +886,20 @@ const MatchingDashboard: React.FC = () => {
               Note: These weights determine how much each factor contributes to the overall matching score.
             </p>
             {selectedGig && (
-              <div className="mt-4 flex justify-center">
+              <div className="mt-4 flex justify-center space-x-4">
+                <button
+                  onClick={(e) => {
+                    console.log('🔍 BUTTON CLICKED - User clicked search button');
+                    console.log('Event:', e);
+                    searchWithCurrentWeights();
+                  }}
+                  className="text-sm px-6 py-3 rounded-lg transition-all duration-200 flex items-center space-x-2 shadow-lg bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  <Search className="w-4 h-4" />
+                  <span>
+                    Search with current weights
+                  </span>
+                </button>
                 <button
                   onClick={(e) => {
                     console.log('🎯 BUTTON CLICKED - User manually clicked save button');
@@ -899,8 +993,8 @@ const MatchingDashboard: React.FC = () => {
                       gigHasWeights ? 'text-green-800' : 'text-blue-800'
                     }`}>
                       {gigHasWeights 
-                        ? `Click "Adjust Weights" to update weights for ${selectedGig.title}, then click "Update weights & Search" to refresh results`
-                        : `Click "Adjust Weights" to configure weights for ${selectedGig.title}, then click "Save weights & Search" to refresh results`
+                        ? `Click "Adjust Weights" to update weights for ${selectedGig.title}, then use "Search with current weights" to test or "Update weights & Search" to save and search`
+                        : `Click "Adjust Weights" to configure weights for ${selectedGig.title}, then use "Search with current weights" to test or "Save weights & Search" to save and search`
                       }
                     </p>
                   </div>
