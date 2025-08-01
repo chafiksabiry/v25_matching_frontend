@@ -1250,16 +1250,7 @@ const MatchingDashboard: React.FC = () => {
                                   <div className="text-xs text-gray-600">
                                     Score: {(match.availabilityMatch.score * 100).toFixed(1)}%
                                   </div>
-                                  <div className={`text-xs px-2 py-1 rounded ${
-                                    match.availabilityMatch.matchStatus === 'perfect_match' 
-                                      ? 'bg-green-100 text-green-800' 
-                                      : match.availabilityMatch.matchStatus === 'partial_match'
-                                      ? 'bg-yellow-100 text-yellow-800'
-                                      : 'bg-red-100 text-red-800'
-                                  }`}>
-                                    {match.availabilityMatch.matchStatus === 'perfect_match' ? '✓ Perfect' : 
-                                     match.availabilityMatch.matchStatus === 'partial_match' ? '~ Partial' : '✗ No Match'}
-                                  </div>
+
                                 </div>
                               ) : (
                                 <div className="text-gray-400 text-sm">No availability data</div>
@@ -1275,16 +1266,7 @@ const MatchingDashboard: React.FC = () => {
                                   <div className="text-xs text-gray-600">
                                     Required: {match.experienceMatch.details.gigRequiredExperience} years
                                   </div>
-                                  <div className={`text-xs px-2 py-1 rounded ${
-                                    match.experienceMatch.matchStatus === 'perfect_match' 
-                                      ? 'bg-green-100 text-green-800' 
-                                      : match.experienceMatch.matchStatus === 'partial_match'
-                                      ? 'bg-yellow-100 text-yellow-800'
-                                      : 'bg-red-100 text-red-800'
-                                  }`}>
-                                    {match.experienceMatch.matchStatus === 'perfect_match' ? '✓ Perfect' : 
-                                     match.experienceMatch.matchStatus === 'partial_match' ? '~ Partial' : '✗ No Match'}
-                                  </div>
+
                                 </div>
                               ) : (
                                 <div className="text-gray-400 text-sm">No experience data</div>
