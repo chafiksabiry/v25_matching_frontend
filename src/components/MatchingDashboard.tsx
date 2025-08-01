@@ -193,73 +193,8 @@ const MatchingDashboard: React.FC = () => {
       setInvitedAgents(new Set<string>());
     }
     
-    // Automatically search for matches with current weights (default or saved)
-    setLoading(true);
-    try {
-      // Use saved weights if available, otherwise use default weights
-      const weightsToUse = savedWeights?.matchingWeights || defaultMatchingWeights;
-      console.log('🔍 Searching with weights:', weightsToUse);
-      
-      const gigResponse = await findMatchesForGig(gig._id || '', weightsToUse);
-      console.log('=== GIG RESPONSE AFTER SELECTION ===', gigResponse);
-      
-      setMatches(gigResponse.preferedmatches || gigResponse.matches || []);
-      setMatchStats({
-        totalMatches: gigResponse.totalMatches || 0,
-        perfectMatches: gigResponse.perfectMatches || 0,
-        partialMatches: gigResponse.partialMatches || 0,
-        noMatches: gigResponse.noMatches || 0,
-        languageStats: gigResponse.languageStats || {
-          perfectMatches: 0,
-          partialMatches: 0,
-          noMatches: 0,
-          totalMatches: 0
-        },
-        skillsStats: gigResponse.skillsStats || {
-          perfectMatches: 0,
-          partialMatches: 0,
-          noMatches: 0,
-          totalMatches: 0
-        },
-        industryStats: (gigResponse as any).industryStats || {
-          perfectMatches: 0,
-          partialMatches: 0,
-          neutralMatches: 0,
-          noMatches: 0,
-          totalMatches: 0
-        },
-        activityStats: (gigResponse as any).activityStats || {
-          perfectMatches: 0,
-          partialMatches: 0,
-          neutralMatches: 0,
-          noMatches: 0,
-          totalMatches: 0
-        },
-        experienceStats: (gigResponse as any).experienceStats || {
-          perfectMatches: 0,
-          partialMatches: 0,
-          noMatches: 0,
-          totalMatches: 0
-        },
-        timezoneStats: (gigResponse as any).timezoneStats || {
-          perfectMatches: 0,
-          partialMatches: 0,
-          noMatches: 0,
-          totalMatches: 0
-        },
-        regionStats: (gigResponse as any).regionStats || {
-          perfectMatches: 0,
-          partialMatches: 0,
-          noMatches: 0,
-          totalMatches: 0
-        }
-      });
-    } catch (error) {
-      console.error('Error searching for matches after gig selection:', error);
-      setError("Failed to get matches. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+    // Enable auto search to trigger automatic search
+    setShouldAutoSearch(true);
     
     setTimeout(scrollToResults, 100);
   };
@@ -326,12 +261,67 @@ const MatchingDashboard: React.FC = () => {
           setMatches(response.preferedmatches || response.matches || []);
           setMatchStats(null);
           setLoading(false);
+        } else if (activeTab === "gigs" && selectedGig && shouldAutoSearch) {
+          // Auto-search for gigs when a gig is selected and auto-search is enabled
+          setLoading(true);
+          response = await findMatchesForGig(selectedGig._id || '', weights);
+          setMatches(response.preferedmatches || response.matches || []);
+          setMatchStats({
+            totalMatches: response.totalMatches || 0,
+            perfectMatches: response.perfectMatches || 0,
+            partialMatches: response.partialMatches || 0,
+            noMatches: response.noMatches || 0,
+            languageStats: response.languageStats || {
+              perfectMatches: 0,
+              partialMatches: 0,
+              noMatches: 0,
+              totalMatches: 0
+            },
+            skillsStats: response.skillsStats || {
+              perfectMatches: 0,
+              partialMatches: 0,
+              noMatches: 0,
+              totalMatches: 0
+            },
+            industryStats: (response as any).industryStats || {
+              perfectMatches: 0,
+              partialMatches: 0,
+              neutralMatches: 0,
+              noMatches: 0,
+              totalMatches: 0
+            },
+            activityStats: (response as any).activityStats || {
+              perfectMatches: 0,
+              partialMatches: 0,
+              neutralMatches: 0,
+              noMatches: 0,
+              totalMatches: 0
+            },
+            experienceStats: (response as any).experienceStats || {
+              perfectMatches: 0,
+              partialMatches: 0,
+              noMatches: 0,
+              totalMatches: 0
+            },
+            timezoneStats: (response as any).timezoneStats || {
+              perfectMatches: 0,
+              partialMatches: 0,
+              noMatches: 0,
+              totalMatches: 0
+            },
+            regionStats: (response as any).regionStats || {
+              perfectMatches: 0,
+              partialMatches: 0,
+              noMatches: 0,
+              totalMatches: 0
+            }
+          });
+          setLoading(false);
         } else if (activeTab === "gigs" && !selectedGig) {
           // Clear matches when no gig is selected
           setMatches([]);
           setMatchStats(null);
         }
-        // Note: For gigs tab, matches are now only loaded when save button is clicked
       } catch (error) {
         console.error("Error getting matches:", error);
         setError("Failed to get matches. Please try again.");
@@ -341,7 +331,7 @@ const MatchingDashboard: React.FC = () => {
       }
     };
     getMatches();
-  }, [activeTab, selectedRep, weights, reps, initialLoading, shouldAutoSearch]);
+  }, [activeTab, selectedRep, selectedGig, weights, reps, initialLoading, shouldAutoSearch]);
 
   // Fetch invited agents when matches are loaded for a gig
   useEffect(() => {
@@ -399,6 +389,11 @@ const MatchingDashboard: React.FC = () => {
       ...prev,
       [key]: value,
     }));
+    
+    // Auto-search when weights change if a gig is selected
+    if (selectedGig && activeTab === "gigs") {
+      setShouldAutoSearch(true);
+    }
   };
 
   // Reset weights to default
@@ -523,92 +518,7 @@ const MatchingDashboard: React.FC = () => {
     }
   };
 
-  // Search with current weights without saving
-  const searchWithCurrentWeights = async () => {
-    if (!selectedGig) {
-      console.error('No gig selected');
-      return;
-    }
 
-    console.log('🔍 SEARCH WITH CURRENT WEIGHTS - User clicked search button');
-    setLoading(true);
-    
-    try {
-      const gigResponse = await findMatchesForGig(selectedGig._id || '', weights);
-      console.log('=== GIG RESPONSE AFTER SEARCH ===', gigResponse);
-      
-      setMatches(gigResponse.preferedmatches || gigResponse.matches || []);
-      setMatchStats({
-        totalMatches: gigResponse.totalMatches || 0,
-        perfectMatches: gigResponse.perfectMatches || 0,
-        partialMatches: gigResponse.partialMatches || 0,
-        noMatches: gigResponse.noMatches || 0,
-        languageStats: gigResponse.languageStats || {
-          perfectMatches: 0,
-          partialMatches: 0,
-          noMatches: 0,
-          totalMatches: 0
-        },
-        skillsStats: gigResponse.skillsStats || {
-          perfectMatches: 0,
-          partialMatches: 0,
-          noMatches: 0,
-          totalMatches: 0
-        },
-        industryStats: (gigResponse as any).industryStats || {
-          perfectMatches: 0,
-          partialMatches: 0,
-          neutralMatches: 0,
-          noMatches: 0,
-          totalMatches: 0
-        },
-        activityStats: (gigResponse as any).activityStats || {
-          perfectMatches: 0,
-          partialMatches: 0,
-          neutralMatches: 0,
-          noMatches: 0,
-          totalMatches: 0
-        },
-        experienceStats: (gigResponse as any).experienceStats || {
-          perfectMatches: 0,
-          partialMatches: 0,
-          noMatches: 0,
-          totalMatches: 0
-        },
-        timezoneStats: (gigResponse as any).timezoneStats || {
-          perfectMatches: 0,
-          partialMatches: 0,
-          noMatches: 0,
-          totalMatches: 0
-        },
-        regionStats: (gigResponse as any).regionStats || {
-          perfectMatches: 0,
-          partialMatches: 0,
-          noMatches: 0,
-          totalMatches: 0
-        }
-      });
-      
-      // Fetch invited agents after getting matches
-      try {
-        const gigAgents = await getGigAgentsForGig(selectedGig._id || '');
-        const invitedAgentIds = new Set<string>(gigAgents.map((ga: any) => ga.agentId as string));
-        setInvitedAgents(invitedAgentIds);
-        console.log('📧 Invited agents for gig (after search):', invitedAgentIds);
-      } catch (error) {
-        console.error('Error fetching invited agents after search:', error);
-        setInvitedAgents(new Set<string>());
-      }
-      
-      setLoading(false);
-      
-      // Scroll to results after search
-      setTimeout(scrollToResults, 100);
-    } catch (error) {
-      console.error('Error in search with current weights:', error);
-      setLoading(false);
-    }
-  };
 
   // Add custom animation classes
   const fadeIn = "animate-[fadeIn_0.5s_ease-in-out]";
@@ -886,20 +796,7 @@ const MatchingDashboard: React.FC = () => {
               Note: These weights determine how much each factor contributes to the overall matching score.
             </p>
             {selectedGig && (
-              <div className="mt-4 flex justify-center space-x-4">
-                <button
-                  onClick={(e) => {
-                    console.log('🔍 BUTTON CLICKED - User clicked search button');
-                    console.log('Event:', e);
-                    searchWithCurrentWeights();
-                  }}
-                  className="text-sm px-6 py-3 rounded-lg transition-all duration-200 flex items-center space-x-2 shadow-lg bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  <Search className="w-4 h-4" />
-                  <span>
-                    Search with current weights
-                  </span>
-                </button>
+              <div className="mt-4 flex justify-center">
                 <button
                   onClick={(e) => {
                     console.log('🎯 BUTTON CLICKED - User manually clicked save button');
@@ -916,7 +813,7 @@ const MatchingDashboard: React.FC = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                   </svg>
                   <span>
-                    {gigHasWeights ? `Update weights & Search for ${selectedGig.title}` : `Save weights & Search for ${selectedGig.title}`}
+                    {gigHasWeights ? `Save updated weights for ${selectedGig.title}` : `Save weights for ${selectedGig.title}`}
                   </span>
                 </button>
               </div>
@@ -993,8 +890,8 @@ const MatchingDashboard: React.FC = () => {
                       gigHasWeights ? 'text-green-800' : 'text-blue-800'
                     }`}>
                       {gigHasWeights 
-                        ? `Click "Adjust Weights" to update weights for ${selectedGig.title}, then use "Search with current weights" to test or "Update weights & Search" to save and search`
-                        : `Click "Adjust Weights" to configure weights for ${selectedGig.title}, then use "Search with current weights" to test or "Save weights & Search" to save and search`
+                        ? `Click "Adjust Weights" to update weights for ${selectedGig.title}. Results will update automatically when you change weights. Use "Update weights & Search" to save your changes.`
+                        : `Click "Adjust Weights" to configure weights for ${selectedGig.title}. Results will update automatically when you change weights. Use "Save weights & Search" to save your changes.`
                       }
                     </p>
                   </div>
