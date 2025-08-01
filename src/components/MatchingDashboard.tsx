@@ -9,6 +9,20 @@ import {
   getGigsByCompanyId,
   createGigAgent,
 } from "../api";
+// Local function to get gig agents for a specific gig
+const getGigAgentsForGig = async (gigId: string): Promise<any[]> => {
+  try {
+    const MATCHING_API_URL = import.meta.env.VITE_MATCHING_API_URL || 'https://api-matching.harx.ai/api';
+    const response = await fetch(`${MATCHING_API_URL}/gig-agents/gig/${gigId}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch gig agents');
+    }
+    return await response.json();
+  } catch (error: any) {
+    console.error('Error fetching gig agents for gig:', error);
+    throw error;
+  }
+};
 import { getAllSkills, getLanguages, type Skill, type Language } from "../api/skillsApi";
 import { saveGigWeights, getGigWeights, resetGigWeights } from "../api/gigWeightsApi";
 
@@ -120,6 +134,7 @@ const MatchingDashboard: React.FC = () => {
   }>({ professional: [], technical: [], soft: [] });
   const [languages, setLanguages] = useState<Language[]>([]);
   const [shouldAutoSearch, setShouldAutoSearch] = useState(false);
+  const [invitedAgents, setInvitedAgents] = useState<Set<string>>(new Set());
 
   const handleTabClick = (tab: TabType) => {
     setActiveTab(tab);
@@ -144,16 +159,15 @@ const MatchingDashboard: React.FC = () => {
     setSelectedGig(gig);
     setCurrentPage(1);
     
-    // Disable auto search when selecting a gig
-    setShouldAutoSearch(false);
-    
     // Reset weights to defaults first
     setWeights(defaultMatchingWeights);
     setGigHasWeights(false);
     
+    let savedWeights = null;
+    
     // Check if gig has saved weights and load them into Adjust Weights
     try {
-      const savedWeights = await getGigWeights(gig._id || '');
+      savedWeights = await getGigWeights(gig._id || '');
       setWeights(savedWeights.matchingWeights);
       setGigHasWeights(true);
       console.log('✅ Gig has saved weights, loaded into Adjust Weights:', gig._id);
@@ -165,6 +179,85 @@ const MatchingDashboard: React.FC = () => {
     // Clear previous matches when selecting a new gig
     setMatches([]);
     setMatchStats(null);
+    
+    // Fetch invited agents for this gig
+    try {
+      const gigAgents = await getGigAgentsForGig(gig._id || '');
+      const invitedAgentIds = new Set<string>(gigAgents.map((ga: any) => ga.agentId as string));
+      setInvitedAgents(invitedAgentIds);
+      console.log('📧 Invited agents for gig:', invitedAgentIds);
+    } catch (error) {
+      console.error('Error fetching invited agents:', error);
+      setInvitedAgents(new Set<string>());
+    }
+    
+    // Automatically search for matches with current weights
+    setLoading(true);
+    try {
+      // Use saved weights if available, otherwise use default weights
+      const weightsToUse = savedWeights?.matchingWeights || defaultMatchingWeights;
+      console.log('🔍 Searching with weights:', weightsToUse);
+      
+      const gigResponse = await findMatchesForGig(gig._id || '', weightsToUse);
+      console.log('=== GIG RESPONSE AFTER SELECTION ===', gigResponse);
+      
+      setMatches(gigResponse.preferedmatches || gigResponse.matches || []);
+      setMatchStats({
+        totalMatches: gigResponse.totalMatches || 0,
+        perfectMatches: gigResponse.perfectMatches || 0,
+        partialMatches: gigResponse.partialMatches || 0,
+        noMatches: gigResponse.noMatches || 0,
+        languageStats: gigResponse.languageStats || {
+          perfectMatches: 0,
+          partialMatches: 0,
+          noMatches: 0,
+          totalMatches: 0
+        },
+        skillsStats: gigResponse.skillsStats || {
+          perfectMatches: 0,
+          partialMatches: 0,
+          noMatches: 0,
+          totalMatches: 0
+        },
+        industryStats: (gigResponse as any).industryStats || {
+          perfectMatches: 0,
+          partialMatches: 0,
+          neutralMatches: 0,
+          noMatches: 0,
+          totalMatches: 0
+        },
+        activityStats: (gigResponse as any).activityStats || {
+          perfectMatches: 0,
+          partialMatches: 0,
+          neutralMatches: 0,
+          noMatches: 0,
+          totalMatches: 0
+        },
+        experienceStats: (gigResponse as any).experienceStats || {
+          perfectMatches: 0,
+          partialMatches: 0,
+          noMatches: 0,
+          totalMatches: 0
+        },
+        timezoneStats: (gigResponse as any).timezoneStats || {
+          perfectMatches: 0,
+          partialMatches: 0,
+          noMatches: 0,
+          totalMatches: 0
+        },
+        regionStats: (gigResponse as any).regionStats || {
+          perfectMatches: 0,
+          partialMatches: 0,
+          noMatches: 0,
+          totalMatches: 0
+        }
+      });
+    } catch (error) {
+      console.error('Error searching for matches after gig selection:', error);
+      setError("Failed to get matches. Please try again.");
+    } finally {
+      setLoading(false);
+    }
     
     setTimeout(scrollToResults, 100);
   };
@@ -248,6 +341,25 @@ const MatchingDashboard: React.FC = () => {
     getMatches();
   }, [activeTab, selectedRep, weights, reps, initialLoading, shouldAutoSearch]);
 
+  // Fetch invited agents when matches are loaded for a gig
+  useEffect(() => {
+    const fetchInvitedAgents = async () => {
+      if (activeTab === "gigs" && selectedGig && matches.length > 0) {
+        try {
+          const gigAgents = await getGigAgentsForGig(selectedGig._id || '');
+          const invitedAgentIds = new Set<string>(gigAgents.map((ga: any) => ga.agentId as string));
+          setInvitedAgents(invitedAgentIds);
+          console.log('📧 Invited agents for gig (matches loaded):', invitedAgentIds);
+        } catch (error) {
+          console.error('Error fetching invited agents:', error);
+          setInvitedAgents(new Set<string>());
+        }
+      }
+    };
+    
+    fetchInvitedAgents();
+  }, [activeTab, selectedGig, matches]);
+
   // Helper functions to get skill and language names
   const getSkillNameById = (skillId: string, skillType: 'professional' | 'technical' | 'soft') => {
     const skillArray = skills[skillType];
@@ -330,7 +442,7 @@ const MatchingDashboard: React.FC = () => {
       const gigResponse = await findMatchesForGig(selectedGig._id || '', weights);
       console.log('=== GIG RESPONSE AFTER SAVE ===', gigResponse);
       
-      setMatches(gigResponse.matches || gigResponse.preferedmatches || []);
+      setMatches(gigResponse.preferedmatches || gigResponse.matches || []);
       setMatchStats({
         totalMatches: gigResponse.totalMatches || 0,
         perfectMatches: gigResponse.perfectMatches || 0,
@@ -381,6 +493,18 @@ const MatchingDashboard: React.FC = () => {
           totalMatches: 0
         }
       });
+      
+      // Fetch invited agents after getting matches
+      try {
+        const gigAgents = await getGigAgentsForGig(selectedGig._id || '');
+        const invitedAgentIds = new Set<string>(gigAgents.map((ga: any) => ga.agentId as string));
+        setInvitedAgents(invitedAgentIds);
+        console.log('📧 Invited agents for gig (after save):', invitedAgentIds);
+      } catch (error) {
+        console.error('Error fetching invited agents after save:', error);
+        setInvitedAgents(new Set<string>());
+      }
+      
       setLoading(false);
       
       // Scroll to results after search
@@ -448,6 +572,18 @@ const MatchingDashboard: React.FC = () => {
       const response = await createGigAgent(requestData);
 
       console.log('Gig-Agent created successfully:', response);
+      
+      // Add agent to invited list
+      setInvitedAgents(prev => new Set([...prev, match.agentId]));
+      
+      // Update the match object to mark it as invited
+      setMatches(prevMatches => 
+        prevMatches.map(m => 
+          m.agentId === match.agentId 
+            ? { ...m, isInvited: true }
+            : m
+        )
+      );
       
       // Close the modal after successful creation
       setTimeout(() => {
@@ -763,8 +899,8 @@ const MatchingDashboard: React.FC = () => {
                       gigHasWeights ? 'text-green-800' : 'text-blue-800'
                     }`}>
                       {gigHasWeights 
-                        ? `Click "Adjust Weights" to update weights for ${selectedGig.title}, then click "Update weights & Search"`
-                        : `Click "Adjust Weights" to configure weights for ${selectedGig.title}, then click "Save weights & Search"`
+                        ? `Click "Adjust Weights" to update weights for ${selectedGig.title}, then click "Update weights & Search" to refresh results`
+                        : `Click "Adjust Weights" to configure weights for ${selectedGig.title}, then click "Save weights & Search" to refresh results`
                       }
                     </p>
                   </div>
@@ -1078,16 +1214,6 @@ const MatchingDashboard: React.FC = () => {
                                   <div className="text-xs text-gray-600">
                                     Score: {(match.availabilityMatch.score * 100).toFixed(1)}%
                                   </div>
-                                  <div className={`text-xs px-2 py-1 rounded ${
-                                    match.availabilityMatch.matchStatus === 'perfect_match' 
-                                      ? 'bg-green-100 text-green-800' 
-                                      : match.availabilityMatch.matchStatus === 'partial_match'
-                                      ? 'bg-yellow-100 text-yellow-800'
-                                      : 'bg-red-100 text-red-800'
-                                  }`}>
-                                    {match.availabilityMatch.matchStatus === 'perfect_match' ? '✓ Perfect' : 
-                                     match.availabilityMatch.matchStatus === 'partial_match' ? '~ Partial' : '✗ No Match'}
-                                  </div>
                                 </div>
                               ) : (
                                 <div className="text-gray-400 text-sm">No availability data</div>
@@ -1103,30 +1229,34 @@ const MatchingDashboard: React.FC = () => {
                                   <div className="text-xs text-gray-600">
                                     Required: {match.experienceMatch.details.gigRequiredExperience} years
                                   </div>
-                                  <div className={`text-xs px-2 py-1 rounded ${
-                                    match.experienceMatch.matchStatus === 'perfect_match' 
-                                      ? 'bg-green-100 text-green-800' 
-                                      : match.experienceMatch.matchStatus === 'partial_match'
-                                      ? 'bg-yellow-100 text-yellow-800'
-                                      : 'bg-red-100 text-red-800'
-                                  }`}>
-                                    {match.experienceMatch.matchStatus === 'perfect_match' ? '✓ Perfect' : 
-                                     match.experienceMatch.matchStatus === 'partial_match' ? '~ Partial' : '✗ No Match'}
-                                  </div>
                                 </div>
                               ) : (
                                 <div className="text-gray-400 text-sm">No experience data</div>
                               )}
                             </td>
                             <td className="px-6 py-4 text-center">
-                              <button
-                                className="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-blue-500 to-violet-600 text-white rounded-lg shadow-md hover:from-blue-600 hover:to-violet-700 transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-lg font-semibold text-base gap-2 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
-                                onClick={() => handleCreateGigAgent(match)}
-                                title="Inviter cet agent à ce gig"
-                              >
-                                <Zap className="w-5 h-5 mr-1 animate-pulse" />
-                                Invite
-                              </button>
+                              {(() => {
+                                // Utiliser l'information isInvited du backend si disponible, sinon utiliser le state local
+                                const isInvited = match.isInvited !== undefined ? match.isInvited : invitedAgents.has(match.agentId);
+                                console.log(`🔍 Agent ${match.agentId} invited status:`, isInvited, 'From backend:', match.isInvited, 'From local state:', invitedAgents.has(match.agentId));
+                                return isInvited ? (
+                                  <div className="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg shadow-md font-semibold text-base gap-2">
+                                    <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    Invited
+                                  </div>
+                                ) : (
+                                  <button
+                                    className="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-blue-500 to-violet-600 text-white rounded-lg shadow-md hover:from-blue-600 hover:to-violet-700 transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-lg font-semibold text-base gap-2 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
+                                    onClick={() => handleCreateGigAgent(match)}
+                                    title="Inviter cet agent à ce gig"
+                                  >
+                                    <Zap className="w-5 h-5 mr-1 animate-pulse" />
+                                    Invite
+                                  </button>
+                                );
+                              })()}
                             </td>
                           </tr>
                           </React.Fragment>
