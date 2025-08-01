@@ -175,7 +175,7 @@ const MatchingDashboard: React.FC = () => {
       const gigResponse = await findMatchesForGig(gig._id || '', weightsToUse);
       console.log('=== GIG RESPONSE AFTER SELECTION ===', gigResponse);
       
-      setMatches(gigResponse.matches || gigResponse.preferedmatches || []);
+      setMatches(gigResponse.preferedmatches || gigResponse.matches || []);
       setMatchStats({
         totalMatches: gigResponse.totalMatches || 0,
         perfectMatches: gigResponse.perfectMatches || 0,
@@ -397,7 +397,7 @@ const MatchingDashboard: React.FC = () => {
       const gigResponse = await findMatchesForGig(selectedGig._id || '', weights);
       console.log('=== GIG RESPONSE AFTER SAVE ===', gigResponse);
       
-      setMatches(gigResponse.matches || gigResponse.preferedmatches || []);
+      setMatches(gigResponse.preferedmatches || gigResponse.matches || []);
       setMatchStats({
         totalMatches: gigResponse.totalMatches || 0,
         perfectMatches: gigResponse.perfectMatches || 0,
