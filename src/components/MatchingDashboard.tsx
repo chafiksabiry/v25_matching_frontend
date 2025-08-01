@@ -937,153 +937,26 @@ const MatchingDashboard: React.FC = () => {
                   <p className="text-sm text-gray-500 mb-4">
                     {gig.companyName}
                   </p>
-                  <div className="space-y-3 text-sm text-gray-600">
-                    {/* Experience */}
+                  <div className="space-y-2 text-sm text-gray-600">
                     <div className="flex items-center space-x-2">
                       <Clock size={16} className="text-gray-400" />
-                      <p>Experience: {gig.seniority?.yearsExperience || gig.requiredExperience || "N/A"} years</p>
+                      <p>Required Experience: {gig.seniority?.yearsExperience}</p>
                     </div>
-                    
-                    {/* Skills */}
-                    {gig.skills && (gig.skills.technical?.length > 0 || gig.skills.professional?.length > 0 || gig.skills.soft?.length > 0) && (
-                      <div className="space-y-1">
-                        <div className="flex items-center space-x-2">
-                          <Brain size={16} className="text-gray-400" />
-                          <p className="font-medium text-gray-700">Skills:</p>
-                        </div>
-                        <div className="ml-6 space-y-1">
-                          {gig.skills.technical?.length > 0 && (
-                            <div className="flex flex-wrap gap-1">
-                              <span className="text-xs text-gray-500">Technical:</span>
-                              {gig.skills.technical.slice(0, 2).map((skill: any, i: number) => (
-                                <span key={i} className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded">
-                                  {skill.skill}
-                                </span>
-                              ))}
-                              {gig.skills.technical.length > 2 && (
-                                <span className="text-xs text-gray-500">+{gig.skills.technical.length - 2}</span>
-                              )}
-                            </div>
-                          )}
-                          {gig.skills.professional?.length > 0 && (
-                            <div className="flex flex-wrap gap-1">
-                              <span className="text-xs text-gray-500">Professional:</span>
-                              {gig.skills.professional.slice(0, 2).map((skill: any, i: number) => (
-                                <span key={i} className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded">
-                                  {skill.skill}
-                                </span>
-                              ))}
-                              {gig.skills.professional.length > 2 && (
-                                <span className="text-xs text-gray-500">+{gig.skills.professional.length - 2}</span>
-                              )}
-                            </div>
-                          )}
-                          {gig.skills.soft?.length > 0 && (
-                            <div className="flex flex-wrap gap-1">
-                              <span className="text-xs text-gray-500">Soft:</span>
-                              {gig.skills.soft.slice(0, 2).map((skill: any, i: number) => (
-                                <span key={i} className="text-xs px-2 py-1 bg-purple-100 text-purple-800 rounded">
-                                  {skill.skill}
-                                </span>
-                              ))}
-                              {gig.skills.soft.length > 2 && (
-                                <span className="text-xs text-gray-500">+{gig.skills.soft.length - 2}</span>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Languages */}
-                    {gig.skills?.languages && gig.skills.languages.length > 0 && (
-                      <div className="space-y-1">
-                        <div className="flex items-center space-x-2">
-                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
-                          </svg>
-                          <p className="font-medium text-gray-700">Languages:</p>
-                        </div>
-                        <div className="ml-6 flex flex-wrap gap-1">
-                          {gig.skills.languages.slice(0, 3).map((lang: any, i: number) => (
-                            <span key={i} className="text-xs px-2 py-1 bg-blue-50 text-blue-800 rounded border border-blue-200">
-                              {lang.language} ({lang.proficiency})
-                            </span>
-                          ))}
-                          {gig.skills.languages.length > 3 && (
-                            <span className="text-xs text-gray-500">+{gig.skills.languages.length - 3}</span>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Industries */}
-                    {gig.industries && gig.industries.length > 0 && (
-                      <div className="space-y-1">
-                        <div className="flex items-center space-x-2">
-                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                          </svg>
-                          <p className="font-medium text-gray-700">Industries:</p>
-                        </div>
-                        <div className="ml-6 flex flex-wrap gap-1">
-                          {gig.industries.slice(0, 3).map((industry: string, i: number) => (
-                            <span key={i} className="text-xs px-2 py-1 bg-green-50 text-green-800 rounded border border-green-200">
-                              {industry}
-                            </span>
-                          ))}
-                          {gig.industries.length > 3 && (
-                            <span className="text-xs text-gray-500">+{gig.industries.length - 3}</span>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Activities */}
-                    {gig.activities && gig.activities.length > 0 && (
-                      <div className="space-y-1">
-                        <div className="flex items-center space-x-2">
-                          <Activity size={16} className="text-gray-400" />
-                          <p className="font-medium text-gray-700">Activities:</p>
-                        </div>
-                        <div className="ml-6 flex flex-wrap gap-1">
-                          {gig.activities.slice(0, 3).map((activity: string, i: number) => (
-                            <span key={i} className="text-xs px-2 py-1 bg-purple-50 text-purple-800 rounded border border-purple-200">
-                              {activity}
-                            </span>
-                          ))}
-                          {gig.activities.length > 3 && (
-                            <span className="text-xs text-gray-500">+{gig.activities.length - 3}</span>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Timezone */}
                     <div className="flex items-center space-x-2">
-                      <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <p>Timezone: {gig.timezone || gig.availability?.timeZone || gig.availability?.time_zone || "Any"}</p>
+                      <Activity size={16} className="text-gray-400" />
+                      <p>
+                        Expected Conversion:{" "}
+                        {gig.expectedConversionRate
+                          ? `${(gig.expectedConversionRate * 100).toFixed(1)}%`
+                          : "N/A"}
+                      </p>
                     </div>
-                    
-                    {/* Region */}
                     <div className="flex items-center space-x-2">
                       <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
-                      <p>Region: {gig.targetRegion || gig.destination_zone || "Any"}</p>
+                      <p>Region: {gig.targetRegion || "Any"}</p>
                     </div>
-                    
-                    {/* Expected Conversion */}
-                    {gig.expectedConversionRate && (
-                      <div className="flex items-center space-x-2">
-                        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                        </svg>
-                        <p>Expected Conversion: {(gig.expectedConversionRate * 100).toFixed(1)}%</p>
-                      </div>
-                    )}
                   </div>
                 </div>
               ))}
@@ -1341,7 +1214,6 @@ const MatchingDashboard: React.FC = () => {
                                   <div className="text-xs text-gray-600">
                                     Score: {(match.availabilityMatch.score * 100).toFixed(1)}%
                                   </div>
-
                                 </div>
                               ) : (
                                 <div className="text-gray-400 text-sm">No availability data</div>
@@ -1357,7 +1229,6 @@ const MatchingDashboard: React.FC = () => {
                                   <div className="text-xs text-gray-600">
                                     Required: {match.experienceMatch.details.gigRequiredExperience} years
                                   </div>
-
                                 </div>
                               ) : (
                                 <div className="text-gray-400 text-sm">No experience data</div>
