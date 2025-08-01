@@ -134,8 +134,13 @@ const MatchingDashboard: React.FC = () => {
   }>({ professional: [], technical: [], soft: [] });
   const [languages, setLanguages] = useState<Language[]>([]);
   const [shouldAutoSearch, setShouldAutoSearch] = useState(false);
-  const [searchTrigger, setSearchTrigger] = useState(0);
   const [invitedAgents, setInvitedAgents] = useState<Set<string>>(new Set());
+  
+  // Track last search parameters to avoid unnecessary API calls
+  const [lastSearchedGigId, setLastSearchedGigId] = useState<string | null>(null);
+  const [lastSearchedWeights, setLastSearchedWeights] = useState<MatchingWeights | null>(null);
+  const [lastSearchedTab, setLastSearchedTab] = useState<TabType | null>(null);
+  const [lastSearchedRepId, setLastSearchedRepId] = useState<string | null>(null);
 
   const handleTabClick = (tab: TabType) => {
     setActiveTab(tab);
@@ -194,7 +199,6 @@ const MatchingDashboard: React.FC = () => {
     
     // Enable auto search to trigger automatic search
     setShouldAutoSearch(true);
-    setSearchTrigger(prev => prev + 1);
     
     setTimeout(scrollToResults, 100);
   };
@@ -243,80 +247,135 @@ const MatchingDashboard: React.FC = () => {
 
 
 
-  // Get matches based on current selection
+  // Fetch matches based on selected tab and criteria
   useEffect(() => {
     const getMatches = async () => {
+      // Skip if still loading initial data
       if (initialLoading) return;
+      
+      // Check if parameters have actually changed to avoid unnecessary API calls
+      const currentGigId = selectedGig?._id || null;
+      const currentRepId = selectedRep?._id || null;
+      
+      const parametersChanged = 
+        lastSearchedTab !== activeTab ||
+        lastSearchedGigId !== currentGigId ||
+        lastSearchedRepId !== currentRepId ||
+        (activeTab === "gigs" && currentGigId && JSON.stringify(lastSearchedWeights) !== JSON.stringify(weights)) ||
+        shouldAutoSearch; // Always search if shouldAutoSearch is true
+      
+      if (!parametersChanged) {
+        console.log('🔄 Skipping search - parameters unchanged');
+        return;
+      }
+      
+      console.log('🔄 Parameters changed, triggering search');
+      console.log('Current tab:', activeTab);
+      console.log('Current gig ID:', currentGigId);
+      console.log('Current rep ID:', currentRepId);
+      console.log('Current weights:', weights);
+      
+      setLoading(true);
+      setError(null);
+      
       try {
-        let response: any;
-        if (activeTab === "reps" && selectedRep && shouldAutoSearch) {
-          setLoading(true);
-          response = await findGigsForRep(selectedRep._id || '', weights);
-          setMatches(response.preferedmatches || response.matches || []);
-          setMatchStats(null);
-          setLoading(false);
-        } else if (activeTab === "optimal" && shouldAutoSearch) {
-          setLoading(true);
-          response = await generateOptimalMatches(weights);
-          setMatches(response.preferedmatches || response.matches || []);
-          setMatchStats(null);
-          setLoading(false);
-        } else if (activeTab === "gigs" && selectedGig && shouldAutoSearch) {
-          // Auto-search for gigs when a gig is selected and auto-search is enabled
-          setLoading(true);
-          response = await findMatchesForGig(selectedGig._id || '', weights);
-          setMatches(response.preferedmatches || response.matches || []);
+        if (activeTab === "gigs" && selectedGig) {
+          console.log("Searching for reps matching gig:", selectedGig.title);
+          const matchesData = await findMatchesForGig(selectedGig._id || '', weights);
+          console.log("=== MATCHES DATA ===", matchesData);
+          setMatches(matchesData.preferedmatches || []);
           setMatchStats({
-            totalMatches: response.totalMatches || 0,
-            perfectMatches: response.perfectMatches || 0,
-            partialMatches: response.partialMatches || 0,
-            noMatches: response.noMatches || 0,
-            languageStats: response.languageStats || {
+            totalMatches: matchesData.totalMatches || 0,
+            perfectMatches: matchesData.perfectMatches || 0,
+            partialMatches: matchesData.partialMatches || 0,
+            noMatches: matchesData.noMatches || 0,
+            languageStats: matchesData.languageStats || {
               perfectMatches: 0,
               partialMatches: 0,
               noMatches: 0,
               totalMatches: 0
             },
-            skillsStats: response.skillsStats || {
+            skillsStats: matchesData.skillsStats || {
               perfectMatches: 0,
               partialMatches: 0,
               noMatches: 0,
               totalMatches: 0
             },
-            industryStats: (response as any).industryStats || {
-              perfectMatches: 0,
-              partialMatches: 0,
-              neutralMatches: 0,
-              noMatches: 0,
-              totalMatches: 0
-            },
-            activityStats: (response as any).activityStats || {
+            industryStats: (matchesData as any).industryStats || {
               perfectMatches: 0,
               partialMatches: 0,
               neutralMatches: 0,
               noMatches: 0,
               totalMatches: 0
             },
-            experienceStats: (response as any).experienceStats || {
+            activityStats: (matchesData as any).activityStats || {
+              perfectMatches: 0,
+              partialMatches: 0,
+              neutralMatches: 0,
+              noMatches: 0,
+              totalMatches: 0
+            },
+            experienceStats: (matchesData as any).experienceStats || {
               perfectMatches: 0,
               partialMatches: 0,
               noMatches: 0,
               totalMatches: 0
             },
-            timezoneStats: (response as any).timezoneStats || {
+            timezoneStats: (matchesData as any).timezoneStats || {
               perfectMatches: 0,
               partialMatches: 0,
               noMatches: 0,
               totalMatches: 0
             },
-            regionStats: (response as any).regionStats || {
+            regionStats: (matchesData as any).regionStats || {
+              perfectMatches: 0,
+              partialMatches: 0,
+              noMatches: 0,
+              totalMatches: 0
+            },
+            availabilityStats: (matchesData as any).availabilityStats || {
               perfectMatches: 0,
               partialMatches: 0,
               noMatches: 0,
               totalMatches: 0
             }
-          });
-          setLoading(false);
+          } as any);
+          
+          // Update last search parameters after successful search
+          setLastSearchedTab(activeTab);
+          setLastSearchedGigId(currentGigId);
+          setLastSearchedRepId(currentRepId);
+          setLastSearchedWeights(JSON.parse(JSON.stringify(weights))); // Deep copy
+          setShouldAutoSearch(false);
+          
+        } else if (activeTab === "reps" && selectedRep) {
+          console.log("Searching for gigs matching rep:", selectedRep.personalInfo.name);
+          const matchesData = await findGigsForRep(selectedRep._id || '', weights);
+          console.log("=== MATCHES DATA ===", matchesData);
+          setMatches(matchesData.matches || []);
+          setMatchStats(null); // findGigsForRep doesn't return stats
+          
+          // Update last search parameters after successful search
+          setLastSearchedTab(activeTab);
+          setLastSearchedGigId(currentGigId);
+          setLastSearchedRepId(currentRepId);
+          setLastSearchedWeights(JSON.parse(JSON.stringify(weights))); // Deep copy
+          setShouldAutoSearch(false);
+          
+        } else if (activeTab === "optimal") {
+          console.log("Generating optimal matches...");
+          const matchesData = await generateOptimalMatches(weights);
+          console.log("=== OPTIMAL MATCHES DATA ===", matchesData);
+          setMatches(matchesData.matches || []);
+          setMatchStats(null); // generateOptimalMatches doesn't return stats
+          
+          // Update last search parameters after successful search
+          setLastSearchedTab(activeTab);
+          setLastSearchedGigId(currentGigId);
+          setLastSearchedRepId(currentRepId);
+          setLastSearchedWeights(JSON.parse(JSON.stringify(weights))); // Deep copy
+          setShouldAutoSearch(false);
+          
         } else if (activeTab === "gigs" && !selectedGig) {
           // Clear matches when no gig is selected
           setMatches([]);
@@ -331,7 +390,7 @@ const MatchingDashboard: React.FC = () => {
       }
     };
     getMatches();
-  }, [activeTab, selectedRep, selectedGig, weights, reps, initialLoading, shouldAutoSearch, searchTrigger]);
+  }, [activeTab, selectedRep, selectedGig, weights, reps, initialLoading, shouldAutoSearch, lastSearchedTab, lastSearchedGigId, lastSearchedRepId, lastSearchedWeights]);
 
   // Fetch invited agents when matches are loaded for a gig
   useEffect(() => {
@@ -393,7 +452,7 @@ const MatchingDashboard: React.FC = () => {
     // Auto-search when weights change if a gig is selected
     if (selectedGig && activeTab === "gigs") {
       setShouldAutoSearch(true);
-      setSearchTrigger(prev => prev + 1);
+      // Remove searchTrigger increment - we'll use parameter comparison instead
     }
   };
 
