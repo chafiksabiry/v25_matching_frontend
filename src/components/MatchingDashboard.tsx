@@ -9,7 +9,7 @@ import {
   getGigsByCompanyId,
   createGigAgent,
 } from "../api";
-// Import getGigAgentsForGig function
+// Local function to get gig agents for a specific gig
 const getGigAgentsForGig = async (gigId: string): Promise<any[]> => {
   try {
     const MATCHING_API_URL = import.meta.env.VITE_MATCHING_API_URL || 'https://api-matching.harx.ai/api';
@@ -341,6 +341,25 @@ const MatchingDashboard: React.FC = () => {
     getMatches();
   }, [activeTab, selectedRep, weights, reps, initialLoading, shouldAutoSearch]);
 
+  // Fetch invited agents when matches are loaded for a gig
+  useEffect(() => {
+    const fetchInvitedAgents = async () => {
+      if (activeTab === "gigs" && selectedGig && matches.length > 0) {
+        try {
+          const gigAgents = await getGigAgentsForGig(selectedGig._id || '');
+          const invitedAgentIds = new Set<string>(gigAgents.map((ga: any) => ga.agentId as string));
+          setInvitedAgents(invitedAgentIds);
+          console.log('📧 Invited agents for gig (matches loaded):', invitedAgentIds);
+        } catch (error) {
+          console.error('Error fetching invited agents:', error);
+          setInvitedAgents(new Set<string>());
+        }
+      }
+    };
+    
+    fetchInvitedAgents();
+  }, [activeTab, selectedGig, matches]);
+
   // Helper functions to get skill and language names
   const getSkillNameById = (skillId: string, skillType: 'professional' | 'technical' | 'soft') => {
     const skillArray = skills[skillType];
@@ -474,6 +493,18 @@ const MatchingDashboard: React.FC = () => {
           totalMatches: 0
         }
       });
+      
+      // Fetch invited agents after getting matches
+      try {
+        const gigAgents = await getGigAgentsForGig(selectedGig._id || '');
+        const invitedAgentIds = new Set<string>(gigAgents.map((ga: any) => ga.agentId as string));
+        setInvitedAgents(invitedAgentIds);
+        console.log('📧 Invited agents for gig (after save):', invitedAgentIds);
+      } catch (error) {
+        console.error('Error fetching invited agents after save:', error);
+        setInvitedAgents(new Set<string>());
+      }
+      
       setLoading(false);
       
       // Scroll to results after search
