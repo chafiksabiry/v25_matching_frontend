@@ -438,3 +438,182 @@ export interface ExperienceMatch {
   matchStatus: 'perfect_match' | 'partial_match' | 'no_match';
 }
 
+// Nouvelle interface pour GigAgent
+export interface GigAgent {
+  _id?: string;
+  agentId: string;
+  gigId: string;
+  status: 'pending' | 'accepted' | 'rejected' | 'completed' | 'cancelled';
+  matchScore: number;
+  matchStatus: 'perfect_match' | 'partial_match' | 'no_match';
+  matchDetails: {
+    languageMatch: {
+      score: number;
+      details: {
+        matchingLanguages: Array<{
+          language: string;
+          languageName: string;
+          requiredLevel: string;
+          agentLevel: string;
+        }>;
+        missingLanguages: Array<{
+          language: string;
+          languageName: string;
+          requiredLevel: string;
+        }>;
+        insufficientLanguages: Array<{
+          language: string;
+          languageName: string;
+          requiredLevel: string;
+          agentLevel: string;
+        }>;
+        matchStatus: 'perfect_match' | 'partial_match' | 'no_match';
+      };
+    };
+    skillsMatch: {
+      score: number;
+      details: {
+        matchingSkills: Array<{
+          skill: string;
+          skillName: string;
+          requiredLevel: number;
+          agentLevel: number;
+          type: 'technical' | 'professional' | 'soft' | 'contactCenter';
+        }>;
+        missingSkills: Array<{
+          skill: string;
+          skillName: string;
+          type: 'technical' | 'professional' | 'soft' | 'contactCenter';
+          requiredLevel: number;
+        }>;
+        insufficientSkills: Array<{
+          skill: string;
+          skillName: string;
+          requiredLevel: number;
+          agentLevel: number;
+          type: 'technical' | 'professional' | 'soft' | 'contactCenter';
+        }>;
+        matchStatus: 'perfect_match' | 'partial_match' | 'no_match';
+      };
+    };
+    industryMatch: {
+      score: number;
+      details: {
+        matchingIndustries: Array<{
+          industry: string;
+          industryName: string;
+          agentIndustryName: string;
+        }>;
+        missingIndustries: Array<{
+          industry: string;
+          industryName: string;
+        }>;
+        matchStatus: 'perfect_match' | 'partial_match' | 'no_match' | 'neutral_match';
+      };
+    };
+    activityMatch: {
+      score: number;
+      details: {
+        matchingActivities: Array<{
+          activity: string;
+          activityName: string;
+          agentActivityName: string;
+        }>;
+        missingActivities: Array<{
+          activity: string;
+          activityName: string;
+        }>;
+        matchStatus: 'perfect_match' | 'partial_match' | 'no_match' | 'neutral_match';
+      };
+    };
+    experienceMatch: {
+      score: number;
+      details: {
+        gigRequiredExperience: number;
+        agentExperience: number;
+        difference: number;
+        reason: string;
+      };
+      matchStatus: 'perfect_match' | 'partial_match' | 'no_match';
+    };
+    timezoneMatch: {
+      score: number;
+      details: {
+        gigTimezone: string;
+        agentTimezone: string;
+        gigGmtOffset?: number;
+        agentGmtOffset?: number;
+        gmtOffsetDifference?: number;
+        reason: string;
+      };
+      matchStatus: 'perfect_match' | 'partial_match' | 'no_match';
+    };
+    regionMatch: {
+      score: number;
+      details: {
+        gigDestinationZone: string;
+        agentCountryCode: string;
+        reason: string;
+      };
+      matchStatus: 'perfect_match' | 'partial_match' | 'no_match';
+    };
+    availabilityMatch: {
+      score: number;
+      details: {
+        matchingDays: Array<{
+          day: string;
+          gigHours: { start: string; end: string };
+          agentHours: { start: string; end: string };
+        }>;
+        missingDays: string[];
+        insufficientHours: Array<{
+          day: string;
+          gigHours: { start: string; end: string };
+          agentHours: { start: string; end: string };
+        }>;
+      };
+      matchStatus: 'perfect_match' | 'partial_match' | 'no_match';
+    };
+  };
+  emailSent: boolean;
+  emailSentAt?: Date;
+  agentResponse: 'accepted' | 'rejected' | 'pending';
+  agentResponseAt?: Date;
+  notes?: string;
+  assignedBy?: string;
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  deadline?: Date;
+  matchingWeights: {
+    experience: number;
+    skills: number;
+    industry: number;
+    languages: number;
+    availability: number;
+    timezone: number;
+    activities: number;
+    region: number;
+  };
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Interface pour la création d'un GigAgent
+export interface GigAgentRequest {
+  agentId: string;
+  gigId: string;
+  matchDetails?: any;
+  notes?: string;
+  assignedBy?: string;
+  priority?: 'low' | 'medium' | 'high' | 'urgent';
+  deadline?: Date;
+  matchingWeights?: MatchingWeights;
+}
+
+// Interface pour la réponse de création d'un GigAgent
+export interface GigAgentResponse {
+  message: string;
+  gigAgent: GigAgent;
+  emailSent: boolean;
+  matchScore: number;
+}
+

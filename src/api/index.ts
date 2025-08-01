@@ -163,7 +163,44 @@ interface GigAgentRequest {
 
 interface GigAgentResponse {
   message: string;
-  gigAgent: any;
+  gigAgent: {
+    _id: string;
+    agentId: string;
+    gigId: string;
+    status: string;
+    matchScore: number;
+    matchStatus: string;
+    matchDetails: {
+      languageMatch: any;
+      skillsMatch: any;
+      industryMatch: any;
+      activityMatch: any;
+      experienceMatch: any;
+      timezoneMatch: any;
+      regionMatch: any;
+      availabilityMatch: any;
+    };
+    emailSent: boolean;
+    emailSentAt: string;
+    agentResponse: string;
+    agentResponseAt: string;
+    notes: string;
+    assignedBy: string;
+    priority: string;
+    deadline: string;
+    matchingWeights: {
+      experience: number;
+      skills: number;
+      industry: number;
+      languages: number;
+      availability: number;
+      timezone: number;
+      activities: number;
+      region: number;
+    };
+    createdAt: string;
+    updatedAt: string;
+  };
   emailSent: boolean;
   matchScore: number;
 }
