@@ -144,16 +144,15 @@ const MatchingDashboard: React.FC = () => {
     setSelectedGig(gig);
     setCurrentPage(1);
     
-    // Disable auto search when selecting a gig
-    setShouldAutoSearch(false);
-    
     // Reset weights to defaults first
     setWeights(defaultMatchingWeights);
     setGigHasWeights(false);
     
+    let savedWeights = null;
+    
     // Check if gig has saved weights and load them into Adjust Weights
     try {
-      const savedWeights = await getGigWeights(gig._id || '');
+      savedWeights = await getGigWeights(gig._id || '');
       setWeights(savedWeights.matchingWeights);
       setGigHasWeights(true);
       console.log('✅ Gig has saved weights, loaded into Adjust Weights:', gig._id);
@@ -165,6 +164,70 @@ const MatchingDashboard: React.FC = () => {
     // Clear previous matches when selecting a new gig
     setMatches([]);
     setMatchStats(null);
+    
+    // Automatically search for matches with current weights
+    setLoading(true);
+    try {
+      const gigResponse = await findMatchesForGig(gig._id || '', savedWeights?.matchingWeights || defaultMatchingWeights);
+      console.log('=== GIG RESPONSE AFTER SELECTION ===', gigResponse);
+      
+      setMatches(gigResponse.matches || gigResponse.preferedmatches || []);
+      setMatchStats({
+        totalMatches: gigResponse.totalMatches || 0,
+        perfectMatches: gigResponse.perfectMatches || 0,
+        partialMatches: gigResponse.partialMatches || 0,
+        noMatches: gigResponse.noMatches || 0,
+        languageStats: gigResponse.languageStats || {
+          perfectMatches: 0,
+          partialMatches: 0,
+          noMatches: 0,
+          totalMatches: 0
+        },
+        skillsStats: gigResponse.skillsStats || {
+          perfectMatches: 0,
+          partialMatches: 0,
+          noMatches: 0,
+          totalMatches: 0
+        },
+        industryStats: (gigResponse as any).industryStats || {
+          perfectMatches: 0,
+          partialMatches: 0,
+          neutralMatches: 0,
+          noMatches: 0,
+          totalMatches: 0
+        },
+        activityStats: (gigResponse as any).activityStats || {
+          perfectMatches: 0,
+          partialMatches: 0,
+          neutralMatches: 0,
+          noMatches: 0,
+          totalMatches: 0
+        },
+        experienceStats: (gigResponse as any).experienceStats || {
+          perfectMatches: 0,
+          partialMatches: 0,
+          noMatches: 0,
+          totalMatches: 0
+        },
+        timezoneStats: (gigResponse as any).timezoneStats || {
+          perfectMatches: 0,
+          partialMatches: 0,
+          noMatches: 0,
+          totalMatches: 0
+        },
+        regionStats: (gigResponse as any).regionStats || {
+          perfectMatches: 0,
+          partialMatches: 0,
+          noMatches: 0,
+          totalMatches: 0
+        }
+      });
+    } catch (error) {
+      console.error('Error searching for matches after gig selection:', error);
+      setError("Failed to get matches. Please try again.");
+    } finally {
+      setLoading(false);
+    }
     
     setTimeout(scrollToResults, 100);
   };
@@ -763,8 +826,8 @@ const MatchingDashboard: React.FC = () => {
                       gigHasWeights ? 'text-green-800' : 'text-blue-800'
                     }`}>
                       {gigHasWeights 
-                        ? `Click "Adjust Weights" to update weights for ${selectedGig.title}, then click "Update weights & Search"`
-                        : `Click "Adjust Weights" to configure weights for ${selectedGig.title}, then click "Save weights & Search"`
+                        ? `Click "Adjust Weights" to update weights for ${selectedGig.title}, then click "Update weights & Search" to refresh results`
+                        : `Click "Adjust Weights" to configure weights for ${selectedGig.title}, then click "Save weights & Search" to refresh results`
                       }
                     </p>
                   </div>
