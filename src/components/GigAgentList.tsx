@@ -180,8 +180,8 @@ const GigAgentList: React.FC<GigAgentListProps> = ({ gigId, agentId }) => {
                     Voir détails
                   </button>
                   {gigAgent.emailSent && (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      Email envoyé
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                      Invited
                     </span>
                   )}
                 </div>

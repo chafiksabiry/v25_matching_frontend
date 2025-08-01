@@ -228,6 +228,16 @@ export const createGigAgent = async (data: GigAgentRequest): Promise<GigAgentRes
   }
 };
 
-
+// Get gig agents for a specific gig
+export const getGigAgentsForGig = async (gigId: string): Promise<any[]> => {
+  try {
+    const MATCHING_API_URL = import.meta.env.VITE_MATCHING_API_URL || 'https://api-matching.harx.ai/api';
+    const response = await axios.get(`${MATCHING_API_URL}/gig-agents/gig/${gigId}`);
+    return response.data;
+  } catch (error: any) {
+    console.error('Error fetching gig agents for gig:', error);
+    throw error;
+  }
+};
 
 export default api;
