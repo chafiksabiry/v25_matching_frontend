@@ -1051,7 +1051,6 @@ const MatchingDashboard: React.FC = () => {
                       <thead className="bg-indigo-50">
                         <tr>
                           <th className="px-6 py-4 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Personal Info</th>
-                          <th className="px-6 py-4 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Match Status</th>
                           <th className="px-6 py-4 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Languages</th>
                           <th className="px-6 py-4 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Skills</th>
                           <th className="px-6 py-4 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Industries</th>
@@ -1103,41 +1102,6 @@ const MatchingDashboard: React.FC = () => {
                                     </span>
                                   </div>
                                   {/* FIN REGION */}
-                                </div>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4">
-                              {/* OVERALL MATCH STATUS */}
-                              <div className="flex flex-col gap-2">
-                                <div className={`inline-flex items-center px-3 py-2 rounded-lg text-sm font-semibold ${
-                                  match.matchStatus === 'perfect_match' 
-                                    ? 'bg-green-100 text-green-800 border border-green-200' 
-                                    : match.matchStatus === 'partial_match'
-                                    ? 'bg-yellow-100 text-yellow-800 border border-yellow-200'
-                                    : 'bg-red-100 text-red-800 border border-red-200'
-                                }`}>
-                                  {match.matchStatus === 'perfect_match' ? (
-                                    <>
-                                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                                      </svg>
-                                      Perfect Match
-                                    </>
-                                  ) : match.matchStatus === 'partial_match' ? (
-                                    <>
-                                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                      </svg>
-                                      Partial Match
-                                    </>
-                                  ) : (
-                                    <>
-                                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                                      </svg>
-                                      No Match
-                                    </>
-                                  )}
                                 </div>
                               </div>
                             </td>
