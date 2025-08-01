@@ -168,7 +168,11 @@ const MatchingDashboard: React.FC = () => {
     // Automatically search for matches with current weights
     setLoading(true);
     try {
-      const gigResponse = await findMatchesForGig(gig._id || '', savedWeights?.matchingWeights || defaultMatchingWeights);
+      // Use saved weights if available, otherwise use default weights
+      const weightsToUse = savedWeights?.matchingWeights || defaultMatchingWeights;
+      console.log('🔍 Searching with weights:', weightsToUse);
+      
+      const gigResponse = await findMatchesForGig(gig._id || '', weightsToUse);
       console.log('=== GIG RESPONSE AFTER SELECTION ===', gigResponse);
       
       setMatches(gigResponse.matches || gigResponse.preferedmatches || []);
