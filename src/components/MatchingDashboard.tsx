@@ -55,8 +55,21 @@ const defaultMatchingWeights: MatchingWeights = {
 type TabType = "gigs" | "reps" | "optimal";
 
 const MatchingDashboard: React.FC = () => {
+  // Debug component mounting
+  useEffect(() => {
+    console.log('🚀 COMPONENT MOUNTED');
+    return () => {
+      console.log('💀 COMPONENT UNMOUNTED');
+    };
+  }, []);
+
   const [reps, setReps] = useState<Rep[]>([]);
   const [gigs, setGigs] = useState<Gig[]>([]);
+  
+  // Debug gigs state changes
+  useEffect(() => {
+    console.log('🔍 GIGS STATE CHANGED:', gigs.length, gigs);
+  }, [gigs]);
   const [selectedGig, setSelectedGig] = useState<Gig | null>(null);
   const [selectedRep, setSelectedRep] = useState<Rep | null>(null);
   const [weights, setWeights] = useState<MatchingWeights>(
@@ -223,6 +236,7 @@ const MatchingDashboard: React.FC = () => {
 
   // Fetch reps and gigs on component mount
   useEffect(() => {
+    console.log('🔄 FETCH DATA EFFECT TRIGGERED');
     const fetchData = async () => {
       setInitialLoading(true);
       try {
