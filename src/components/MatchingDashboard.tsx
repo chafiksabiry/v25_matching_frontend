@@ -207,6 +207,16 @@ const MatchingDashboard: React.FC = () => {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+  
+  // Debug pagination
+  console.log('🔍 GIGS DEBUG:', {
+    totalGigs: gigs.length,
+    currentPage,
+    itemsPerPage,
+    paginatedGigs: paginatedGigs.length,
+    gigsData: gigs
+  });
+  
   const totalPages = Math.ceil(
     (activeTab === "gigs" ? gigs.length : reps.length) / itemsPerPage
   );
@@ -228,10 +238,25 @@ const MatchingDashboard: React.FC = () => {
         console.log("=== GIGS DATA ===", gigsData);
         console.log("=== SKILLS DATA ===", skillsData);
         console.log("=== LANGUAGES DATA ===", languagesData);
+        
+        // Debug gigs before setting state
+        console.log('🎯 GIGS DEBUG BEFORE STATE:', {
+          isArray: Array.isArray(gigsData),
+          length: gigsData?.length,
+          firstGig: gigsData?.[0],
+          gigStructure: gigsData?.[0] ? Object.keys(gigsData[0]) : 'No gig'
+        });
+        
         setReps(repsData);
         setGigs(gigsData);
         setSkills(skillsData);
         setLanguages(languagesData);
+        
+        // Debug gigs after setting state
+        console.log('🎯 GIGS DEBUG AFTER STATE SET');
+        setTimeout(() => {
+          console.log('🎯 GIGS STATE:', gigs);
+        }, 100);
         
 
       } catch (error) {
@@ -929,6 +954,7 @@ const MatchingDashboard: React.FC = () => {
         </div>
 
         {/* Selection Area */}
+        {console.log('🔍 GIGS SECTION CONDITIONS:', { activeTab, loading, initialLoading })}
         {activeTab === "gigs" && !loading && (
           <div className={`bg-white rounded-xl shadow-lg p-6 mb-6 transform transition-all duration-300 ${slideUp}`}>
             <h2 className="text-xl font-semibold text-gray-800 mb-6 flex items-center space-x-2">
@@ -960,6 +986,7 @@ const MatchingDashboard: React.FC = () => {
             )}
 
             {/* Gigs Grid */}
+            {console.log('🎯 RENDERING GIGS:', { paginatedGigs, activeTab, loading })}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {paginatedGigs.map((gig) => (
                 <div
