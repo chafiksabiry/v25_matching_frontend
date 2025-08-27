@@ -131,6 +131,11 @@ const MatchingDashboard: React.FC = () => {
 
   } | null>(null);
   const [loading, setLoading] = useState(false);
+  
+  // Debug loading state changes
+  useEffect(() => {
+    console.log('⏳ LOADING STATE CHANGED:', loading);
+  }, [loading]);
   const [aiLoading, setAiLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -419,12 +424,15 @@ const MatchingDashboard: React.FC = () => {
           // Clear matches when no gig is selected
           setMatches([]);
           setMatchStats(null);
+          setLoading(false); // Important: Reset loading state when no gig is selected
         }
       } catch (error) {
         console.error("Error getting matches:", error);
         setError("Failed to get matches. Please try again.");
         setMatches([]);
         setMatchStats(null);
+      } finally {
+        // Always reset loading state regardless of success or error
         setLoading(false);
       }
     };
