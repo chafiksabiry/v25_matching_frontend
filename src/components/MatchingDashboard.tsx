@@ -723,13 +723,33 @@ const MatchingDashboard: React.FC = () => {
                 e.currentTarget.innerHTML = '<div class="flex items-center space-x-2"><div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div><span>Updating...</span></div>';
                 
                 console.log("=== BACK TO ONBOARDING TRIGGERED ===");
-                console.log("Current URL:", window.location.href);
-                console.log("Current timestamp:", new Date().toISOString());
+                console.log("🌐 Current URL:", window.location.href);
+                console.log("⏰ Current timestamp:", new Date().toISOString());
+                console.log("🔍 User Agent:", navigator.userAgent);
+                console.log("📍 Window location details:", {
+                  href: window.location.href,
+                  pathname: window.location.pathname,
+                  search: window.location.search,
+                  hash: window.location.hash,
+                  origin: window.location.origin
+                });
                 
                 try {
                   const companyId = Cookies.get("companyId");
-                  console.log("Company ID:", companyId);
-                  console.log("Company API URL:", import.meta.env.VITE_COMPANY_API_URL);
+                  console.log("🍪 Company ID:", companyId);
+                  console.log("🌐 Company API URL:", import.meta.env.VITE_COMPANY_API_URL);
+                  
+                  // Debug all available cookies
+                  console.log("🍪 All cookies:", document.cookie);
+                  console.log("🍪 Available cookie keys:", Object.keys(Cookies.get()));
+                  
+                  // Debug environment variables
+                  console.log("🔧 Environment variables:", {
+                    NODE_ENV: import.meta.env.NODE_ENV,
+                    MODE: import.meta.env.MODE,
+                    VITE_COMPANY_API_URL: import.meta.env.VITE_COMPANY_API_URL,
+                    VITE_MATCHING_API_URL: import.meta.env.VITE_MATCHING_API_URL
+                  });
                   
                   if (!companyId) {
                     console.warn("⚠️ No companyId found in cookies, proceeding without updating onboarding");
@@ -836,10 +856,27 @@ const MatchingDashboard: React.FC = () => {
 
                   console.log("🎉 Onboarding update process completed successfully!");
                   
+                  // Debug summary before redirect
+                  console.log("=== DEBUG SUMMARY BEFORE REDIRECT ===");
+                  console.log("✅ Step updated:", stepUpdated);
+                  console.log("✅ Phase updated:", phaseUpdated);
+                  console.log("🍪 Company ID:", companyId);
+                  console.log("🌐 API URL:", import.meta.env.VITE_COMPANY_API_URL);
+                  console.log("🎯 Target redirect:", "/app11");
+                  console.log("⏰ Current time:", new Date().toISOString());
+                  console.log("🔍 Current URL before redirect:", window.location.href);
+                  console.log("📊 Success rates:", {
+                    stepUpdateSuccess: stepUpdated,
+                    phaseUpdateSuccess: phaseUpdated,
+                    overallSuccess: stepUpdated || phaseUpdated
+                  });
+                  console.log("===================================");
+                  
                   // Small delay for user feedback
                   setTimeout(() => {
+                    console.log("🚀 REDIRECTING NOW to /app11...");
                     window.location.href = "/app11";
-                  }, 500);
+                  }, 1000); // Increased delay to see debug info
 
                 } catch (error: any) {
                   console.error("💥 Error updating onboarding progress:", error);
@@ -849,14 +886,28 @@ const MatchingDashboard: React.FC = () => {
                     status: error?.response?.status
                   });
                   
+                  // Debug summary in error case
+                  console.log("=== DEBUG SUMMARY (ERROR CASE) ===");
+                  console.log("❌ Error occurred during update process");
+                  console.log("🍪 Company ID:", companyId);
+                  console.log("🌐 API URL:", import.meta.env.VITE_COMPANY_API_URL);
+                  console.log("🎯 Target redirect:", "/app11");
+                  console.log("⏰ Current time:", new Date().toISOString());
+                  console.log("🔍 Current URL before redirect:", window.location.href);
+                  console.log("💥 Error type:", error?.constructor?.name);
+                  console.log("💥 Error message:", error?.message);
+                  console.log("💥 HTTP Status:", error?.response?.status);
+                  console.log("===================================");
+                  
                   // Re-enable button and show error state
                   e.currentTarget.disabled = false;
                   e.currentTarget.innerHTML = '<span>⚠️ Error - Redirecting...</span>';
                   
                   // Continue to redirect even if API calls fail
                   setTimeout(() => {
+                    console.log("🚀 REDIRECTING NOW to /app11 (after error)...");
                     window.location.href = "/app11";
-                  }, 1500);
+                  }, 2000); // Slightly longer delay to see error debug info
                 }
               }}
               className="flex items-center space-x-2 bg-white/10 hover:bg-white/20 px-6 py-2.5 rounded-lg transition-all duration-200 text-white font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
