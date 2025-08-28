@@ -717,98 +717,149 @@ const MatchingDashboard: React.FC = () => {
           </div>
           <div className="flex items-center space-x-4">
             <button
-              onClick={async () => {
-                // Ajouter des console logs avant le back to onboarding
+              onClick={async (e) => {
+                // Prevent multiple clicks
+                e.currentTarget.disabled = true;
+                e.currentTarget.innerHTML = '<div class="flex items-center space-x-2"><div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div><span>Updating...</span></div>';
+                
                 console.log("=== BACK TO ONBOARDING TRIGGERED ===");
                 console.log("Current URL:", window.location.href);
                 console.log("Current timestamp:", new Date().toISOString());
-                console.log("User agent:", navigator.userAgent);
                 
                 try {
                   const companyId = Cookies.get("companyId");
                   console.log("Company ID:", companyId);
                   console.log("Company API URL:", import.meta.env.VITE_COMPANY_API_URL);
                   
-                  // Debug logs
                   if (!companyId) {
-                    console.warn("No companyId found in cookies, proceeding without updating onboarding");
+                    console.warn("⚠️ No companyId found in cookies, proceeding without updating onboarding");
                     window.location.href = "/app11";
                     return;
                   }
 
                   if (!import.meta.env.VITE_COMPANY_API_URL) {
-                    console.error("VITE_COMPANY_API_URL is not defined");
+                    console.error("❌ VITE_COMPANY_API_URL is not defined");
                     window.location.href = "/app11";
                     return;
                   }
 
-                  // Marquer le step 10 de la phase 4 comme completed
-                  console.log("Updating step 10 status...");
-                  console.log("Step URL:", `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/phases/3/steps/10`);
-                  console.log("Step request data:", { status: "completed" });
-                  
-                  let stepUpdated = false;
-                  
-                  // Essayer d'abord phase 3, step 10
+                  // Step 1: Récupérer l'état actuel de l'onboarding
+                  console.log("📊 Fetching current onboarding state...");
+                  let currentOnboardingState = null;
                   try {
-                    const stepResponse = await axios.put(
-                      `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/phases/3/steps/10`,
-                      { status: "completed" }
+                    const stateResponse = await axios.get(
+                      `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding`
                     );
-                    console.log("Step update response (phase 3):", stepResponse.data);
-                    stepUpdated = true;
-                  } catch (stepError: any) {
-                    console.error("Step update error (phase 3):", stepError);
-                    console.error("Step error response:", stepError.response?.data);
-                    console.error("Step error status:", stepError.response?.status);
-                    
-                    // Essayer phase 4, step 10
+                    currentOnboardingState = stateResponse.data;
+                    console.log("✅ Current onboarding state:", currentOnboardingState);
+                  } catch (stateError: any) {
+                    console.warn("⚠️ Could not fetch onboarding state:", stateError.response?.data);
+                  }
+
+                  // Step 2: Mettre à jour le step approprié
+                  console.log("🔄 Updating onboarding step...");
+                  let stepUpdated = false;
+                  const stepsToTry = [
+                    { phase: 3, step: 10, name: "Phase 3, Step 10" },
+                    { phase: 4, step: 10, name: "Phase 4, Step 10" },
+                    { phase: 3, step: 9, name: "Phase 3, Step 9" },
+                    { phase: 4, step: 9, name: "Phase 4, Step 9" }
+                  ];
+
+                  for (const stepConfig of stepsToTry) {
                     try {
-                      console.log("Trying phase 4, step 10...");
-                      const stepResponse2 = await axios.put(
-                        `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/phases/4/steps/10`,
-                        { status: "completed",  }
+                      console.log(`🎯 Trying to update ${stepConfig.name}...`);
+                      const stepResponse = await axios.put(
+                        `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/phases/${stepConfig.phase}/steps/${stepConfig.step}`,
+                        { 
+                          status: "completed",
+                          updatedAt: new Date().toISOString(),
+                          source: "matching-dashboard"
+                        }
                       );
-                      console.log("Step update response (phase 4):", stepResponse2.data);
+                      console.log(`✅ Successfully updated ${stepConfig.name}:`, stepResponse.data);
                       stepUpdated = true;
-                    } catch (stepError2: any) {
-                      console.error("Step update error (phase 4):", stepError2);
-                      console.error("Step error response (phase 4):", stepError2.response?.data);
+                      break;
+                    } catch (stepError: any) {
+                      console.log(`❌ Failed to update ${stepConfig.name}:`, stepError.response?.status, stepError.response?.data?.message);
+                      // Continue to next step configuration
                     }
                   }
-                  
-                  // Mettre à jour la phase courante vers la phase 4 (si pas déjà en phase 4)
-                  console.log("Updating current phase...");
-                  console.log("Phase URL:", `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/current-phase`);
-                  console.log("Phase request data:", { phase: 4 });
-                  
-                  try {
-                    const phaseResponse = await axios.put(
-                      `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/current-phase`,
-                      { phase: 4 }
-                    );
-                    console.log("Phase update response:", phaseResponse.data);
-                  } catch (phaseError: any) {
-                    console.error("Phase update error:", phaseError);
-                    console.error("Phase error response:", phaseError.response?.data);
-                    console.error("Phase error status:", phaseError.response?.status);
+
+                  if (stepUpdated) {
+                    console.log("✅ Step successfully updated!");
+                  } else {
+                    console.warn("⚠️ No step could be updated, but continuing...");
                   }
+
+                  // Step 3: Mettre à jour la phase courante
+                  console.log("🔄 Updating current phase...");
+                  const phasesToTry = [4, 5]; // Try phase 4 first, then 5
+                  let phaseUpdated = false;
+
+                  for (const targetPhase of phasesToTry) {
+                    try {
+                      console.log(`🎯 Trying to update to phase ${targetPhase}...`);
+                      const phaseResponse = await axios.put(
+                        `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/current-phase`,
+                        { 
+                          phase: targetPhase,
+                          updatedAt: new Date().toISOString(),
+                          source: "matching-dashboard"
+                        }
+                      );
+                      console.log(`✅ Successfully updated to phase ${targetPhase}:`, phaseResponse.data);
+                      phaseUpdated = true;
+                      break;
+                    } catch (phaseError: any) {
+                      console.log(`❌ Failed to update to phase ${targetPhase}:`, phaseError.response?.status, phaseError.response?.data?.message);
+                      // Continue to next phase
+                    }
+                  }
+
+                  if (phaseUpdated) {
+                    console.log("✅ Phase successfully updated!");
+                  } else {
+                    console.warn("⚠️ No phase could be updated, but continuing...");
+                  }
+
+                  // Step 4: Vérifier l'état final
+                  try {
+                    console.log("🔍 Verifying final onboarding state...");
+                    const finalStateResponse = await axios.get(
+                      `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding`
+                    );
+                    console.log("✅ Final onboarding state:", finalStateResponse.data);
+                  } catch (verifyError: any) {
+                    console.warn("⚠️ Could not verify final state:", verifyError.response?.data);
+                  }
+
+                  console.log("🎉 Onboarding update process completed successfully!");
                   
-                  console.log("Onboarding progress updated successfully");
-                  window.location.href = "/app11";
+                  // Small delay for user feedback
+                  setTimeout(() => {
+                    window.location.href = "/app11";
+                  }, 500);
+
                 } catch (error: any) {
-                  console.error("Error updating onboarding progress:", error);
+                  console.error("💥 Error updating onboarding progress:", error);
                   console.error("Error details:", {
                     message: error?.message || "Unknown error",
                     response: error?.response?.data,
                     status: error?.response?.status
                   });
                   
+                  // Re-enable button and show error state
+                  e.currentTarget.disabled = false;
+                  e.currentTarget.innerHTML = '<span>⚠️ Error - Redirecting...</span>';
+                  
                   // Continue to redirect even if API calls fail
-                  window.location.href = "/app11";
+                  setTimeout(() => {
+                    window.location.href = "/app11";
+                  }, 1500);
                 }
               }}
-              className="flex items-center space-x-2 bg-white/10 hover:bg-white/20 px-6 py-2.5 rounded-lg transition-all duration-200 text-white font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+              className="flex items-center space-x-2 bg-white/10 hover:bg-white/20 px-6 py-2.5 rounded-lg transition-all duration-200 text-white font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
               <span>Back to onboarding</span>
             </button>
