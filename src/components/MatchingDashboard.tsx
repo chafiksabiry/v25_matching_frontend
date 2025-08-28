@@ -743,82 +743,16 @@ const MatchingDashboard: React.FC = () => {
                     return;
                   }
 
-                  // Step 1: Récupérer l'état actuel de l'onboarding
-                  console.log("📊 Fetching current onboarding state...");
-                  let currentOnboardingState = null;
+                                    // Mettre à jour le step 9 de la phase 3
+                  console.log("🔄 Updating Phase 3, Step 9...");
                   try {
-                    const stateResponse = await axios.get(
-                      `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding`
-                    );
-                    currentOnboardingState = stateResponse.data;
-                    console.log("✅ Current onboarding state:", currentOnboardingState);
-                  } catch (stateError: any) {
-                    console.warn("⚠️ Could not fetch onboarding state:", stateError.response?.data);
-                  }
-
-                                    // Step 2: Mettre à jour le step approprié (Phase 2, Step 9)
-                  console.log("🔄 Updating onboarding step (Phase 2, Step 9)...");
-                  let stepUpdated = false;
-                  
-                  try {
-                    console.log("🎯 Updating Phase 2, Step 9...");
                     const stepResponse = await axios.put(
                       `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/phases/3/steps/9`,
-                      { 
-                        status: "completed",
-                        updatedAt: new Date().toISOString(),
-                        source: "matching-dashboard"
-                      }
+                      { status: "completed" }
                     );
-                    console.log("✅ Successfully updated Phase 2, Step 9:", stepResponse.data);
-                    stepUpdated = true;
+                    console.log("✅ Successfully updated Phase 3, Step 9:", stepResponse.data);
                   } catch (stepError: any) {
-                    console.error("❌ Failed to update Phase 2, Step 9:", stepError.response?.status, stepError.response?.data);
-                    // Continue even if step update fails
-                  }
-
-                  if (stepUpdated) {
-                    console.log("✅ Step successfully updated!");
-                  } else {
-                    console.warn("⚠️ No step could be updated, but continuing...");
-                  }
-
-                                    // Step 3: Mettre à jour la phase courante vers la phase 3
-                  console.log("🔄 Updating current phase to Phase 3...");
-                  let phaseUpdated = false;
-
-                  try {
-                    console.log("🎯 Updating to phase 3...");
-                    const phaseResponse = await axios.put(
-                      `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/current-phase`,
-                      { 
-                        phase: 3,
-                        updatedAt: new Date().toISOString(),
-                        source: "matching-dashboard"
-                      }
-                    );
-                    console.log("✅ Successfully updated to phase 3:", phaseResponse.data);
-                    phaseUpdated = true;
-                  } catch (phaseError: any) {
-                    console.error("❌ Failed to update to phase 3:", phaseError.response?.status, phaseError.response?.data);
-                    // Continue even if phase update fails
-                  }
-
-                  if (phaseUpdated) {
-                    console.log("✅ Phase successfully updated!");
-                  } else {
-                    console.warn("⚠️ No phase could be updated, but continuing...");
-                  }
-
-                  // Step 4: Vérifier l'état final
-                  try {
-                    console.log("🔍 Verifying final onboarding state...");
-                    const finalStateResponse = await axios.get(
-                      `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding`
-                    );
-                    console.log("✅ Final onboarding state:", finalStateResponse.data);
-                  } catch (verifyError: any) {
-                    console.warn("⚠️ Could not verify final state:", verifyError.response?.data);
+                    console.error("❌ Failed to update Phase 3, Step 9:", stepError.response?.status, stepError.response?.data);
                   }
 
                   console.log("🎉 Onboarding update process completed successfully!");
