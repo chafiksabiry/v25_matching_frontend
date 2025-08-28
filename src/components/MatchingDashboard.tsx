@@ -784,22 +784,47 @@ const MatchingDashboard: React.FC = () => {
                   const currentPhase = currentOnboardingState?.currentPhase || 2;
                   console.log("📊 Current phase from API:", currentPhase);
                   
-                  // Adapter les steps à essayer selon la phase actuelle
-                  const stepsToTry = [
-                    // Essayer de compléter des steps de la phase courante
-                    { phase: currentPhase, step: 7, name: `Phase ${currentPhase}, Step 7 (matching system)` },
-                    { phase: currentPhase, step: 8, name: `Phase ${currentPhase}, Step 8` },
-                    { phase: currentPhase, step: 9, name: `Phase ${currentPhase}, Step 9` },
-                    // Fallback vers les phases suivantes si disponible
-                    { phase: currentPhase + 1, step: 10, name: `Phase ${currentPhase + 1}, Step 10` },
-                    { phase: currentPhase + 1, step: 11, name: `Phase ${currentPhase + 1}, Step 11` }
-                  ];
+                  // Adapter les steps à essayer selon la phase actuelle (structure réelle)
+                  // Phase 1: steps 1,2,3 | Phase 2: steps 4,5,6,7,8,9 | Phase 3: steps 10,11,12 | Phase 4: step 13
+                  let stepsToTry = [];
+                  
+                  if (currentPhase === 1) {
+                    stepsToTry = [
+                      { phase: 1, step: 1, name: "Phase 1, Step 1" },
+                      { phase: 1, step: 2, name: "Phase 1, Step 2" },
+                      { phase: 1, step: 3, name: "Phase 1, Step 3" }
+                    ];
+                  } else if (currentPhase === 2) {
+                    stepsToTry = [
+                      { phase: 2, step: 7, name: "Phase 2, Step 7" },
+                      { phase: 2, step: 8, name: "Phase 2, Step 8" },
+                      { phase: 2, step: 9, name: "Phase 2, Step 9 (matching system)" }
+                    ];
+                  } else if (currentPhase === 3) {
+                    stepsToTry = [
+                      { phase: 3, step: 10, name: "Phase 3, Step 10 (matching system)" },
+                      { phase: 3, step: 11, name: "Phase 3, Step 11" },
+                      { phase: 3, step: 12, name: "Phase 3, Step 12" }
+                    ];
+                  } else if (currentPhase === 4) {
+                    stepsToTry = [
+                      { phase: 4, step: 13, name: "Phase 4, Step 13" }
+                    ];
+                  } else {
+                    // Fallback pour phases inconnues
+                    stepsToTry = [
+                      { phase: currentPhase, step: 10, name: `Phase ${currentPhase}, Step 10 (generic)` },
+                      { phase: currentPhase, step: 11, name: `Phase ${currentPhase}, Step 11 (generic)` }
+                    ];
+                  }
+                  
+                  console.log("📋 Steps to try for current phase:", stepsToTry);
 
                   for (const stepConfig of stepsToTry) {
                     try {
                       console.log(`🎯 Trying to update ${stepConfig.name}...`);
                       const stepResponse = await axios.put(
-                        `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/phases/${stepConfig.phase}/steps/${stepConfig.step}`,
+                        `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/phases/4/steps/9`,
                         { 
                           status: "completed",
                           updatedAt: new Date().toISOString(),
@@ -841,7 +866,7 @@ const MatchingDashboard: React.FC = () => {
                       const phaseResponse = await axios.put(
                         `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/current-phase`,
                         { 
-                          phase: targetPhase,
+                          phase: 3,
                           updatedAt: new Date().toISOString(),
                           source: "matching-dashboard"
                         }
