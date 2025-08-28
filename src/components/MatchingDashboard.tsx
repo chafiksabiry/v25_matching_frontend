@@ -743,16 +743,16 @@ const MatchingDashboard: React.FC = () => {
                     return;
                   }
 
-                                    // Mettre à jour le step 9 de la phase 3
-                  console.log("🔄 Updating Phase 3, Step 9...");
+                                    // Mettre à jour le step 10 de la phase 3 (step actuel)
+                  console.log("🔄 Updating Phase 3, Step 10...");
                   try {
                     const stepResponse = await axios.put(
-                      `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/phases/3/steps/9`,
+                      `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/phases/3/steps/10`,
                       { status: "completed" }
                     );
-                    console.log("✅ Successfully updated Phase 3, Step 9:", stepResponse.data);
+                    console.log("✅ Successfully updated Phase 3, Step 10:", stepResponse.data);
                   } catch (stepError: any) {
-                    console.error("❌ Failed to update Phase 3, Step 9:", stepError.response?.status, stepError.response?.data);
+                    console.error("❌ Failed to update Phase 3, Step 10:", stepError.response?.status, stepError.response?.data);
                   }
 
                   console.log("🎉 Onboarding update process completed successfully!");
