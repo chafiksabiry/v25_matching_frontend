@@ -776,14 +776,23 @@ const MatchingDashboard: React.FC = () => {
                     console.warn("⚠️ Could not fetch onboarding state:", stateError.response?.data);
                   }
 
-                  // Step 2: Mettre à jour le step approprié
+                  // Step 2: Mettre à jour le step approprié basé sur l'état actuel
                   console.log("🔄 Updating onboarding step...");
                   let stepUpdated = false;
+                  
+                  // Extraire l'état actuel depuis l'onboarding state
+                  const currentPhase = currentOnboardingState?.currentPhase || 2;
+                  console.log("📊 Current phase from API:", currentPhase);
+                  
+                  // Adapter les steps à essayer selon la phase actuelle
                   const stepsToTry = [
-                    { phase: 3, step: 10, name: "Phase 3, Step 10" },
-                    { phase: 4, step: 10, name: "Phase 4, Step 10" },
-                    { phase: 3, step: 9, name: "Phase 3, Step 9" },
-                    { phase: 4, step: 9, name: "Phase 4, Step 9" }
+                    // Essayer de compléter des steps de la phase courante
+                    { phase: currentPhase, step: 7, name: `Phase ${currentPhase}, Step 7 (matching system)` },
+                    { phase: currentPhase, step: 8, name: `Phase ${currentPhase}, Step 8` },
+                    { phase: currentPhase, step: 9, name: `Phase ${currentPhase}, Step 9` },
+                    // Fallback vers les phases suivantes si disponible
+                    { phase: currentPhase + 1, step: 10, name: `Phase ${currentPhase + 1}, Step 10` },
+                    { phase: currentPhase + 1, step: 11, name: `Phase ${currentPhase + 1}, Step 11` }
                   ];
 
                   for (const stepConfig of stepsToTry) {
@@ -812,9 +821,18 @@ const MatchingDashboard: React.FC = () => {
                     console.warn("⚠️ No step could be updated, but continuing...");
                   }
 
-                  // Step 3: Mettre à jour la phase courante
+                  // Step 3: Mettre à jour la phase courante intelligemment
                   console.log("🔄 Updating current phase...");
-                  const phasesToTry = [4, 5]; // Try phase 4 first, then 5
+                  
+                  // Ne pas essayer de sauter aux phases suivantes si on n'a pas mis à jour de step
+                  // Au lieu de cela, essayer de progresser logiquement
+                  const phasesToTry = stepUpdated ? 
+                    [currentPhase + 1] : // Si on a réussi à mettre à jour un step, essayer la phase suivante
+                    [currentPhase]; // Sinon, rester sur la phase courante
+                    
+                  console.log("🎯 Phase update strategy:", stepUpdated ? "Progress to next phase" : "Stay on current phase");
+                  console.log("🎯 Phases to try:", phasesToTry);
+                  
                   let phaseUpdated = false;
 
                   for (const targetPhase of phasesToTry) {
@@ -841,6 +859,22 @@ const MatchingDashboard: React.FC = () => {
                     console.log("✅ Phase successfully updated!");
                   } else {
                     console.warn("⚠️ No phase could be updated, but continuing...");
+                    
+                    // Fallback: Si on n'arrive pas à mettre à jour l'onboarding,
+                    // au moins marquer dans le localStorage que l'utilisateur a utilisé le matching
+                    try {
+                      const matchingUsageData = {
+                        companyId: companyId,
+                        usedMatchingSystem: true,
+                        lastUsed: new Date().toISOString(),
+                        fromDashboard: true,
+                        currentPhase: currentPhase
+                      };
+                      localStorage.setItem('harx_matching_usage', JSON.stringify(matchingUsageData));
+                      console.log("📝 Marked matching system usage in localStorage:", matchingUsageData);
+                    } catch (localStorageError) {
+                      console.warn("⚠️ Could not save to localStorage:", localStorageError);
+                    }
                   }
 
                   // Step 4: Vérifier l'état final
@@ -860,6 +894,7 @@ const MatchingDashboard: React.FC = () => {
                   console.log("=== DEBUG SUMMARY BEFORE REDIRECT ===");
                   console.log("✅ Step updated:", stepUpdated);
                   console.log("✅ Phase updated:", phaseUpdated);
+                  console.log("📊 Detected current phase:", currentPhase);
                   console.log("🍪 Company ID:", companyId);
                   console.log("🌐 API URL:", import.meta.env.VITE_COMPANY_API_URL);
                   console.log("🎯 Target redirect:", "/app11");
@@ -868,8 +903,10 @@ const MatchingDashboard: React.FC = () => {
                   console.log("📊 Success rates:", {
                     stepUpdateSuccess: stepUpdated,
                     phaseUpdateSuccess: phaseUpdated,
-                    overallSuccess: stepUpdated || phaseUpdated
+                    overallSuccess: stepUpdated || phaseUpdated,
+                    matchingUsageTracked: !stepUpdated && !phaseUpdated // localStorage fallback
                   });
+                  console.log("🔄 Update strategy used:", stepUpdated ? "Progressive" : "Current phase maintenance");
                   console.log("===================================");
                   
                   // Small delay for user feedback
