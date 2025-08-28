@@ -723,33 +723,13 @@ const MatchingDashboard: React.FC = () => {
                 e.currentTarget.innerHTML = '<div class="flex items-center space-x-2"><div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div><span>Updating...</span></div>';
                 
                 console.log("=== BACK TO ONBOARDING TRIGGERED ===");
-                console.log("🌐 Current URL:", window.location.href);
-                console.log("⏰ Current timestamp:", new Date().toISOString());
-                console.log("🔍 User Agent:", navigator.userAgent);
-                console.log("📍 Window location details:", {
-                  href: window.location.href,
-                  pathname: window.location.pathname,
-                  search: window.location.search,
-                  hash: window.location.hash,
-                  origin: window.location.origin
-                });
+                console.log("Current URL:", window.location.href);
+                console.log("Current timestamp:", new Date().toISOString());
                 
                 try {
                   const companyId = Cookies.get("companyId");
-                  console.log("🍪 Company ID:", companyId);
-                  console.log("🌐 Company API URL:", import.meta.env.VITE_COMPANY_API_URL);
-                  
-                  // Debug all available cookies
-                  console.log("🍪 All cookies:", document.cookie);
-                  console.log("🍪 Available cookie keys:", Object.keys(Cookies.get()));
-                  
-                  // Debug environment variables
-                  console.log("🔧 Environment variables:", {
-                    NODE_ENV: import.meta.env.NODE_ENV,
-                    MODE: import.meta.env.MODE,
-                    VITE_COMPANY_API_URL: import.meta.env.VITE_COMPANY_API_URL,
-                    VITE_MATCHING_API_URL: import.meta.env.VITE_MATCHING_API_URL
-                  });
+                  console.log("Company ID:", companyId);
+                  console.log("Company API URL:", import.meta.env.VITE_COMPANY_API_URL);
                   
                   if (!companyId) {
                     console.warn("⚠️ No companyId found in cookies, proceeding without updating onboarding");
@@ -776,68 +756,25 @@ const MatchingDashboard: React.FC = () => {
                     console.warn("⚠️ Could not fetch onboarding state:", stateError.response?.data);
                   }
 
-                  // Step 2: Mettre à jour le step approprié basé sur l'état actuel
-                  console.log("🔄 Updating onboarding step...");
+                                    // Step 2: Mettre à jour le step approprié (Phase 2, Step 9)
+                  console.log("🔄 Updating onboarding step (Phase 2, Step 9)...");
                   let stepUpdated = false;
                   
-                  // Extraire l'état actuel depuis l'onboarding state
-                  const currentPhase = currentOnboardingState?.currentPhase || 2;
-                  console.log("📊 Current phase from API:", currentPhase);
-                  
-                  // Adapter les steps à essayer selon la phase actuelle (structure réelle)
-                  // Phase 1: steps 1,2,3 | Phase 2: steps 4,5,6,7,8,9 | Phase 3: steps 10,11,12 | Phase 4: step 13
-                  let stepsToTry = [];
-                  
-                  if (currentPhase === 1) {
-                    stepsToTry = [
-                      { phase: 1, step: 1, name: "Phase 1, Step 1" },
-                      { phase: 1, step: 2, name: "Phase 1, Step 2" },
-                      { phase: 1, step: 3, name: "Phase 1, Step 3" }
-                    ];
-                  } else if (currentPhase === 2) {
-                    stepsToTry = [
-                      { phase: 2, step: 7, name: "Phase 2, Step 7" },
-                      { phase: 2, step: 8, name: "Phase 2, Step 8" },
-                      { phase: 2, step: 9, name: "Phase 2, Step 9 (matching system)" }
-                    ];
-                  } else if (currentPhase === 3) {
-                    stepsToTry = [
-                      { phase: 3, step: 10, name: "Phase 3, Step 10 (matching system)" },
-                      { phase: 3, step: 11, name: "Phase 3, Step 11" },
-                      { phase: 3, step: 12, name: "Phase 3, Step 12" }
-                    ];
-                  } else if (currentPhase === 4) {
-                    stepsToTry = [
-                      { phase: 4, step: 13, name: "Phase 4, Step 13" }
-                    ];
-                  } else {
-                    // Fallback pour phases inconnues
-                    stepsToTry = [
-                      { phase: currentPhase, step: 10, name: `Phase ${currentPhase}, Step 10 (generic)` },
-                      { phase: currentPhase, step: 11, name: `Phase ${currentPhase}, Step 11 (generic)` }
-                    ];
-                  }
-                  
-                  console.log("📋 Steps to try for current phase:", stepsToTry);
-
-                  for (const stepConfig of stepsToTry) {
-                    try {
-                      console.log(`🎯 Trying to update ${stepConfig.name}...`);
-                      const stepResponse = await axios.put(
-                        `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/phases/4/steps/9`,
-                        { 
-                          status: "completed",
-                          updatedAt: new Date().toISOString(),
-                          source: "matching-dashboard"
-                        }
-                      );
-                      console.log(`✅ Successfully updated ${stepConfig.name}:`, stepResponse.data);
-                      stepUpdated = true;
-                      break;
-                    } catch (stepError: any) {
-                      console.log(`❌ Failed to update ${stepConfig.name}:`, stepError.response?.status, stepError.response?.data?.message);
-                      // Continue to next step configuration
-                    }
+                  try {
+                    console.log("🎯 Updating Phase 2, Step 9...");
+                    const stepResponse = await axios.put(
+                      `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/phases/3/steps/9`,
+                      { 
+                        status: "completed",
+                        updatedAt: new Date().toISOString(),
+                        source: "matching-dashboard"
+                      }
+                    );
+                    console.log("✅ Successfully updated Phase 2, Step 9:", stepResponse.data);
+                    stepUpdated = true;
+                  } catch (stepError: any) {
+                    console.error("❌ Failed to update Phase 2, Step 9:", stepError.response?.status, stepError.response?.data);
+                    // Continue even if step update fails
                   }
 
                   if (stepUpdated) {
@@ -846,60 +783,31 @@ const MatchingDashboard: React.FC = () => {
                     console.warn("⚠️ No step could be updated, but continuing...");
                   }
 
-                  // Step 3: Mettre à jour la phase courante intelligemment
-                  console.log("🔄 Updating current phase...");
-                  
-                  // Ne pas essayer de sauter aux phases suivantes si on n'a pas mis à jour de step
-                  // Au lieu de cela, essayer de progresser logiquement
-                  const phasesToTry = stepUpdated ? 
-                    [currentPhase + 1] : // Si on a réussi à mettre à jour un step, essayer la phase suivante
-                    [currentPhase]; // Sinon, rester sur la phase courante
-                    
-                  console.log("🎯 Phase update strategy:", stepUpdated ? "Progress to next phase" : "Stay on current phase");
-                  console.log("🎯 Phases to try:", phasesToTry);
-                  
+                                    // Step 3: Mettre à jour la phase courante vers la phase 3
+                  console.log("🔄 Updating current phase to Phase 3...");
                   let phaseUpdated = false;
 
-                  for (const targetPhase of phasesToTry) {
-                    try {
-                      console.log(`🎯 Trying to update to phase ${targetPhase}...`);
-                      const phaseResponse = await axios.put(
-                        `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/current-phase`,
-                        { 
-                          phase: 3,
-                          updatedAt: new Date().toISOString(),
-                          source: "matching-dashboard"
-                        }
-                      );
-                      console.log(`✅ Successfully updated to phase ${targetPhase}:`, phaseResponse.data);
-                      phaseUpdated = true;
-                      break;
-                    } catch (phaseError: any) {
-                      console.log(`❌ Failed to update to phase ${targetPhase}:`, phaseError.response?.status, phaseError.response?.data?.message);
-                      // Continue to next phase
-                    }
+                  try {
+                    console.log("🎯 Updating to phase 3...");
+                    const phaseResponse = await axios.put(
+                      `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/current-phase`,
+                      { 
+                        phase: 3,
+                        updatedAt: new Date().toISOString(),
+                        source: "matching-dashboard"
+                      }
+                    );
+                    console.log("✅ Successfully updated to phase 3:", phaseResponse.data);
+                    phaseUpdated = true;
+                  } catch (phaseError: any) {
+                    console.error("❌ Failed to update to phase 3:", phaseError.response?.status, phaseError.response?.data);
+                    // Continue even if phase update fails
                   }
 
                   if (phaseUpdated) {
                     console.log("✅ Phase successfully updated!");
                   } else {
                     console.warn("⚠️ No phase could be updated, but continuing...");
-                    
-                    // Fallback: Si on n'arrive pas à mettre à jour l'onboarding,
-                    // au moins marquer dans le localStorage que l'utilisateur a utilisé le matching
-                    try {
-                      const matchingUsageData = {
-                        companyId: companyId,
-                        usedMatchingSystem: true,
-                        lastUsed: new Date().toISOString(),
-                        fromDashboard: true,
-                        currentPhase: currentPhase
-                      };
-                      localStorage.setItem('harx_matching_usage', JSON.stringify(matchingUsageData));
-                      console.log("📝 Marked matching system usage in localStorage:", matchingUsageData);
-                    } catch (localStorageError) {
-                      console.warn("⚠️ Could not save to localStorage:", localStorageError);
-                    }
                   }
 
                   // Step 4: Vérifier l'état final
@@ -915,30 +823,10 @@ const MatchingDashboard: React.FC = () => {
 
                   console.log("🎉 Onboarding update process completed successfully!");
                   
-                  // Debug summary before redirect
-                  console.log("=== DEBUG SUMMARY BEFORE REDIRECT ===");
-                  console.log("✅ Step updated:", stepUpdated);
-                  console.log("✅ Phase updated:", phaseUpdated);
-                  console.log("📊 Detected current phase:", currentPhase);
-                  console.log("🍪 Company ID:", companyId);
-                  console.log("🌐 API URL:", import.meta.env.VITE_COMPANY_API_URL);
-                  console.log("🎯 Target redirect:", "/app11");
-                  console.log("⏰ Current time:", new Date().toISOString());
-                  console.log("🔍 Current URL before redirect:", window.location.href);
-                  console.log("📊 Success rates:", {
-                    stepUpdateSuccess: stepUpdated,
-                    phaseUpdateSuccess: phaseUpdated,
-                    overallSuccess: stepUpdated || phaseUpdated,
-                    matchingUsageTracked: !stepUpdated && !phaseUpdated // localStorage fallback
-                  });
-                  console.log("🔄 Update strategy used:", stepUpdated ? "Progressive" : "Current phase maintenance");
-                  console.log("===================================");
-                  
                   // Small delay for user feedback
                   setTimeout(() => {
-                    console.log("🚀 REDIRECTING NOW to /app11...");
-                    window.location.href = "/app11";
-                  }, 1000); // Increased delay to see debug info
+                  window.location.href = "/app11";
+                  }, 500);
 
                 } catch (error: any) {
                   console.error("💥 Error updating onboarding progress:", error);
@@ -948,28 +836,14 @@ const MatchingDashboard: React.FC = () => {
                     status: error?.response?.status
                   });
                   
-                  // Debug summary in error case
-                  console.log("=== DEBUG SUMMARY (ERROR CASE) ===");
-                  console.log("❌ Error occurred during update process");
-                  console.log("🍪 Company ID:", companyId);
-                  console.log("🌐 API URL:", import.meta.env.VITE_COMPANY_API_URL);
-                  console.log("🎯 Target redirect:", "/app11");
-                  console.log("⏰ Current time:", new Date().toISOString());
-                  console.log("🔍 Current URL before redirect:", window.location.href);
-                  console.log("💥 Error type:", error?.constructor?.name);
-                  console.log("💥 Error message:", error?.message);
-                  console.log("💥 HTTP Status:", error?.response?.status);
-                  console.log("===================================");
-                  
                   // Re-enable button and show error state
                   e.currentTarget.disabled = false;
                   e.currentTarget.innerHTML = '<span>⚠️ Error - Redirecting...</span>';
                   
                   // Continue to redirect even if API calls fail
                   setTimeout(() => {
-                    console.log("🚀 REDIRECTING NOW to /app11 (after error)...");
-                    window.location.href = "/app11";
-                  }, 2000); // Slightly longer delay to see error debug info
+                  window.location.href = "/app11";
+                  }, 1500);
                 }
               }}
               className="flex items-center space-x-2 bg-white/10 hover:bg-white/20 px-6 py-2.5 rounded-lg transition-all duration-200 text-white font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
