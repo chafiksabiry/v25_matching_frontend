@@ -24,9 +24,9 @@ function render(props: { container?: HTMLElement }) {
       root = createRoot(rootElement);
     }
     root.render(
-      <React.StrictMode>
+      // <React.StrictMode>
         <App />
-      </React.StrictMode>
+      // </React.StrictMode>
     );
   } else {
     console.warn('[App12] Root element not found!');

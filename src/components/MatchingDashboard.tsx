@@ -42,8 +42,8 @@ import { Toaster } from 'react-hot-toast';
 
 
 const defaultMatchingWeights: MatchingWeights = {
-  experience: 0.25,
-  skills: 0.25,
+  experience: 0.20,
+  skills: 0.20,
   industry: 0.15,
   languages: 0.15,
   availability: 0.10,
@@ -55,8 +55,21 @@ const defaultMatchingWeights: MatchingWeights = {
 type TabType = "gigs" | "reps" | "optimal";
 
 const MatchingDashboard: React.FC = () => {
+  // Debug component mounting
+  useEffect(() => {
+    console.log('🚀 COMPONENT MOUNTED');
+    return () => {
+      console.log('💀 COMPONENT UNMOUNTED');
+    };
+  }, []);
+
   const [reps, setReps] = useState<Rep[]>([]);
   const [gigs, setGigs] = useState<Gig[]>([]);
+  
+  // Debug gigs state changes
+  useEffect(() => {
+    console.log('🔍 GIGS STATE CHANGED:', gigs.length, gigs);
+  }, [gigs]);
   const [selectedGig, setSelectedGig] = useState<Gig | null>(null);
   const [selectedRep, setSelectedRep] = useState<Rep | null>(null);
   const [weights, setWeights] = useState<MatchingWeights>(
@@ -118,6 +131,11 @@ const MatchingDashboard: React.FC = () => {
 
   } | null>(null);
   const [loading, setLoading] = useState(false);
+  
+  // Debug loading state changes
+  useEffect(() => {
+    console.log('⏳ LOADING STATE CHANGED:', loading);
+  }, [loading]);
   const [aiLoading, setAiLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -135,6 +153,12 @@ const MatchingDashboard: React.FC = () => {
   const [languages, setLanguages] = useState<Language[]>([]);
   const [shouldAutoSearch, setShouldAutoSearch] = useState(false);
   const [invitedAgents, setInvitedAgents] = useState<Set<string>>(new Set());
+  
+  // Track last search parameters to avoid unnecessary API calls
+  const [lastSearchedGigId, setLastSearchedGigId] = useState<string | null>(null);
+  const [lastSearchedWeights, setLastSearchedWeights] = useState<MatchingWeights | null>(null);
+  const [lastSearchedTab, setLastSearchedTab] = useState<TabType | null>(null);
+  const [lastSearchedRepId, setLastSearchedRepId] = useState<string | null>(null);
 
   const handleTabClick = (tab: TabType) => {
     setActiveTab(tab);
@@ -159,8 +183,7 @@ const MatchingDashboard: React.FC = () => {
     setSelectedGig(gig);
     setCurrentPage(1);
     
-    // Reset weights to defaults first
-    setWeights(defaultMatchingWeights);
+    // Don't reset weights to defaults - keep current weights
     setGigHasWeights(false);
     
     let savedWeights = null;
@@ -174,6 +197,7 @@ const MatchingDashboard: React.FC = () => {
     } catch (error) {
       console.log('❌ No saved weights found for gig:', gig._id);
       setGigHasWeights(false);
+      // Keep current weights instead of resetting to defaults
     }
     
     // Clear previous matches when selecting a new gig
@@ -191,73 +215,8 @@ const MatchingDashboard: React.FC = () => {
       setInvitedAgents(new Set<string>());
     }
     
-    // Automatically search for matches with current weights
-    setLoading(true);
-    try {
-      // Use saved weights if available, otherwise use default weights
-      const weightsToUse = savedWeights?.matchingWeights || defaultMatchingWeights;
-      console.log('🔍 Searching with weights:', weightsToUse);
-      
-      const gigResponse = await findMatchesForGig(gig._id || '', weightsToUse);
-      console.log('=== GIG RESPONSE AFTER SELECTION ===', gigResponse);
-      
-      setMatches(gigResponse.preferedmatches || gigResponse.matches || []);
-      setMatchStats({
-        totalMatches: gigResponse.totalMatches || 0,
-        perfectMatches: gigResponse.perfectMatches || 0,
-        partialMatches: gigResponse.partialMatches || 0,
-        noMatches: gigResponse.noMatches || 0,
-        languageStats: gigResponse.languageStats || {
-          perfectMatches: 0,
-          partialMatches: 0,
-          noMatches: 0,
-          totalMatches: 0
-        },
-        skillsStats: gigResponse.skillsStats || {
-          perfectMatches: 0,
-          partialMatches: 0,
-          noMatches: 0,
-          totalMatches: 0
-        },
-        industryStats: (gigResponse as any).industryStats || {
-          perfectMatches: 0,
-          partialMatches: 0,
-          neutralMatches: 0,
-          noMatches: 0,
-          totalMatches: 0
-        },
-        activityStats: (gigResponse as any).activityStats || {
-          perfectMatches: 0,
-          partialMatches: 0,
-          neutralMatches: 0,
-          noMatches: 0,
-          totalMatches: 0
-        },
-        experienceStats: (gigResponse as any).experienceStats || {
-          perfectMatches: 0,
-          partialMatches: 0,
-          noMatches: 0,
-          totalMatches: 0
-        },
-        timezoneStats: (gigResponse as any).timezoneStats || {
-          perfectMatches: 0,
-          partialMatches: 0,
-          noMatches: 0,
-          totalMatches: 0
-        },
-        regionStats: (gigResponse as any).regionStats || {
-          perfectMatches: 0,
-          partialMatches: 0,
-          noMatches: 0,
-          totalMatches: 0
-        }
-      });
-    } catch (error) {
-      console.error('Error searching for matches after gig selection:', error);
-      setError("Failed to get matches. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+    // Enable auto search to trigger automatic search
+    setShouldAutoSearch(true);
     
     setTimeout(scrollToResults, 100);
   };
@@ -266,12 +225,23 @@ const MatchingDashboard: React.FC = () => {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+  
+  // Debug pagination
+  console.log('🔍 GIGS DEBUG:', {
+    totalGigs: gigs.length,
+    currentPage,
+    itemsPerPage,
+    paginatedGigs: paginatedGigs.length,
+    gigsData: gigs
+  });
+  
   const totalPages = Math.ceil(
     (activeTab === "gigs" ? gigs.length : reps.length) / itemsPerPage
   );
 
   // Fetch reps and gigs on component mount
   useEffect(() => {
+    console.log('🔄 FETCH DATA EFFECT TRIGGERED');
     const fetchData = async () => {
       setInitialLoading(true);
       try {
@@ -287,10 +257,25 @@ const MatchingDashboard: React.FC = () => {
         console.log("=== GIGS DATA ===", gigsData);
         console.log("=== SKILLS DATA ===", skillsData);
         console.log("=== LANGUAGES DATA ===", languagesData);
+        
+        // Debug gigs before setting state
+        console.log('🎯 GIGS DEBUG BEFORE STATE:', {
+          isArray: Array.isArray(gigsData),
+          length: gigsData?.length,
+          firstGig: gigsData?.[0],
+          gigStructure: gigsData?.[0] ? Object.keys(gigsData[0]) : 'No gig'
+        });
+        
         setReps(repsData);
         setGigs(gigsData);
         setSkills(skillsData);
         setLanguages(languagesData);
+        
+        // Debug gigs after setting state
+        console.log('🎯 GIGS DEBUG AFTER STATE SET');
+        setTimeout(() => {
+          console.log('🎯 GIGS STATE:', gigs);
+        }, 100);
         
 
       } catch (error) {
@@ -306,40 +291,153 @@ const MatchingDashboard: React.FC = () => {
 
 
 
-  // Get matches based on current selection
+  // Fetch matches based on selected tab and criteria
   useEffect(() => {
     const getMatches = async () => {
+      // Skip if still loading initial data
       if (initialLoading) return;
+      
+      // Check if parameters have actually changed to avoid unnecessary API calls
+      const currentGigId = selectedGig?._id || null;
+      const currentRepId = selectedRep?._id || null;
+      
+      const parametersChanged = 
+        lastSearchedTab !== activeTab ||
+        lastSearchedGigId !== currentGigId ||
+        lastSearchedRepId !== currentRepId ||
+        (activeTab === "gigs" && currentGigId && JSON.stringify(lastSearchedWeights) !== JSON.stringify(weights)) ||
+        shouldAutoSearch; // Always search if shouldAutoSearch is true
+      
+      if (!parametersChanged) {
+        console.log('🔄 Skipping search - parameters unchanged');
+        return;
+      }
+      
+      console.log('🔄 Parameters changed, triggering search');
+      console.log('Current tab:', activeTab);
+      console.log('Current gig ID:', currentGigId);
+      console.log('Current rep ID:', currentRepId);
+      console.log('Current weights:', weights);
+      
+      setLoading(true);
+      setError(null);
+      
       try {
-        let response: any;
-        if (activeTab === "reps" && selectedRep && shouldAutoSearch) {
-          setLoading(true);
-          response = await findGigsForRep(selectedRep._id || '', weights);
-          setMatches(response.preferedmatches || response.matches || []);
-          setMatchStats(null);
-          setLoading(false);
-        } else if (activeTab === "optimal" && shouldAutoSearch) {
-          setLoading(true);
-          response = await generateOptimalMatches(weights);
-          setMatches(response.preferedmatches || response.matches || []);
-          setMatchStats(null);
-          setLoading(false);
+        if (activeTab === "gigs" && selectedGig) {
+          console.log("Searching for reps matching gig:", selectedGig.title);
+          const matchesData = await findMatchesForGig(selectedGig._id || '', weights);
+          console.log("=== MATCHES DATA ===", matchesData);
+          setMatches(matchesData.preferedmatches || []);
+          setMatchStats({
+            totalMatches: matchesData.totalMatches || 0,
+            perfectMatches: matchesData.perfectMatches || 0,
+            partialMatches: matchesData.partialMatches || 0,
+            noMatches: matchesData.noMatches || 0,
+            languageStats: matchesData.languageStats || {
+              perfectMatches: 0,
+              partialMatches: 0,
+              noMatches: 0,
+              totalMatches: 0
+            },
+            skillsStats: matchesData.skillsStats || {
+              perfectMatches: 0,
+              partialMatches: 0,
+              noMatches: 0,
+              totalMatches: 0
+            },
+            industryStats: (matchesData as any).industryStats || {
+              perfectMatches: 0,
+              partialMatches: 0,
+              neutralMatches: 0,
+              noMatches: 0,
+              totalMatches: 0
+            },
+            activityStats: (matchesData as any).activityStats || {
+              perfectMatches: 0,
+              partialMatches: 0,
+              neutralMatches: 0,
+              noMatches: 0,
+              totalMatches: 0
+            },
+            experienceStats: (matchesData as any).experienceStats || {
+              perfectMatches: 0,
+              partialMatches: 0,
+              noMatches: 0,
+              totalMatches: 0
+            },
+            timezoneStats: (matchesData as any).timezoneStats || {
+              perfectMatches: 0,
+              partialMatches: 0,
+              noMatches: 0,
+              totalMatches: 0
+            },
+            regionStats: (matchesData as any).regionStats || {
+              perfectMatches: 0,
+              partialMatches: 0,
+              noMatches: 0,
+              totalMatches: 0
+            },
+            availabilityStats: (matchesData as any).availabilityStats || {
+              perfectMatches: 0,
+              partialMatches: 0,
+              noMatches: 0,
+              totalMatches: 0
+            }
+          } as any);
+          
+          // Update last search parameters after successful search
+          setLastSearchedTab(activeTab);
+          setLastSearchedGigId(currentGigId);
+          setLastSearchedRepId(currentRepId);
+          setLastSearchedWeights(JSON.parse(JSON.stringify(weights))); // Deep copy
+          setShouldAutoSearch(false);
+          
+        } else if (activeTab === "reps" && selectedRep) {
+          console.log("Searching for gigs matching rep:", selectedRep.personalInfo.name);
+          const matchesData = await findGigsForRep(selectedRep._id || '', weights);
+          console.log("=== MATCHES DATA ===", matchesData);
+          setMatches(matchesData.matches || []);
+          setMatchStats(null); // findGigsForRep doesn't return stats
+          
+          // Update last search parameters after successful search
+          setLastSearchedTab(activeTab);
+          setLastSearchedGigId(currentGigId);
+          setLastSearchedRepId(currentRepId);
+          setLastSearchedWeights(JSON.parse(JSON.stringify(weights))); // Deep copy
+          setShouldAutoSearch(false);
+          
+        } else if (activeTab === "optimal") {
+          console.log("Generating optimal matches...");
+          const matchesData = await generateOptimalMatches(weights);
+          console.log("=== OPTIMAL MATCHES DATA ===", matchesData);
+          setMatches(matchesData.matches || []);
+          setMatchStats(null); // generateOptimalMatches doesn't return stats
+          
+          // Update last search parameters after successful search
+          setLastSearchedTab(activeTab);
+          setLastSearchedGigId(currentGigId);
+          setLastSearchedRepId(currentRepId);
+          setLastSearchedWeights(JSON.parse(JSON.stringify(weights))); // Deep copy
+          setShouldAutoSearch(false);
+          
         } else if (activeTab === "gigs" && !selectedGig) {
           // Clear matches when no gig is selected
           setMatches([]);
           setMatchStats(null);
+          setLoading(false); // Important: Reset loading state when no gig is selected
         }
-        // Note: For gigs tab, matches are now only loaded when save button is clicked
       } catch (error) {
         console.error("Error getting matches:", error);
         setError("Failed to get matches. Please try again.");
         setMatches([]);
         setMatchStats(null);
+      } finally {
+        // Always reset loading state regardless of success or error
         setLoading(false);
       }
     };
     getMatches();
-  }, [activeTab, selectedRep, weights, reps, initialLoading, shouldAutoSearch]);
+  }, [activeTab, selectedRep, selectedGig, weights, reps, initialLoading, shouldAutoSearch, lastSearchedTab, lastSearchedGigId, lastSearchedRepId, lastSearchedWeights]);
 
   // Fetch invited agents when matches are loaded for a gig
   useEffect(() => {
@@ -397,6 +495,12 @@ const MatchingDashboard: React.FC = () => {
       ...prev,
       [key]: value,
     }));
+    
+    // Auto-search when weights change if a gig is selected
+    if (selectedGig && activeTab === "gigs") {
+      setShouldAutoSearch(true);
+      // Remove searchTrigger increment - we'll use parameter comparison instead
+    }
   };
 
   // Reset weights to default
@@ -416,25 +520,17 @@ const MatchingDashboard: React.FC = () => {
 
     console.log('🔄 MANUAL SAVE TRIGGERED - User clicked save button');
     
-    // Check if gig already has saved weights
+    // Always try to save weights first (create or update)
     try {
-      const existingWeights = await getGigWeights(selectedGig._id || '');
-      console.log('⚠️ Gig already has saved weights, skipping save operation');
+      await saveGigWeights(selectedGig._id || '', weights);
+      console.log('✅ Weights saved successfully for gig:', selectedGig._id);
       setGigHasWeights(true);
-    } catch (error) {
-      // No existing weights found, proceed with saving
-      console.log('✅ No existing weights found, saving new weights');
-      try {
-        await saveGigWeights(selectedGig._id || '', weights);
-        console.log('✅ Weights saved successfully for gig:', selectedGig._id);
-        setGigHasWeights(true);
-      } catch (saveError) {
-        console.error('❌ Error saving weights:', saveError);
-        return;
-      }
+    } catch (saveError) {
+      console.error('❌ Error saving weights:', saveError);
+      // Continue with search even if saving fails
     }
     
-    // Enable auto search and trigger search with updated weights after saving
+    // Enable auto search and trigger search with current weights
     setShouldAutoSearch(true);
     setLoading(true);
     
@@ -529,6 +625,8 @@ const MatchingDashboard: React.FC = () => {
     }
   };
 
+
+
   // Add custom animation classes
   const fadeIn = "animate-[fadeIn_0.5s_ease-in-out]";
   const slideUp = "animate-[slideUp_0.3s_ease-out]";
@@ -619,98 +717,70 @@ const MatchingDashboard: React.FC = () => {
           </div>
           <div className="flex items-center space-x-4">
             <button
-              onClick={async () => {
-                // Ajouter des console logs avant le back to onboarding
+              onClick={async (e) => {
+                // Prevent multiple clicks
+                e.currentTarget.disabled = true;
+                e.currentTarget.innerHTML = '<div class="flex items-center space-x-2"><div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div><span>Updating...</span></div>';
+                
                 console.log("=== BACK TO ONBOARDING TRIGGERED ===");
                 console.log("Current URL:", window.location.href);
                 console.log("Current timestamp:", new Date().toISOString());
-                console.log("User agent:", navigator.userAgent);
                 
                 try {
                   const companyId = Cookies.get("companyId");
                   console.log("Company ID:", companyId);
                   console.log("Company API URL:", import.meta.env.VITE_COMPANY_API_URL);
                   
-                  // Debug logs
                   if (!companyId) {
-                    console.warn("No companyId found in cookies, proceeding without updating onboarding");
+                    console.warn("⚠️ No companyId found in cookies, proceeding without updating onboarding");
                     window.location.href = "/app11";
                     return;
                   }
 
                   if (!import.meta.env.VITE_COMPANY_API_URL) {
-                    console.error("VITE_COMPANY_API_URL is not defined");
+                    console.error("❌ VITE_COMPANY_API_URL is not defined");
                     window.location.href = "/app11";
                     return;
                   }
 
-                  // Marquer le step 10 de la phase 4 comme completed
-                  console.log("Updating step 10 status...");
-                  console.log("Step URL:", `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/phases/3/steps/10`);
-                  console.log("Step request data:", { status: "completed" });
-                  
-                  let stepUpdated = false;
-                  
-                  // Essayer d'abord phase 3, step 10
+                                    // Mettre à jour le step 10 de la phase 3 (step actuel)
+                  console.log("🔄 Updating Phase 3, Step 10...");
                   try {
                     const stepResponse = await axios.put(
                       `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/phases/3/steps/10`,
                       { status: "completed" }
                     );
-                    console.log("Step update response (phase 3):", stepResponse.data);
-                    stepUpdated = true;
+                    console.log("✅ Successfully updated Phase 3, Step 10:", stepResponse.data);
                   } catch (stepError: any) {
-                    console.error("Step update error (phase 3):", stepError);
-                    console.error("Step error response:", stepError.response?.data);
-                    console.error("Step error status:", stepError.response?.status);
-                    
-                    // Essayer phase 4, step 10
-                    try {
-                      console.log("Trying phase 4, step 10...");
-                      const stepResponse2 = await axios.put(
-                        `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/phases/4/steps/10`,
-                        { status: "completed",  }
-                      );
-                      console.log("Step update response (phase 4):", stepResponse2.data);
-                      stepUpdated = true;
-                    } catch (stepError2: any) {
-                      console.error("Step update error (phase 4):", stepError2);
-                      console.error("Step error response (phase 4):", stepError2.response?.data);
-                    }
+                    console.error("❌ Failed to update Phase 3, Step 10:", stepError.response?.status, stepError.response?.data);
                   }
+
+                  console.log("🎉 Onboarding update process completed successfully!");
                   
-                  // Mettre à jour la phase courante vers la phase 4 (si pas déjà en phase 4)
-                  console.log("Updating current phase...");
-                  console.log("Phase URL:", `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/current-phase`);
-                  console.log("Phase request data:", { phase: 4 });
-                  
-                  try {
-                    const phaseResponse = await axios.put(
-                      `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/current-phase`,
-                      { phase: 4 }
-                    );
-                    console.log("Phase update response:", phaseResponse.data);
-                  } catch (phaseError: any) {
-                    console.error("Phase update error:", phaseError);
-                    console.error("Phase error response:", phaseError.response?.data);
-                    console.error("Phase error status:", phaseError.response?.status);
-                  }
-                  
-                  console.log("Onboarding progress updated successfully");
+                  // Small delay for user feedback
+                  setTimeout(() => {
                   window.location.href = "/app11";
+                  }, 500);
+
                 } catch (error: any) {
-                  console.error("Error updating onboarding progress:", error);
+                  console.error("💥 Error updating onboarding progress:", error);
                   console.error("Error details:", {
                     message: error?.message || "Unknown error",
                     response: error?.response?.data,
                     status: error?.response?.status
                   });
                   
+                  // Re-enable button and show error state
+                  e.currentTarget.disabled = false;
+                  e.currentTarget.innerHTML = '<span>⚠️ Error - Redirecting...</span>';
+                  
                   // Continue to redirect even if API calls fail
+                  setTimeout(() => {
                   window.location.href = "/app11";
+                  }, 1500);
                 }
               }}
-              className="flex items-center space-x-2 bg-white/10 hover:bg-white/20 px-6 py-2.5 rounded-lg transition-all duration-200 text-white font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+              className="flex items-center space-x-2 bg-white/10 hover:bg-white/20 px-6 py-2.5 rounded-lg transition-all duration-200 text-white font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
               <span>Back to onboarding</span>
             </button>
@@ -822,7 +892,7 @@ const MatchingDashboard: React.FC = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                   </svg>
                   <span>
-                    {gigHasWeights ? `Update weights & Search for ${selectedGig.title}` : `Save weights & Search for ${selectedGig.title}`}
+                    {gigHasWeights ? `Save updated weights for ${selectedGig.title}` : `Save weights for ${selectedGig.title}`}
                   </span>
                 </button>
               </div>
@@ -878,6 +948,7 @@ const MatchingDashboard: React.FC = () => {
         </div>
 
         {/* Selection Area */}
+        {console.log('🔍 GIGS SECTION CONDITIONS:', { activeTab, loading, initialLoading })}
         {activeTab === "gigs" && !loading && (
           <div className={`bg-white rounded-xl shadow-lg p-6 mb-6 transform transition-all duration-300 ${slideUp}`}>
             <h2 className="text-xl font-semibold text-gray-800 mb-6 flex items-center space-x-2">
@@ -899,8 +970,8 @@ const MatchingDashboard: React.FC = () => {
                       gigHasWeights ? 'text-green-800' : 'text-blue-800'
                     }`}>
                       {gigHasWeights 
-                        ? `Click "Adjust Weights" to update weights for ${selectedGig.title}, then click "Update weights & Search" to refresh results`
-                        : `Click "Adjust Weights" to configure weights for ${selectedGig.title}, then click "Save weights & Search" to refresh results`
+                        ? `Click "Adjust Weights" to update weights for ${selectedGig.title}. Results will update automatically when you change weights. Use "Update weights & Search" to save your changes.`
+                        : `Click "Adjust Weights" to configure weights for ${selectedGig.title}. Results will update automatically when you change weights. Use "Save weights & Search" to save your changes.`
                       }
                     </p>
                   </div>
@@ -909,6 +980,7 @@ const MatchingDashboard: React.FC = () => {
             )}
 
             {/* Gigs Grid */}
+            {console.log('🎯 RENDERING GIGS:', { paginatedGigs, activeTab, loading })}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {paginatedGigs.map((gig) => (
                 <div
