@@ -185,113 +185,13 @@ function RepMatchingPanel() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Header with Navigation Tabs */}
-      <header className="bg-gradient-to-r from-orange-600 to-red-600 text-white shadow-lg">
-        {/* Top Header */}
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-white/20 rounded-lg">
-                <Users size={24} className="text-yellow-300" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold">Reps Management System</h1>
-                <p className="text-orange-200 text-sm">Manage reps through their complete lifecycle</p>
-              </div>
-            </div>
-
-            {/* Quick Stats */}
-            <div className="hidden lg:flex items-center space-x-6 px-4 py-2 bg-white/10 rounded-lg text-sm">
-              <div className="text-center">
-                <div className="font-bold text-lg">{reps.length}</div>
-                <div className="text-orange-200 text-xs">Total Reps</div>
-              </div>
-              <div className="text-center">
-                <div className="font-bold text-lg">{invitedAgentsList.length}</div>
-                <div className="text-orange-200 text-xs">Invited</div>
-              </div>
-              <div className="text-center">
-                <div className="font-bold text-lg">{enrollmentRequests.length}</div>
-                <div className="text-orange-200 text-xs">Requests</div>
-              </div>
-              <div className="text-center">
-                <div className="font-bold text-lg">{activeAgentsList.length}</div>
-                <div className="text-orange-200 text-xs">Active</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Navigation Tabs */}
-        <div className="border-t border-white/20">
-          <div className="container mx-auto px-4">
-            <nav className="flex space-x-0">
-              {[
-                { id: 'matching', label: 'Smart Matching System', icon: '🎯', description: 'Find & match perfect reps' },
-                { id: 'invited', label: 'Invited Reps', icon: '📧', description: 'Pending invitations' },
-                { id: 'enrollment', label: 'Enrollment Requests', icon: '📋', description: 'Rep applications' },
-                { id: 'active', label: 'Active Reps', icon: '✅', description: 'Working reps' }
-              ].map(section => (
-                <button
-                  key={section.id}
-                  onClick={() => setActiveSection(section.id as any)}
-                  className={`flex-1 px-4 py-4 text-left transition-all duration-200 border-b-2 ${
-                    activeSection === section.id
-                      ? 'border-yellow-300 bg-white/10'
-                      : 'border-transparent hover:bg-white/5'
-                  }`}
-                >
-                  <div className="flex items-center space-x-3">
-                    <span className="text-xl">{section.icon}</span>
-                    <div>
-                      <div className={`font-medium ${activeSection === section.id ? 'text-yellow-300' : 'text-white'}`}>
-                        {section.label}
-                      </div>
-                      <div className="text-orange-200 text-xs">{section.description}</div>
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </nav>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="container mx-auto p-6">
-        {/* Error Message */}
-        {error && (
-          <div className="mb-6 bg-red-100 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-lg shadow-md">
-            <p className="flex items-center">
-              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-              </svg>
-              {error}
-            </p>
-          </div>
-        )}
-
-        {/* Loading Indicators */}
-        {initialLoading && (
-          <div className="flex justify-center items-center py-20">
-            <div className="relative">
-              <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-orange-500"></div>
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                <Zap size={24} className="text-orange-500 animate-pulse" />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Section Content - Placeholder for now */}
-        {!initialLoading && (
-          <div>
-            <p>Active Section: {activeSection}</p>
-            <p>Total Gigs: {gigs.length}</p>
-            <p>Total Reps: {reps.length}</p>
-          </div>
-        )}
-      </main>
+      <div className="container mx-auto p-6">
+        <h1>Rep Matching Panel - Implementation in Progress</h1>
+        <p>Total Gigs: {gigs.length}</p>
+        <p>Total Reps: {reps.length}</p>
+        {error && <div className="error">{error}</div>}
+        {initialLoading && <div>Loading...</div>}
+      </div>
     </div>
   );
 }
