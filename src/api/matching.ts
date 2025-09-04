@@ -1,4 +1,4 @@
-import { Match, MatchResponse, MatchingWeights } from '../types';
+import { Match, MatchResponse, MatchingWeights } from '../types/index';
 import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5011/api';
@@ -174,7 +174,7 @@ export const getGigsByCompanyId = async (companyId: string): Promise<any[]> => {
 export const createGigAgent = async (data: {
   agentId: string;
   gigId: string;
-  matchDetails: any;
+  matchDetails?: any;
 }): Promise<any> => {
   try {
     console.log('Creating gig-agent with data:', data);
@@ -185,6 +185,195 @@ export const createGigAgent = async (data: {
     return response.data;
   } catch (error) {
     console.error('Error creating gig-agent:', error);
+    throw error;
+  }
+};
+
+/**
+ * Récupère les gig-agents pour un gig spécifique
+ */
+export const getGigAgentsForGig = async (gigId: string): Promise<any[]> => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/gig-agents/gig/${gigId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching gig agents:', error);
+    throw error;
+  }
+};
+
+/**
+ * Récupère les agents invités pour une compagnie
+ */
+export const getInvitedAgentsForCompany = async (companyId: string): Promise<any[]> => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/invited-agents/company/${companyId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching invited agents:', error);
+    throw error;
+  }
+};
+
+/**
+ * Récupère les demandes d'inscription pour une compagnie
+ */
+export const getEnrollmentRequestsForCompany = async (companyId: string): Promise<any[]> => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/enrollment-requests/company/${companyId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching enrollment requests:', error);
+    throw error;
+  }
+};
+
+/**
+ * Récupère les agents actifs pour une compagnie
+ */
+export const getActiveAgentsForCompany = async (companyId: string): Promise<any[]> => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/active-agents/company/${companyId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching active agents:', error);
+    throw error;
+  }
+};
+
+/**
+ * Accepte une demande d'inscription
+ */
+export const acceptEnrollmentRequest = async (requestId: string, notes?: string): Promise<any> => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/enrollment-requests/${requestId}/accept`, { notes });
+    return response.data;
+  } catch (error) {
+    console.error('Error accepting enrollment request:', error);
+    throw error;
+  }
+};
+
+/**
+ * Rejette une demande d'inscription
+ */
+export const rejectEnrollmentRequest = async (requestId: string, notes?: string): Promise<any> => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/enrollment-requests/${requestId}/reject`, { notes });
+    return response.data;
+  } catch (error) {
+    console.error('Error rejecting enrollment request:', error);
+    throw error;
+  }
+};
+
+// Types et interfaces
+export interface Skill {
+  _id: string;
+  name: string;
+  category: 'professional' | 'technical' | 'soft';
+}
+
+export interface Language {
+  _id: string;
+  code: string;
+  name: string;
+  nativeName: string;
+}
+
+export interface GigWeights {
+  _id: string;
+  gigId: string;
+  matchingWeights: MatchingWeights;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Récupère tous les skills
+ */
+export const getAllSkills = async (): Promise<{ professional: Skill[]; technical: Skill[]; soft: Skill[]; }> => {
+  try {
+    // Mock data - replace with actual API call
+    return {
+      professional: [
+        { _id: '1', name: 'Project Management', category: 'professional' },
+        { _id: '2', name: 'Sales', category: 'professional' },
+        { _id: '3', name: 'Marketing', category: 'professional' },
+      ],
+      technical: [
+        { _id: '4', name: 'JavaScript', category: 'technical' },
+        { _id: '5', name: 'Python', category: 'technical' },
+        { _id: '6', name: 'React', category: 'technical' },
+      ],
+      soft: [
+        { _id: '7', name: 'Communication', category: 'soft' },
+        { _id: '8', name: 'Leadership', category: 'soft' },
+        { _id: '9', name: 'Teamwork', category: 'soft' },
+      ]
+    };
+  } catch (error) {
+    console.error('Error fetching skills:', error);
+    throw error;
+  }
+};
+
+/**
+ * Récupère toutes les langues
+ */
+export const getLanguages = async (): Promise<Language[]> => {
+  try {
+    // Mock data - replace with actual API call
+    return [
+      { _id: '1', code: 'en', name: 'English', nativeName: 'English' },
+      { _id: '2', code: 'fr', name: 'French', nativeName: 'français' },
+      { _id: '3', code: 'es', name: 'Spanish', nativeName: 'español' },
+      { _id: '4', code: 'de', name: 'German', nativeName: 'Deutsch' },
+      { _id: '5', code: 'ar', name: 'Arabic', nativeName: 'العربية' },
+    ];
+  } catch (error) {
+    console.error('Error fetching languages:', error);
+    throw error;
+  }
+};
+
+/**
+ * Sauvegarde les poids pour un gig
+ */
+export const saveGigWeights = async (gigId: string, weights: MatchingWeights): Promise<GigWeights> => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/gig-weights`, {
+      gigId,
+      matchingWeights: weights
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error saving gig weights:', error);
+    throw error;
+  }
+};
+
+/**
+ * Récupère les poids pour un gig
+ */
+export const getGigWeights = async (gigId: string): Promise<GigWeights> => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/gig-weights/${gigId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error getting gig weights:', error);
+    throw error;
+  }
+};
+
+/**
+ * Reset les poids pour un gig
+ */
+export const resetGigWeights = async (gigId: string): Promise<void> => {
+  try {
+    await axios.delete(`${API_BASE_URL}/gig-weights/${gigId}`);
+  } catch (error) {
+    console.error('Error resetting gig weights:', error);
     throw error;
   }
 }; 

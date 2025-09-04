@@ -198,6 +198,7 @@ export interface AgentInfo {
 }
 
 export interface LanguageMatch {
+  score: number;
   details: {
     matchingLanguages: Array<{
       language: string;
@@ -215,6 +216,7 @@ export interface LanguageMatch {
 }
 
 export interface SkillsMatch {
+  score: number;
   details: {
     matchingSkills: Array<{
       skill: string;
@@ -291,6 +293,12 @@ export interface Match {
   matchStatus: 'perfect_match' | 'partial_match' | 'no_match';
   alreadyAssigned?: boolean;
   isInvited?: boolean;
+  totalMatchingScore: number;
+  alreadyEnrolled?: boolean;
+  status?: string;
+  isEnrolled?: boolean;
+  enrollmentStatus?: string;
+  agentResponse?: string;
 }
 
 export interface MatchResponse {
@@ -399,6 +407,7 @@ export interface MatchingWeights {
 }
 
 export interface IndustryMatch {
+  score: number;
   details: {
     matchingIndustries: Array<{
       industry: string;
@@ -414,6 +423,7 @@ export interface IndustryMatch {
 }
 
 export interface ActivityMatch {
+  score: number;
   details: {
     matchingActivities: Array<{
       activity: string;
