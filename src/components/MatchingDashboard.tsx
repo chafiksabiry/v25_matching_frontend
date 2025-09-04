@@ -1101,7 +1101,7 @@ const MatchingDashboard: React.FC = () => {
               {console.log('=== RENDERING MATCHES ===', matches)}
               {console.log('=== MATCHES LENGTH IN RENDER ===', matches.length)}
               {matches.length > 0 && matches[0]?.agentInfo?.languages && 
-                console.log('=== LANGUAGE IDs IN MATCHING DATA ===', matches[0].agentInfo.languages.map((l: any) => l.language))
+                console.log('=== LANGUAGE DATA IN MATCHING ===', matches[0].agentInfo.languages.map((l: any) => ({ code: l.language?.code, name: l.language?.name, languageName: l.languageName })))
               }
               {matches.length > 0 ? (
                 <>
@@ -1181,7 +1181,7 @@ const MatchingDashboard: React.FC = () => {
                               {/* LANGUAGES SIMPLIFIÉ */}
                               {match.agentInfo?.languages?.length > 0 ? (
                                 <div className="flex flex-wrap gap-2">
-                                  {match.agentInfo.languages.map((lang: { language: string; proficiency?: string }, i: number) => {
+                                  {match.agentInfo.languages.map((lang: { language: { _id: string; code: string; name: string; nativeName: string }; languageName: string; proficiency?: string }, i: number) => {
                                     let levelLabel = '';
                                     if (lang.proficiency) {
                                       if (["A1", "A2"].includes(lang.proficiency)) levelLabel = 'Beginner';
@@ -1189,11 +1189,11 @@ const MatchingDashboard: React.FC = () => {
                                       else if (["C1", "C2"].includes(lang.proficiency)) levelLabel = 'Advanced';
                                     }
                                     
-                                    // Try to get the language name from our languages data
-                                    const languageName = getLanguageNameByCode(lang.language);
+                                    // Use the languageName directly from the API response, or fallback to language.name
+                                    const languageName = lang.languageName || lang.language?.name || 'Unknown';
                                     
                                     // Debug: Log language lookup
-                                    console.log(`Language lookup: ${lang.language} -> ${languageName}`);
+                                    console.log(`Language data:`, lang);
                                     
                                     return (
                                       <span key={i} className="px-2 py-1 rounded text-xs bg-blue-50 text-blue-800 border border-blue-200">
