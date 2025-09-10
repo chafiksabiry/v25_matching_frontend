@@ -46,7 +46,7 @@ function RepMatchingPanel() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
-  const [showWeights, setShowWeights] = useState(false);
+  const [showWeights, setShowWeights] = useState(true);
   const [weights, setWeights] = useState<MatchingWeights>({
     experience: 0,
     skills: 0,
