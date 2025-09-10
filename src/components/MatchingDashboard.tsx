@@ -198,7 +198,7 @@ function RepMatchingPanel() {
       let matchesData;
       try {
         matchesData = await findMatchesForGig(gig._id || '', currentWeights);
-        console.log("=== MATCHES DATA ===", matchesData);
+      console.log("=== MATCHES DATA ===", matchesData);
       } catch (error: any) {
         console.error("❌ Error finding matches for gig:", error);
         
@@ -580,321 +580,194 @@ function RepMatchingPanel() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Header with Navigation Tabs */}
-      <header className="bg-gradient-to-r from-orange-600 to-red-600 text-white shadow-lg">
-        {/* Top Header */}
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-white/20 rounded-lg">
-                <Users size={24} className="text-yellow-300" />
+    <div className="min-h-screen bg-gray-50">
+      {/* Modern Header */}
+      <header className="bg-white shadow-sm border-b border-gray-200">
+        <div className="px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="p-2 bg-gradient-to-r from-orange-500 to-red-600 rounded-lg">
+                <Users size={24} className="text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold">Reps Management System</h1>
-                <p className="text-orange-200 text-sm">Manage reps through their complete lifecycle</p>
+                <h1 className="text-2xl font-bold text-gray-900">Reps Management</h1>
+                <p className="text-gray-600 text-sm">Smart matching & lifecycle management</p>
               </div>
             </div>
             
-            {/* Quick Stats */}
-            <div className="hidden lg:flex items-center space-x-6 px-4 py-2 bg-white/10 rounded-lg text-sm">
+            {/* Quick Stats - Compact */}
+            <div className="flex items-center space-x-6">
               <div className="text-center">
-                <div className="font-bold text-lg">{reps.length}</div>
-                <div className="text-orange-200 text-xs">Total Reps</div>
+                <div className="text-lg font-bold text-gray-900">{reps.length}</div>
+                <div className="text-xs text-gray-500">Total</div>
               </div>
               <div className="text-center">
-                <div className="font-bold text-lg">{invitedAgentsList.length}</div>
-                <div className="text-orange-200 text-xs">Invited</div>
+                <div className="text-lg font-bold text-blue-600">{invitedAgentsList.length}</div>
+                <div className="text-xs text-gray-500">Invited</div>
               </div>
               <div className="text-center">
-                <div className="font-bold text-lg">{enrollmentRequests.length}</div>
-                <div className="text-orange-200 text-xs">Requests</div>
+                <div className="text-lg font-bold text-yellow-600">{enrollmentRequests.length}</div>
+                <div className="text-xs text-gray-500">Pending</div>
               </div>
               <div className="text-center">
-                <div className="font-bold text-lg">{activeAgentsList.length}</div>
-                <div className="text-orange-200 text-xs">Active</div>
+                <div className="text-lg font-bold text-green-600">{activeAgentsList.length}</div>
+                <div className="text-xs text-gray-500">Active</div>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Navigation Tabs */}
-        <div className="border-t border-white/20">
-          <div className="container mx-auto px-4">
-            <nav className="flex space-x-0">
-              {[
-                { id: 'matching', label: 'Smart Matching System', icon: '🎯', description: 'Find & match perfect reps' },
-                { id: 'invited', label: 'Invited Reps', icon: '📧', description: 'Pending invitations' },
-                { id: 'enrollment', label: 'Enrollment Requests', icon: '📋', description: 'Rep applications' },
-                { id: 'active', label: 'Active Reps', icon: '✅', description: 'Working reps' }
-              ].map(section => (
-                <button
-                  key={section.id}
-                  onClick={() => setActiveSection(section.id as any)}
-                  className={`flex-1 px-4 py-4 text-left transition-all duration-200 border-b-2 ${
-                    activeSection === section.id
-                      ? 'border-yellow-300 bg-white/10'
-                      : 'border-transparent hover:bg-white/5'
-                  }`}
-                >
-                  <div className="flex items-center space-x-3">
-                    <span className="text-xl">{section.icon}</span>
-                    <div>
-                      <div className={`font-medium ${activeSection === section.id ? 'text-yellow-300' : 'text-white'}`}>
-                        {section.label}
-                      </div>
-                      <div className="text-orange-200 text-xs">{section.description}</div>
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </nav>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="container mx-auto p-6">
-        
-        {/* Error Message */}
-        {error && (
-          <div className="mb-6 bg-red-100 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-lg shadow-md">
-            <p className="flex items-center">
-              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-              </svg>
-              {error}
-            </p>
+      {/* Main Layout - 2 Columns */}
+      <div className="flex h-screen">
+        {/* Left Sidebar */}
+        <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
+          {/* Navigation */}
+          <div className="p-6 border-b border-gray-200">
+            <nav className="space-y-2">
+              {[
+                { id: 'matching', label: 'Smart Matching', icon: '🎯', color: 'text-orange-600' },
+                { id: 'invited', label: 'Invited Reps', icon: '📧', color: 'text-blue-600' },
+                { id: 'enrollment', label: 'Enrollment', icon: '📋', color: 'text-yellow-600' },
+                { id: 'active', label: 'Active Reps', icon: '✅', color: 'text-green-600' }
+              ].map(section => (
+                <button
+                  key={section.id}
+                  onClick={() => setActiveSection(section.id as any)}
+                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${
+                    activeSection === section.id
+                      ? 'bg-orange-50 text-orange-700 border border-orange-200'
+                      : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                    <span className="text-xl">{section.icon}</span>
+                  <span className="font-medium">{section.label}</span>
+                </button>
+              ))}
+            </nav>
           </div>
-        )}
 
-        {/* Loading Indicators */}
-        {initialLoading && (
-          <div className="flex justify-center items-center py-20">
-            <div className="relative">
-              <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-orange-500"></div>
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                <Zap size={24} className="text-orange-500 animate-pulse" />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Section Content */}
-        {!initialLoading && (
-          <>
-            {/* 1. SMART MATCHING SYSTEM */}
+          {/* Weights Configuration - Always Visible */}
             {activeSection === 'matching' && (
+            <div className="flex-1 p-6 overflow-y-auto">
     <div className="space-y-6">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h2 className="text-2xl font-bold text-gray-900">🎯 Smart Matching System</h2>
-                    <p className="text-gray-600">Find and match the perfect reps for your gigs</p>
-            </div>
-                  <button
-                        onClick={() => setShowWeights(!showWeights)}
-                        className={`px-4 py-2 rounded-lg transition-all duration-200 flex items-center space-x-2 text-sm font-medium ${
-                          showWeights 
-                            ? 'bg-orange-600 text-white' 
-                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                        }`}
-                      >
-                        <Settings size={16} className={showWeights ? 'rotate-180' : ''} />
-                        <span>{showWeights ? 'Close Weights' : 'Adjust Weights'}</span>
-                  </button>
-        </div>
-
-                {/* Weights Configuration Panel */}
-                {showWeights && (
-          <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-2xl p-8 mb-8 transform transition-all duration-500 ease-in-out border border-gray-200">
-            <div className="flex justify-between items-center mb-8">
-              <div className="flex items-center space-x-4">
-                <div className="p-3 bg-gradient-to-r from-orange-500 to-red-600 rounded-xl shadow-lg">
-                  <Settings size={24} className="text-white" />
-                </div>
-                <div>
-                  <div className="flex items-center space-x-3">
-                  <h2 className="text-2xl font-bold text-gray-900">Matching Weights Configuration</h2>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-gray-900">Matching Weights</h3>
                     {hasUnsavedChanges && (
-                      <span className="inline-flex items-center px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium animate-pulse">
-                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                        </svg>
-                        Unsaved changes
+                    <span className="inline-flex items-center px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">
+                      Unsaved
                       </span>
                     )}
-                  </div>
-                  <p className="text-gray-600 text-sm mt-1">Customize how each factor influences the matching algorithm</p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-4">
-                <button
-                  onClick={resetWeights}
-                  disabled={loading}
-                  className="px-6 py-3 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-xl shadow-lg hover:from-gray-600 hover:to-gray-700 transition-all duration-200 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5 hover:shadow-xl"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                  <span className="font-semibold">Reset to Default</span>
-                </button>
-                {selectedGig && gigHasWeights && (
-                  <button
-                    onClick={async () => {
-                      if (!selectedGig) return;
-                      try {
-                        setLoading(true);
-                        await resetGigWeights(selectedGig._id || '');
-                        setGigHasWeights(false);
-                        resetWeights(); // Reset UI weights to default
-                        console.log('✅ Gig weights reset successfully');
-                      } catch (error) {
-                        console.error('❌ Error resetting gig weights:', error);
-                        setError('Failed to reset gig weights');
-                      } finally {
-                        setLoading(false);
-                      }
-                    }}
-                    disabled={loading}
-                    className="px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl shadow-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5 hover:shadow-xl"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                    <span className="font-semibold">Delete Saved Weights</span>
-                  </button>
-                )}
-              </div>
             </div>
 
-            {/* Weights Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                {/* Weights Grid - Compact */}
+                <div className="space-y-4">
               {Object.entries(weights).map(([key, value]) => (
-                <div key={`weight-${key}`} className="bg-white rounded-xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 group">
-                  <div className="flex justify-between items-center mb-4">
-                    <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">
+                    <div key={`weight-${key}`} className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <label className="text-sm font-medium text-gray-700 capitalize">
                       {key}
                     </label>
-                    <div className={`px-3 py-1 rounded-lg text-sm font-bold ${
-                      Math.round(value * 100) >= 20 ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white' :
-                      Math.round(value * 100) >= 10 ? 'bg-orange-100 text-orange-800' :
-                      'bg-gray-100 text-gray-600'
-                    }`}>
+                        <span className="text-sm font-bold text-gray-900">
                       {Math.round(value * 100)}%
+                        </span>
                     </div>
-                  </div>
-                  
-                  {/* Custom Slider */}
-                  <div className="relative mb-3">
                     <input
                       type="range"
                       min="0"
                       max="1"
                       step="0.05"
                       value={value}
-                      onChange={(e) =>
-                        handleWeightChange(key, parseFloat(e.target.value))
-                      }
-                      className="w-full h-3 bg-gray-200 rounded-full appearance-none cursor-pointer slider"
+                        onChange={(e) => handleWeightChange(key, parseFloat(e.target.value))}
+                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
                       style={{
                         background: `linear-gradient(to right, #f97316 0%, #dc2626 ${value * 100}%, #e5e7eb ${value * 100}%, #e5e7eb 100%)`
                       }}
                     />
-                    <div 
-                      className="absolute top-1/2 transform -translate-y-1/2 w-6 h-6 bg-gradient-to-r from-orange-500 to-red-600 rounded-full shadow-lg border-2 border-white pointer-events-none transition-all duration-200 group-hover:scale-110"
-                      style={{ left: `calc(${value * 100}% - 12px)` }}
-                    ></div>
-                  </div>
-                  
-                  {/* Weight Description */}
-                  <div className="text-xs text-gray-500 text-center">
-                    {key === 'experience' && 'Years of relevant experience'}
-                    {key === 'skills' && 'Skill compatibility score'}
-                    {key === 'industry' && 'Industry background match'}
-                    {key === 'languages' && 'Language proficiency'}
-                    {key === 'availability' && 'Schedule availability'}
-                    {key === 'timezone' && 'Time zone compatibility'}
-                    {key === 'activities' && 'Activity performance'}
-                    {key === 'region' && 'Geographic location'}
-                  </div>
                 </div>
               ))}
             </div>
-            {/* Info Box */}
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 mb-6">
-              <div className="flex items-start space-x-3">
-                <div className="p-2 bg-blue-500 rounded-lg">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
+
+                {/* Action Buttons */}
+                <div className="space-y-3">
+                  <button
+                    onClick={resetWeights}
+                    className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+                  >
+                    Reset to Default
+                  </button>
+                  
+            {selectedGig && (
+                <button
+                      onClick={saveWeightsForGig}
+                  disabled={loading}
+                      className={`w-full px-4 py-2 rounded-lg transition-colors text-sm font-medium ${
+                    hasUnsavedChanges
+                          ? 'bg-orange-600 text-white hover:bg-orange-700'
+                      : gigHasWeights 
+                          ? 'bg-green-600 text-white hover:bg-green-700'
+                          : 'bg-orange-600 text-white hover:bg-orange-700'
+                      } disabled:opacity-50 disabled:cursor-not-allowed`}
+                    >
+                      {loading ? 'Saving...' : 
+                       hasUnsavedChanges ? 'Save Changes' :
+                       gigHasWeights ? 'Update Weights' : 
+                       'Save Weights'}
+                    </button>
+                  )}
                 </div>
-                <div>
-                  <h4 className="text-sm font-bold text-blue-900 mb-1">How Weights Work</h4>
-                  <p className="text-sm text-blue-700 mb-2">
-                    These weights determine how much each factor contributes to the overall matching score. 
-                    Higher weights give more importance to that criteria when ranking reps.
-                  </p>
-                  <p className="text-sm text-orange-700 font-medium">
-                    ⚠️ All weights start at 0. You must set at least one weight above 0 to get meaningful matches.
+
+                {/* Info */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <p className="text-sm text-blue-800">
+                    <span className="font-medium">💡 Tip:</span> Set at least one weight above 0% to get meaningful matches.
                   </p>
                 </div>
               </div>
             </div>
+          )}
+        </div>
 
-            {/* Save Button */}
-            {selectedGig && (
-              <div className="flex justify-center">
-                <button
-                  onClick={() => {
-                    console.log('🎯 BUTTON CLICKED - User manually clicked save button');
-                    saveWeightsForGig();
-                  }}
-                  disabled={loading}
-                  className={`group relative px-10 py-4 rounded-2xl transition-all duration-300 flex items-center space-x-3 shadow-2xl transform hover:-translate-y-1 hover:shadow-3xl font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed ${
-                    hasUnsavedChanges
-                      ? 'bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 text-white animate-pulse'
-                      : gigHasWeights 
-                      ? 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white' 
-                      : 'bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white'
-                  }`}
-                >
-                  {/* Animated Background */}
-                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  
-                  {/* Icon */}
-                  {loading ? (
-                    <div className="animate-spin w-6 h-6 border-2 border-white border-t-transparent rounded-full"></div>
-                  ) : (
-                    <svg className="w-6 h-6 group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                  )}
-                  
-                  {/* Text */}
-                  <span className="relative z-10">
-                    {loading ? 'Saving weights...' : 
-                     hasUnsavedChanges ? `Save Changes for ${selectedGig.title}` :
-                     gigHasWeights ? `Update Weights for ${selectedGig.title}` : 
-                     `Save Weights for ${selectedGig.title}`}
-                  </span>
-                  
-                  {/* Glow Effect */}
-                  <div className={`absolute inset-0 rounded-2xl blur-xl opacity-30 group-hover:opacity-60 transition-opacity duration-300 ${
-                    hasUnsavedChanges
-                      ? 'bg-gradient-to-r from-yellow-500 to-orange-600'
-                      : gigHasWeights 
-                      ? 'bg-gradient-to-r from-green-500 to-emerald-600' 
-                      : 'bg-gradient-to-r from-orange-500 to-red-600'
-                  }`}></div>
-                </button>
+        {/* Main Content Area */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Error Message */}
+          {error && (
+            <div className="mx-6 mt-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+              <p className="flex items-center">
+                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+                {error}
+              </p>
               </div>
             )}
+
+          {/* Loading Indicators */}
+          {initialLoading && (
+            <div className="flex-1 flex justify-center items-center">
+              <div className="relative">
+                <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-orange-500"></div>
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                  <Zap size={24} className="text-orange-500 animate-pulse" />
+                </div>
+              </div>
           </div>
                 )}
 
-                {/* Gig Selection for Matching */}
-                <div className="bg-white rounded-xl shadow-lg p-6">
-                  <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center space-x-2">
+          {/* Section Content */}
+          {!initialLoading && (
+            <div className="flex-1 overflow-y-auto">
+              {/* 1. SMART MATCHING SYSTEM */}
+              {activeSection === 'matching' && (
+                <div className="p-6 space-y-6">
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">🎯 Smart Matching System</h2>
+                    <p className="text-gray-600">Find and match the perfect reps for your gigs</p>
+                  </div>
+
+                  {/* Gig Selection Section */}
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
                     <Briefcase size={20} className="text-orange-600" />
                     <span>Select a Gig to Find Matching Reps</span>
                   </h3>
@@ -1114,14 +987,12 @@ function RepMatchingPanel() {
 
                 {/* Matching Results */}
                 {selectedGig && (
-                  <div className="bg-white rounded-xl shadow-lg p-6">
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                     <div className="mb-6">
                       <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center space-x-2">
                         <Users size={20} className="text-orange-600" />
                         <span>Matches for "{selectedGig?.title}"</span>
                       </h3>
-                      
-
                     </div>
                     
                     {loading ? (
@@ -1811,9 +1682,10 @@ function RepMatchingPanel() {
                 </div>
               </div>
             )}
-          </>
-        )}
-      </main>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
