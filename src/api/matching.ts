@@ -91,8 +91,25 @@ export const findMatchesForGig = async (gigId: string, weights: MatchingWeights)
     });
     
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to find matches for gig');
+      let errorMessage = 'Failed to find matches for gig';
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.message || errorMessage;
+      } catch (parseError) {
+        // If we can't parse the error response, use the status text
+        errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+      }
+      
+      // Create more specific error messages based on status codes
+      if (response.status === 404) {
+        errorMessage = `Gig with ID ${gigId} not found`;
+      } else if (response.status === 400) {
+        errorMessage = `Invalid request data for gig ${gigId}`;
+      } else if (response.status === 500) {
+        errorMessage = `Server error while processing gig ${gigId}`;
+      }
+      
+      throw new Error(errorMessage);
     }
     
     const data = await response.json();
@@ -112,9 +129,17 @@ export const findMatchesForGig = async (gigId: string, weights: MatchingWeights)
         matches: data.matches || []
       } as MatchResponse;
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in findMatchesForGig:', error);
-    throw error;
+    
+    // Re-throw with more context
+    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+      throw new Error(`Network error: Unable to connect to matching service. ${error.message}`);
+    } else if (error.message) {
+      throw new Error(`Matching error: ${error.message}`);
+    } else {
+      throw new Error(`Unknown error occurred while finding matches for gig ${gigId}`);
+    }
   }
 };
 

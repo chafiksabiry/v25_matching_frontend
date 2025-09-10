@@ -172,8 +172,15 @@ function RepMatchingPanel() {
         setHasUnsavedChanges(false);
         currentWeights = savedWeights.matchingWeights;
         console.log('✅ Gig has saved weights, loaded:', savedWeights.matchingWeights);
-      } catch (error) {
-        console.log('❌ No saved weights found for gig:', gig._id);
+      } catch (error: any) {
+        // Handle different types of errors more gracefully
+        if (error.message?.includes('No saved weights found')) {
+          console.log('ℹ️ No saved weights found for gig:', gig._id, '- Using default weights');
+        } else if (error.message?.includes('Failed to fetch')) {
+          console.warn('⚠️ Network error loading weights for gig:', gig._id, '- Using current weights');
+        } else {
+          console.error('❌ Unexpected error loading weights for gig:', gig._id, error);
+        }
         setGigHasWeights(false);
         // Keep current weights
       }
@@ -187,8 +194,32 @@ function RepMatchingPanel() {
       // Find matches for the selected gig using current or loaded weights
       console.log("Searching for reps matching gig:", gig.title);
       console.log("🎯 WEIGHTS BEING SENT TO API:", currentWeights);
-      const matchesData = await findMatchesForGig(gig._id || '', currentWeights);
-      console.log("=== MATCHES DATA ===", matchesData);
+      
+      let matchesData;
+      try {
+        matchesData = await findMatchesForGig(gig._id || '', currentWeights);
+        console.log("=== MATCHES DATA ===", matchesData);
+      } catch (error: any) {
+        console.error("❌ Error finding matches for gig:", error);
+        
+        // Provide user-friendly error message
+        if (error.message?.includes('Failed to fetch')) {
+          console.error("🌐 Network error: Unable to connect to matching service");
+        } else if (error.message?.includes('500')) {
+          console.error("🔧 Server error: Matching service encountered an internal error");
+        } else {
+          console.error("❓ Unexpected error:", error.message);
+        }
+        
+        // Set empty matches data to prevent crashes
+        matchesData = {
+          preferedmatches: [],
+          totalMatches: 0,
+          perfectMatches: 0,
+          partialMatches: 0,
+          noMatches: 0
+        };
+      }
       
       // Debug first match score calculation
       if (matchesData.preferedmatches && matchesData.preferedmatches.length > 0) {
