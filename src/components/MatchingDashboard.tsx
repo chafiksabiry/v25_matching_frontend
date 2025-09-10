@@ -48,14 +48,14 @@ function RepMatchingPanel() {
   const [initialLoading, setInitialLoading] = useState(true);
   const [showWeights, setShowWeights] = useState(false);
   const [weights, setWeights] = useState<MatchingWeights>({
-    experience: 0.20,
-    skills: 0.20,
-    industry: 0.15,
-    languages: 0.15,
-    availability: 0.10,
-    timezone: 0.10,
-    activities: 0.10,
-    region: 0.10,
+    experience: 0,
+    skills: 0,
+    industry: 0,
+    languages: 0,
+    availability: 0,
+    timezone: 0,
+    activities: 0,
+    region: 0,
   });
   const [matchStats, setMatchStats] = useState<MatchResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -321,14 +321,14 @@ function RepMatchingPanel() {
 
   const resetWeights = () => {
     const defaultWeights: MatchingWeights = {
-      experience: 0.20,
-      skills: 0.20,
-      industry: 0.15,
-      languages: 0.15,
-      availability: 0.10,
-      timezone: 0.10,
-      activities: 0.10,
-      region: 0.10,
+      experience: 0,
+      skills: 0,
+      industry: 0,
+      languages: 0,
+      availability: 0,
+      timezone: 0,
+      activities: 0,
+      region: 0,
     };
     setWeights(defaultWeights);
     
@@ -830,9 +830,12 @@ function RepMatchingPanel() {
                 </div>
                 <div>
                   <h4 className="text-sm font-bold text-blue-900 mb-1">How Weights Work</h4>
-                  <p className="text-sm text-blue-700">
+                  <p className="text-sm text-blue-700 mb-2">
                     These weights determine how much each factor contributes to the overall matching score. 
                     Higher weights give more importance to that criteria when ranking reps.
+                  </p>
+                  <p className="text-sm text-orange-700 font-medium">
+                    ⚠️ All weights start at 0. You must set at least one weight above 0 to get meaningful matches.
                   </p>
                 </div>
               </div>
