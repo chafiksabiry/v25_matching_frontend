@@ -862,9 +862,9 @@ function RepMatchingPanel() {
                 )}
 
                 {/* Two Column Layout: Gigs and Reps */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                   {/* Left Column: Gig Selection */}
-                <div className="bg-white rounded-xl shadow-lg p-6">
+                <div className="lg:col-span-3 bg-white rounded-xl shadow-lg p-6">
                   <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center space-x-2">
                     <Briefcase size={20} className="text-orange-600" />
                       <span>Available Gigs</span>
@@ -1081,7 +1081,7 @@ function RepMatchingPanel() {
         </div>
 
                   {/* Right Column: Matching Results */}
-                  <div className="bg-white rounded-xl shadow-lg p-6">
+                  <div className="lg:col-span-9 bg-white rounded-xl shadow-lg p-6">
                     <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center space-x-2">
                         <Users size={20} className="text-orange-600" />
                       <span>{selectedGig ? `Matches for "${selectedGig.title}"` : 'Select a Gig to See Matches'}</span>
