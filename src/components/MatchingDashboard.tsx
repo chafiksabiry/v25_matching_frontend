@@ -140,6 +140,10 @@ function RepMatchingPanel() {
     // Skip if no data yet
     if (!companyInvitedAgents || !enrollmentRequests || !activeAgentsList) return;
     
+    console.log('🔍 Company Invited Agents Structure:', companyInvitedAgents);
+    console.log('🔍 Enrollment Requests Structure:', enrollmentRequests);
+    console.log('🔍 Active Agents Structure:', activeAgentsList);
+    
     // Directly set the lists without filtering again
     setInvitedAgentsList(companyInvitedAgents.filter(agent => !agent.isActive && !agent.hasCompletedOnboarding));
     setEnrollmentRequests(enrollmentRequests);
@@ -1574,14 +1578,7 @@ function RepMatchingPanel() {
                   {invitedAgentsList.length > 0 ? (
                     <div className="space-y-4">
                       {invitedAgentsList.map((agent, index) => {
-                        // Find the gig associated with this agent from companyInvitedAgents
-                        const agentWithGig = companyInvitedAgents.find(companyAgent => 
-                          companyAgent._id === agent._id || 
-                          companyAgent.agentId?._id === agent._id
-                        );
-                        
                         console.log('🔍 Invited Agent Data:', agent);
-                        console.log('🔍 Agent with Gig Info:', agentWithGig);
                         
                         return (
                         <div key={`invited-${agent._id}-${index}`} className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
@@ -1593,9 +1590,9 @@ function RepMatchingPanel() {
                                 <p className="text-sm text-yellow-700">
                                   Invited • Waiting for response
                                 </p>
-                                {(agentWithGig?.gigId?.title || agentWithGig?.gig?.title) && (
+                                {(agent.gigId?.title || agent.gig?.title) && (
                                   <p className="text-sm text-gray-600">
-                                    <span className="font-medium">Gig:</span> {agentWithGig.gigId?.title || agentWithGig.gig?.title}
+                                    <span className="font-medium">Gig:</span> {agent.gigId?.title || agent.gig?.title}
                                   </p>
                                 )}
                               </div>
