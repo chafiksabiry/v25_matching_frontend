@@ -1579,9 +1579,16 @@ function RepMatchingPanel() {
                             <div className="flex-1">
                               <h3 className="text-lg font-bold text-gray-900">{agent.personalInfo?.name}</h3>
                               <p className="text-gray-600">{agent.personalInfo?.email}</p>
-                              <p className="text-sm text-yellow-700 mt-1">
-                                Invited • Waiting for response
-                              </p>
+                              <div className="mt-2 space-y-1">
+                                <p className="text-sm text-yellow-700">
+                                  Invited • Waiting for response
+                                </p>
+                                {agent.gigId?.title && (
+                                  <p className="text-sm text-gray-600">
+                                    <span className="font-medium">Gig:</span> {agent.gigId.title}
+                                  </p>
+                                )}
+                              </div>
                             </div>
                             <div className="flex items-center space-x-2">
                               <span className="inline-flex items-center px-3 py-2 bg-yellow-100 text-yellow-800 rounded-lg text-sm font-medium">
@@ -1626,14 +1633,16 @@ function RepMatchingPanel() {
                                 <p className="text-sm text-blue-700">
                                   <span className="font-medium">Status:</span> {agent.enrollmentStatus}
                                 </p>
+                                {agent.gigId?.title && (
+                                  <p className="text-sm text-gray-600">
+                                    <span className="font-medium">Gig:</span> {agent.gigId.title}
+                                  </p>
+                                )}
                                 {agent.notes && (
                                   <p className="text-sm text-gray-600 italic">
                                     "{agent.notes}"
                                   </p>
                                 )}
-                                <p className="text-xs text-gray-500">
-                                  For: {agent.gigId?.title}
-                                </p>
                               </div>
                             </div>
                             <div className="flex items-center space-x-2">
@@ -1725,6 +1734,13 @@ function RepMatchingPanel() {
                               <p className="text-gray-600 mb-2">{agent.agentId?.personalInfo?.email}</p>
                               
                               <div className="mt-3 space-y-2">
+                                {agent.gigId?.title && (
+                                  <div className="mb-2">
+                                    <p className="text-sm text-gray-600">
+                                      <span className="font-medium">Gig:</span> {agent.gigId.title}
+                                    </p>
+                                  </div>
+                                )}
                                 <div className="flex items-center gap-4 text-sm">
                                   <span className="text-gray-600">
                                     <span className="font-medium">Experience:</span> {agent.agentId?.professionalSummary?.yearsOfExperience} years
