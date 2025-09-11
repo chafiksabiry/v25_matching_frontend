@@ -768,11 +768,11 @@ function RepMatchingPanel() {
             </div>
 
             {/* Weights Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-4 mb-4">
               {Object.entries(weights).map(([key, value]) => (
-                <div key={`weight-${key}`} className="bg-white rounded-lg p-3 shadow-md border border-gray-200 hover:shadow-lg transition-all duration-200 group">
+                <div key={`weight-${key}`} className="bg-white rounded-lg p-4 shadow-md border border-gray-200 hover:shadow-lg transition-all duration-200 group min-w-[120px]">
                   <div className="flex justify-between items-center mb-2">
-                    <label className="text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">
                       {key}
                     </label>
                     <div className={`px-2 py-1 rounded text-xs font-bold ${
@@ -806,17 +806,6 @@ function RepMatchingPanel() {
                     ></div>
                   </div>
                   
-                  {/* Weight Description */}
-                  <div className="text-xs text-gray-500 text-center leading-tight">
-                    {key === 'experience' && 'Years of relevant experience'}
-                    {key === 'skills' && 'Skill compatibility score'}
-                    {key === 'industry' && 'Industry background match'}
-                    {key === 'languages' && 'Language proficiency'}
-                    {key === 'availability' && 'Schedule availability'}
-                    {key === 'timezone' && 'Time zone compatibility'}
-                    {key === 'activities' && 'Activity performance'}
-                    {key === 'region' && 'Geographic location'}
-                  </div>
                 </div>
               ))}
             </div>
