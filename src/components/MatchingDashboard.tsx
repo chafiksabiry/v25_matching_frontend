@@ -79,6 +79,21 @@ function RepMatchingPanel() {
   const [invitedAgentsList, setInvitedAgentsList] = useState<any[]>([]);
   const [enrollmentRequests, setEnrollmentRequests] = useState<any[]>([]);
   const [activeAgentsList, setActiveAgentsList] = useState<any[]>([]);
+  const [searchTerm, setSearchTerm] = useState<string>('');
+
+  // Filter functions
+  const filteredGigs = gigs.filter(gig => 
+    gig.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    gig.companyName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    gig.category?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const filteredMatches = matches.filter(match => 
+    match.agentInfo?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    match.agentInfo?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    match.agentInfo?.personalInfo?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    match.agentInfo?.personalInfo?.email?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   // Fetch data from real backend
 
@@ -865,6 +880,34 @@ function RepMatchingPanel() {
           </div>
                 )}
 
+                {/* Search Input */}
+                <div className="mb-6">
+                  <div className="relative max-w-md mx-auto">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Search gigs and reps..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm"
+                    />
+                    {searchTerm && (
+                      <button
+                        onClick={() => setSearchTerm('')}
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                      >
+                        <svg className="h-5 w-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                </div>
+
                 {/* Two Column Layout: Gigs and Reps */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 overflow-hidden">
                   {/* Left Column: Gig Selection */}
@@ -875,7 +918,7 @@ function RepMatchingPanel() {
                   </h3>
                   
                     <div className="space-y-3 max-h-96 overflow-y-auto">
-                    {gigs.map((gig) => {
+                    {filteredGigs.length > 0 ? filteredGigs.map((gig) => {
                       const isGigExpanded = expandedGigs.has(gig._id || '');
                       
                       return (
@@ -1080,7 +1123,17 @@ function RepMatchingPanel() {
                           )}
                         </div>
                       );
-                    })}
+                    }) : (
+                      <div className="text-center py-8">
+                        <div className="bg-gray-50 rounded-xl p-6 max-w-md mx-auto">
+                          <svg className="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                          </svg>
+                          <p className="text-gray-600 mb-2">No gigs found for "{searchTerm}"</p>
+                          <p className="text-sm text-gray-400">Try adjusting your search terms</p>
+                        </div>
+                      </div>
+                    )}
           </div>
         </div>
 
@@ -1108,9 +1161,9 @@ function RepMatchingPanel() {
                           </div>
                         </div>
                       </div>
-                    ) : matches.length > 0 ? (
+                    ) : filteredMatches.length > 0 ? (
                       <div className="space-y-3 max-h-96 overflow-y-auto">
-                        {matches.map((match, index) => {
+                        {filteredMatches.map((match, index) => {
                           // Check if agent is already enrolled in this specific gig
                           const isAlreadyEnrolledInThisGig = activeAgentsList.some(
                             agent => agent.agentId._id === match.agentId && agent.gigId._id === selectedGig?._id
@@ -1529,6 +1582,16 @@ function RepMatchingPanel() {
                             </div>
                           );
                         })}
+                      </div>
+                    ) : searchTerm ? (
+                      <div className="text-center py-8">
+                        <div className="bg-gray-50 rounded-xl p-6 max-w-md mx-auto">
+                          <svg className="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                          </svg>
+                          <p className="text-gray-600 mb-2">No results found for "{searchTerm}"</p>
+                          <p className="text-sm text-gray-400">Try adjusting your search terms</p>
+                        </div>
                       </div>
                     ) : (
                       <div className="text-center py-8">
