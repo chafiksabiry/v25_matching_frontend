@@ -1589,7 +1589,6 @@ function RepMatchingPanel() {
                       </div>
                     )}
                   </div>
-                )}
                 </div>
               </div>
             )}
