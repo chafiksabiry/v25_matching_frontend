@@ -580,42 +580,42 @@ function RepMatchingPanel() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      {/* Floating Header */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200/50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 py-4">
+    <div className="h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex flex-col">
+      {/* Compact Header */}
+      <header className="bg-white/90 backdrop-blur-md border-b border-gray-200/50 shadow-sm flex-shrink-0">
+        <div className="px-4 py-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3">
               <div className="relative">
-                <div className="w-12 h-12 bg-gradient-to-br from-orange-500 via-red-500 to-pink-500 rounded-2xl shadow-lg flex items-center justify-center">
-                  <Users size={24} className="text-white" />
+                <div className="w-10 h-10 bg-gradient-to-br from-orange-500 via-red-500 to-pink-500 rounded-xl shadow-lg flex items-center justify-center">
+                  <Users size={20} className="text-white" />
                 </div>
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
               </div>
               <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                <h1 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
                   Reps Management
                 </h1>
-                <p className="text-sm text-gray-500">Intelligent matching & lifecycle management</p>
+                <p className="text-xs text-gray-500">Intelligent matching & lifecycle management</p>
               </div>
             </div>
             
-            {/* Stats Cards */}
-            <div className="flex items-center space-x-4">
-              <div className="bg-gradient-to-r from-blue-50 to-blue-100 px-4 py-2 rounded-xl border border-blue-200">
-                <div className="text-lg font-bold text-blue-700">{reps.length}</div>
-                <div className="text-xs text-blue-600">Total Reps</div>
+            {/* Stats Cards - Compact */}
+            <div className="flex items-center space-x-2">
+              <div className="bg-gradient-to-r from-blue-50 to-blue-100 px-3 py-1.5 rounded-lg border border-blue-200">
+                <div className="text-sm font-bold text-blue-700">{reps.length}</div>
+                <div className="text-xs text-blue-600">Total</div>
               </div>
-              <div className="bg-gradient-to-r from-yellow-50 to-yellow-100 px-4 py-2 rounded-xl border border-yellow-200">
-                <div className="text-lg font-bold text-yellow-700">{invitedAgentsList.length}</div>
+              <div className="bg-gradient-to-r from-yellow-50 to-yellow-100 px-3 py-1.5 rounded-lg border border-yellow-200">
+                <div className="text-sm font-bold text-yellow-700">{invitedAgentsList.length}</div>
                 <div className="text-xs text-yellow-600">Invited</div>
               </div>
-              <div className="bg-gradient-to-r from-orange-50 to-orange-100 px-4 py-2 rounded-xl border border-orange-200">
-                <div className="text-lg font-bold text-orange-700">{enrollmentRequests.length}</div>
+              <div className="bg-gradient-to-r from-orange-50 to-orange-100 px-3 py-1.5 rounded-lg border border-orange-200">
+                <div className="text-sm font-bold text-orange-700">{enrollmentRequests.length}</div>
                 <div className="text-xs text-orange-600">Pending</div>
               </div>
-              <div className="bg-gradient-to-r from-green-50 to-green-100 px-4 py-2 rounded-xl border border-green-200">
-                <div className="text-lg font-bold text-green-700">{activeAgentsList.length}</div>
+              <div className="bg-gradient-to-r from-green-50 to-green-100 px-3 py-1.5 rounded-lg border border-green-200">
+                <div className="text-sm font-bold text-green-700">{activeAgentsList.length}</div>
                 <div className="text-xs text-green-600">Active</div>
               </div>
             </div>
@@ -623,8 +623,8 @@ function RepMatchingPanel() {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-6 py-8">
+      {/* Main Content - Full Height */}
+      <main className="flex-1 flex flex-col min-h-0 px-4 py-4">
         {/* Error Message */}
         {error && (
           <div className="mb-6 bg-red-50 border-l-4 border-red-400 p-4 rounded-r-xl shadow-sm">
@@ -679,43 +679,43 @@ function RepMatchingPanel() {
 
             {/* Matching Section */}
             {activeSection === 'matching' && (
-              <div className="h-screen flex flex-col">
-                {/* Header */}
-                <div className="text-center mb-6">
-                  <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-2">
+              <div className="flex-1 flex flex-col min-h-0">
+                {/* Compact Header */}
+                <div className="text-center mb-4 flex-shrink-0">
+                  <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-1">
                     🎯 Smart Matching System
                   </h2>
-                  <p className="text-gray-600 text-lg">Find and match the perfect reps for your gigs</p>
+                  <p className="text-gray-600 text-sm">Find and match the perfect reps for your gigs</p>
                 </div>
 
-                {/* 3-Column Layout */}
-                <div className="flex-1 grid grid-cols-12 gap-6 min-h-0">
+                {/* 3-Column Layout - Full Height */}
+                <div className="flex-1 grid grid-cols-12 gap-4 min-h-0">
                   
                   {/* Column 1: Weights Configuration */}
-                  <div className="col-span-3 bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200/50 p-6 flex flex-col">
-                    <div className="flex items-center space-x-3 mb-6">
-                      <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center shadow-lg">
-                        <Settings size={20} className="text-white" />
+                  <div className="col-span-3 bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200/50 p-4 flex flex-col">
+                    <div className="flex items-center space-x-2 mb-4">
+                      <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg flex items-center justify-center shadow-md">
+                        <Settings size={16} className="text-white" />
                       </div>
                       <div>
-                        <h3 className="text-lg font-bold text-gray-900">Matching Weights</h3>
-                        <p className="text-sm text-gray-600">Configure factors</p>
+                        <h3 className="text-base font-bold text-gray-900">Matching Weights</h3>
+                        <p className="text-xs text-gray-600">Configure factors</p>
                       </div>
                     </div>
                     
                     {hasUnsavedChanges && (
-                      <div className="flex items-center space-x-2 px-3 py-2 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium animate-pulse mb-4">
-                        <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                        <span>Unsaved Changes</span>
+                      <div className="flex items-center space-x-2 px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium animate-pulse mb-3">
+                        <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full"></div>
+                        <span>Unsaved</span>
                       </div>
                     )}
 
-                    {/* Weights List - Compact */}
-                    <div className="flex-1 space-y-4 overflow-y-auto">
+                    {/* Weights List - Ultra Compact */}
+                    <div className="flex-1 space-y-3 overflow-y-auto">
                       {Object.entries(weights).map(([key, value]) => (
-                        <div key={`weight-${key}`} className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-4 border border-gray-200 shadow-sm">
-                          <div className="flex justify-between items-center mb-3">
-                            <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">
+                        <div key={`weight-${key}`} className="bg-gradient-to-br from-gray-50 to-white rounded-lg p-3 border border-gray-200 shadow-sm">
+                          <div className="flex justify-between items-center mb-2">
+                            <label className="text-xs font-bold text-gray-700 uppercase tracking-wider">
                               {key}
                             </label>
                             <div className={`px-2 py-1 rounded-full text-xs font-bold ${
@@ -734,7 +734,7 @@ function RepMatchingPanel() {
                             step="0.05"
                             value={value}
                             onChange={(e) => handleWeightChange(key, parseFloat(e.target.value))}
-                            className="w-full h-2 bg-gray-200 rounded-full appearance-none cursor-pointer slider"
+                            className="w-full h-1.5 bg-gray-200 rounded-full appearance-none cursor-pointer slider"
                             style={{
                               background: `linear-gradient(to right, #f97316 0%, #dc2626 ${value * 100}%, #e5e7eb ${value * 100}%, #e5e7eb 100%)`
                             }}
@@ -743,11 +743,11 @@ function RepMatchingPanel() {
                       ))}
                     </div>
 
-                    {/* Action Buttons */}
-                    <div className="space-y-3 mt-6">
+                    {/* Action Buttons - Compact */}
+                    <div className="space-y-2 mt-4 flex-shrink-0">
                       <button
                         onClick={resetWeights}
-                        className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all duration-200 font-medium text-sm"
+                        className="w-full px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 font-medium text-xs"
                       >
                         Reset to Default
                       </button>
@@ -756,7 +756,7 @@ function RepMatchingPanel() {
                         <button
                           onClick={saveWeightsForGig}
                           disabled={loading}
-                          className={`w-full px-4 py-2 rounded-xl font-medium text-sm transition-all duration-200 ${
+                          className={`w-full px-3 py-2 rounded-lg font-medium text-xs transition-all duration-200 ${
                             hasUnsavedChanges
                               ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white hover:from-yellow-600 hover:to-orange-600'
                               : gigHasWeights
@@ -774,38 +774,38 @@ function RepMatchingPanel() {
                   </div>
 
                   {/* Column 2: Gigs Selection */}
-                  <div className="col-span-4 bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200/50 p-6 flex flex-col">
-                    <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center space-x-2">
-                      <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
-                        <Briefcase size={16} className="text-white" />
+                  <div className="col-span-4 bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200/50 p-4 flex flex-col">
+                    <h3 className="text-base font-bold text-gray-900 mb-3 flex items-center space-x-2">
+                      <div className="w-7 h-7 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
+                        <Briefcase size={14} className="text-white" />
                       </div>
                       <span>Available Gigs</span>
                     </h3>
                     
-                    <div className="flex-1 overflow-y-auto space-y-3">
+                    <div className="flex-1 overflow-y-auto space-y-2">
                       {gigs.map((gig) => {
                         const isGigExpanded = expandedGigs.has(gig._id || '');
                         
                         return (
-                          <div key={gig._id} className={`rounded-xl border-2 transition-all duration-200 ${
+                          <div key={gig._id} className={`rounded-lg border-2 transition-all duration-200 ${
                             selectedGig?._id === gig._id
-                              ? "border-orange-400 shadow-lg bg-orange-50"
-                              : "border-gray-200 hover:border-orange-300 hover:shadow-md bg-white"
+                              ? "border-orange-400 shadow-md bg-orange-50"
+                              : "border-gray-200 hover:border-orange-300 hover:shadow-sm bg-white"
                           }`}>
                             {/* Gig Header - Clickable for selection */}
                             <div
-                              className="cursor-pointer p-4"
+                              className="cursor-pointer p-3"
                               onClick={() => handleGigSelect(gig)}
                             >
-                              <div className="flex justify-between items-start mb-2">
+                              <div className="flex justify-between items-start mb-1">
                                 <div className="flex items-center space-x-2 flex-1">
-                                  <div className={`p-2 rounded-lg ${
+                                  <div className={`p-1.5 rounded-md ${
                                     selectedGig?._id === gig._id ? "bg-orange-500" : "bg-gray-400"
                                   }`}>
-                                    <Briefcase size={14} className="text-white" />
+                                    <Briefcase size={12} className="text-white" />
                                   </div>
                                   <div className="flex-1 min-w-0">
-                                    <h4 className={`font-bold text-sm truncate ${
+                                    <h4 className={`font-bold text-xs truncate ${
                                       selectedGig?._id === gig._id ? "text-orange-900" : "text-gray-800"
                                     }`}>
                                       {gig.title}
@@ -824,8 +824,8 @@ function RepMatchingPanel() {
                               </div>
 
                               {selectedGig?._id === gig._id && (
-                                <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full flex items-center justify-center">
-                                  <svg className="w-2 h-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-500 rounded-full flex items-center justify-center">
+                                  <svg className="w-1.5 h-1.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                                   </svg>
                                 </div>
@@ -833,15 +833,15 @@ function RepMatchingPanel() {
                             </div>
 
                             {/* View Details Button */}
-                            <div className="px-4 pb-4">
+                            <div className="px-3 pb-3">
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   toggleGigDetails(gig._id || '');
                                 }}
-                                className="w-full flex items-center justify-center space-x-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all duration-200 text-xs font-medium text-gray-700"
+                                className="w-full flex items-center justify-center space-x-1 px-2 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-md transition-all duration-200 text-xs font-medium text-gray-700"
                               >
-                                <span>View Details</span>
+                                <span>Details</span>
                                 <svg 
                                   className={`w-3 h-3 transform transition-transform duration-200 ${isGigExpanded ? 'rotate-180' : ''}`} 
                                   fill="none" 
@@ -855,8 +855,8 @@ function RepMatchingPanel() {
 
                             {/* Expanded Details */}
                             {isGigExpanded && (
-                              <div className="px-4 pb-4 border-t border-gray-200 bg-gray-50">
-                                <div className="pt-4 space-y-3 text-xs">
+                              <div className="px-3 pb-3 border-t border-gray-200 bg-gray-50">
+                                <div className="pt-2 space-y-2 text-xs">
                                   
                                   {/* Industries */}
                                   {gig.industries && gig.industries.length > 0 && (
@@ -960,14 +960,14 @@ function RepMatchingPanel() {
                   </div>
 
                   {/* Column 3: Matching Results */}
-                  <div className="col-span-5 bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200/50 p-6 flex flex-col">
-                    <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center space-x-2">
-                      <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
-                        <Users size={16} className="text-white" />
+                  <div className="col-span-5 bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200/50 p-4 flex flex-col">
+                    <h3 className="text-base font-bold text-gray-900 mb-3 flex items-center space-x-2">
+                      <div className="w-7 h-7 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
+                        <Users size={14} className="text-white" />
                       </div>
                       <span>Matching Results</span>
                       {selectedGig && (
-                        <span className="text-sm text-gray-600">for "{selectedGig?.title}"</span>
+                        <span className="text-xs text-gray-600">for "{selectedGig?.title}"</span>
                       )}
                     </h3>
                     
@@ -991,7 +991,7 @@ function RepMatchingPanel() {
                           </div>
                         </div>
                       ) : matches.length > 0 ? (
-                        <div className="space-y-3">
+                        <div className="space-y-2">
                           {matches.map((match, index) => {
                             // Check if agent is already enrolled in this specific gig
                             const isAlreadyEnrolledInThisGig = activeAgentsList.some(
@@ -1014,27 +1014,27 @@ function RepMatchingPanel() {
                             const isExpanded = expandedReps.has(match.agentId);
                             
                             return (
-                              <div key={`match-${match.agentId}-${index}`} className={`rounded-xl p-4 border-2 hover:shadow-lg transition-all duration-300 ${cardBgColor}`}>
+                              <div key={`match-${match.agentId}-${index}`} className={`rounded-lg p-3 border-2 hover:shadow-md transition-all duration-300 ${cardBgColor}`}>
                                 {/* Rep Header */}
-                                <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center justify-between mb-2">
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 mb-1">
-                                      <h4 className="text-sm font-bold text-gray-900 truncate">{match.agentInfo?.name}</h4>
+                                      <h4 className="text-xs font-bold text-gray-900 truncate">{match.agentInfo?.name}</h4>
                                       <div className={`px-2 py-1 rounded-full text-xs font-bold ${
                                         matchScore >= 70 ? 'bg-green-500 text-white' :
                                         matchScore >= 50 ? 'bg-yellow-500 text-white' :
                                         'bg-red-500 text-white'
                                       }`}>
-                                        {matchScore}% Match
+                                        {matchScore}%
                                       </div>
                                     </div>
                                     <p className="text-xs text-gray-600 truncate">{match.agentInfo?.email}</p>
-                                    <div className="flex items-center gap-3 text-xs text-gray-500 mt-1">
+                                    <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
                                       {(match.agentInfo?.timezone?.countryName || match.agentInfo?.location) && (
                                         <span>📍 {match.agentInfo?.timezone?.countryName || match.agentInfo?.location}</span>
                                       )}
                                       {match.agentInfo?.professionalSummary?.yearsOfExperience && (
-                                        <span>💼 {match.agentInfo.professionalSummary.yearsOfExperience.toString().replace(/\s+years?/gi, '')} years</span>
+                                        <span>💼 {match.agentInfo.professionalSummary.yearsOfExperience.toString().replace(/\s+years?/gi, '')}y</span>
                                       )}
                                     </div>
                                   </div>
@@ -1046,7 +1046,7 @@ function RepMatchingPanel() {
                                       </span>
                                     ) : match.alreadyEnrolled ? (
                                       <span className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs font-medium">
-                                        Already Enrolled
+                                        Enrolled
                                       </span>
                                     ) : isInvited ? (
                                       <span className="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
@@ -1054,7 +1054,7 @@ function RepMatchingPanel() {
                                       </span>
                                     ) : (
                                       <button
-                                        className="inline-flex items-center px-2 py-1 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-all duration-200 text-xs font-medium gap-1"
+                                        className="inline-flex items-center px-2 py-1 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-all duration-200 text-xs font-medium gap-1"
                                         onClick={() => handleCreateGigAgent(match)}
                                         disabled={creatingGigAgent}
                                       >
@@ -1069,9 +1069,9 @@ function RepMatchingPanel() {
                                 <div className="flex justify-center">
                                   <button
                                     onClick={() => toggleRepDetails(match.agentId)}
-                                    className="flex items-center space-x-1 px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all duration-200 text-xs font-medium text-gray-700"
+                                    className="flex items-center space-x-1 px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded-md transition-all duration-200 text-xs font-medium text-gray-700"
                                   >
-                                    <span>View Details</span>
+                                    <span>Details</span>
                                     <svg 
                                       className={`w-3 h-3 transform transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} 
                                       fill="none" 
@@ -1085,15 +1085,15 @@ function RepMatchingPanel() {
 
                                 {/* Expanded Details */}
                                 {isExpanded && (
-                                  <div className="mt-3 pt-3 border-t border-gray-200 space-y-3">
-                                    <div className="grid grid-cols-2 gap-2">
+                                  <div className="mt-2 pt-2 border-t border-gray-200 space-y-2">
+                                    <div className="grid grid-cols-2 gap-1">
                                       
                                       {/* Skills Match */}
                                       {match.skillsMatch && (
-                                        <div className="bg-white rounded-lg p-3 shadow-sm">
+                                        <div className="bg-white rounded-md p-2 shadow-sm">
                                           <div className="flex items-center justify-between mb-1">
                                             <h5 className="font-semibold text-gray-800 text-xs">Skills</h5>
-                                            <span className={`px-2 py-1 rounded text-xs font-bold ${
+                                            <span className={`px-1.5 py-0.5 rounded text-xs font-bold ${
                                               Math.round((match.skillsMatch.score || 0) * 100) >= 70 ? 'bg-green-100 text-green-800' :
                                               Math.round((match.skillsMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
                                               'bg-red-100 text-red-800'
@@ -1104,12 +1104,12 @@ function RepMatchingPanel() {
                                           {match.skillsMatch.details?.matchingSkills && match.skillsMatch.details.matchingSkills.length > 0 && (
                                             <div className="flex flex-wrap gap-1">
                                               {match.skillsMatch.details.matchingSkills.slice(0, 2).map((skill: any, i: number) => (
-                                                <span key={i} className="px-1 py-1 bg-blue-100 text-blue-800 rounded text-xs">
+                                                <span key={i} className="px-1 py-0.5 bg-blue-100 text-blue-800 rounded text-xs">
                                                   {skill.skill?.name || skill.skillName || getSkillNameById(skill._id || skill.skillId || skill, skill.category || 'professional')}
                                                 </span>
                                               ))}
                                               {match.skillsMatch.details.matchingSkills.length > 2 && (
-                                                <span className="px-1 py-1 bg-gray-100 text-gray-600 rounded text-xs">
+                                                <span className="px-1 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">
                                                   +{match.skillsMatch.details.matchingSkills.length - 2}
                                                 </span>
                                               )}
@@ -1120,10 +1120,10 @@ function RepMatchingPanel() {
 
                                       {/* Languages Match */}
                                       {match.languageMatch && (
-                                        <div className="bg-white rounded-lg p-3 shadow-sm">
+                                        <div className="bg-white rounded-md p-2 shadow-sm">
                                           <div className="flex items-center justify-between mb-1">
                                             <h5 className="font-semibold text-gray-800 text-xs">Languages</h5>
-                                            <span className={`px-2 py-1 rounded text-xs font-bold ${
+                                            <span className={`px-1.5 py-0.5 rounded text-xs font-bold ${
                                               Math.round((match.languageMatch.score || 0) * 100) >= 70 ? 'bg-green-100 text-green-800' :
                                               Math.round((match.languageMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
                                               'bg-red-100 text-red-800'
@@ -1134,12 +1134,12 @@ function RepMatchingPanel() {
                                           {match.languageMatch.details?.matchingLanguages && match.languageMatch.details.matchingLanguages.length > 0 && (
                                             <div className="flex flex-wrap gap-1">
                                               {match.languageMatch.details.matchingLanguages.slice(0, 2).map((lang: any, i: number) => (
-                                                <span key={i} className="px-1 py-1 bg-purple-100 text-purple-800 rounded text-xs">
+                                                <span key={i} className="px-1 py-0.5 bg-purple-100 text-purple-800 rounded text-xs">
                                                   {lang.language?.name || lang.languageName || getLanguageNameByCode(lang.language || lang.code || lang)}
                                                 </span>
                                               ))}
                                               {match.languageMatch.details.matchingLanguages.length > 2 && (
-                                                <span className="px-1 py-1 bg-gray-100 text-gray-600 rounded text-xs">
+                                                <span className="px-1 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">
                                                   +{match.languageMatch.details.matchingLanguages.length - 2}
                                                 </span>
                                               )}
@@ -1150,10 +1150,10 @@ function RepMatchingPanel() {
 
                                       {/* Industry Match */}
                                       {match.industryMatch && (
-                                        <div className="bg-white rounded-lg p-3 shadow-sm">
+                                        <div className="bg-white rounded-md p-2 shadow-sm">
                                           <div className="flex items-center justify-between mb-1">
                                             <h5 className="font-semibold text-gray-800 text-xs">Industry</h5>
-                                            <span className={`px-2 py-1 rounded text-xs font-bold ${
+                                            <span className={`px-1.5 py-0.5 rounded text-xs font-bold ${
                                               Math.round((match.industryMatch.score || 0) * 100) >= 70 ? 'bg-green-100 text-green-800' :
                                               Math.round((match.industryMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
                                               'bg-red-100 text-red-800'
@@ -1164,12 +1164,12 @@ function RepMatchingPanel() {
                                           {match.industryMatch.details?.matchingIndustries && match.industryMatch.details.matchingIndustries.length > 0 && (
                                             <div className="flex flex-wrap gap-1">
                                               {match.industryMatch.details.matchingIndustries.slice(0, 1).map((industry: any, i: number) => (
-                                                <span key={i} className="px-1 py-1 bg-orange-100 text-orange-800 rounded text-xs">
+                                                <span key={i} className="px-1 py-0.5 bg-orange-100 text-orange-800 rounded text-xs">
                                                   {industry.industry?.name || industry.industryName || industry.name || industry}
                                                 </span>
                                               ))}
                                               {match.industryMatch.details.matchingIndustries.length > 1 && (
-                                                <span className="px-1 py-1 bg-gray-100 text-gray-600 rounded text-xs">
+                                                <span className="px-1 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">
                                                   +{match.industryMatch.details.matchingIndustries.length - 1}
                                                 </span>
                                               )}
@@ -1180,10 +1180,10 @@ function RepMatchingPanel() {
 
                                       {/* Experience Match */}
                                       {match.experienceMatch && (
-                                        <div className="bg-white rounded-lg p-3 shadow-sm">
+                                        <div className="bg-white rounded-md p-2 shadow-sm">
                                           <div className="flex items-center justify-between mb-1">
                                             <h5 className="font-semibold text-gray-800 text-xs">Experience</h5>
-                                            <span className={`px-2 py-1 rounded text-xs font-bold ${
+                                            <span className={`px-1.5 py-0.5 rounded text-xs font-bold ${
                                               Math.round((match.experienceMatch.score || 0) * 100) >= 70 ? 'bg-green-100 text-green-800' :
                                               Math.round((match.experienceMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
                                               'bg-red-100 text-red-800'
@@ -1192,8 +1192,8 @@ function RepMatchingPanel() {
                                             </span>
                                           </div>
                                           <div className="text-xs text-gray-600">
-                                            <p>Rep: {match.agentInfo?.professionalSummary?.yearsOfExperience || 'N/A'} years</p>
-                                            <p>Required: {selectedGig?.seniority?.yearsExperience || 'N/A'} years</p>
+                                            <p>Rep: {match.agentInfo?.professionalSummary?.yearsOfExperience || 'N/A'}y</p>
+                                            <p>Req: {selectedGig?.seniority?.yearsExperience || 'N/A'}y</p>
                                           </div>
                                         </div>
                                       )}
