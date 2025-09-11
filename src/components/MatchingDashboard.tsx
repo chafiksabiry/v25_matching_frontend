@@ -1574,7 +1574,15 @@ function RepMatchingPanel() {
                   {invitedAgentsList.length > 0 ? (
                     <div className="space-y-4">
                       {invitedAgentsList.map((agent, index) => {
+                        // Find the gig associated with this agent from companyInvitedAgents
+                        const agentWithGig = companyInvitedAgents.find(companyAgent => 
+                          companyAgent._id === agent._id || 
+                          companyAgent.agentId?._id === agent._id
+                        );
+                        
                         console.log('🔍 Invited Agent Data:', agent);
+                        console.log('🔍 Agent with Gig Info:', agentWithGig);
+                        
                         return (
                         <div key={`invited-${agent._id}-${index}`} className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                           <div className="flex items-center justify-between">
@@ -1585,15 +1593,9 @@ function RepMatchingPanel() {
                                 <p className="text-sm text-yellow-700">
                                   Invited • Waiting for response
                                 </p>
-                                {(agent.gigId?.title || agent.gig?.title) && (
+                                {(agentWithGig?.gigId?.title || agentWithGig?.gig?.title) && (
                                   <p className="text-sm text-gray-600">
-                                    <span className="font-medium">Gig:</span> {agent.gigId?.title || agent.gig?.title}
-                                  </p>
-                                )}
-                                {/* Debug: Show all available properties */}
-                                {!agent.gigId?.title && !agent.gig?.title && (
-                                  <p className="text-xs text-gray-400">
-                                    Debug: {JSON.stringify(Object.keys(agent))}
+                                    <span className="font-medium">Gig:</span> {agentWithGig.gigId?.title || agentWithGig.gig?.title}
                                   </p>
                                 )}
                               </div>
@@ -1642,9 +1644,9 @@ function RepMatchingPanel() {
                                 <p className="text-sm text-blue-700">
                                   <span className="font-medium">Status:</span> {agent.enrollmentStatus}
                                 </p>
-                                {agent.gigId?.title && (
+                                {(agent.gigId?.title || agent.gig?.title) && (
                                   <p className="text-sm text-gray-600">
-                                    <span className="font-medium">Gig:</span> {agent.gigId.title}
+                                    <span className="font-medium">Gig:</span> {agent.gigId?.title || agent.gig?.title}
                                   </p>
                                 )}
                                 {agent.notes && (
@@ -1743,10 +1745,10 @@ function RepMatchingPanel() {
                               <p className="text-gray-600 mb-2">{agent.agentId?.personalInfo?.email}</p>
                               
                               <div className="mt-3 space-y-2">
-                                {agent.gigId?.title && (
+                                {(agent.gigId?.title || agent.gig?.title) && (
                                   <div className="mb-2">
                                     <p className="text-sm text-gray-600">
-                                      <span className="font-medium">Gig:</span> {agent.gigId.title}
+                                      <span className="font-medium">Gig:</span> {agent.gigId?.title || agent.gig?.title}
                                     </p>
                                   </div>
                                 )}
