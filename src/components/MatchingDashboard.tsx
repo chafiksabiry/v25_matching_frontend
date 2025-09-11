@@ -706,15 +706,15 @@ function RepMatchingPanel() {
 
                 {/* Weights Configuration Panel */}
                 {showWeights && (
-          <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-2xl p-8 mb-8 transform transition-all duration-500 ease-in-out border border-gray-200">
-            <div className="flex justify-between items-center mb-8">
-              <div className="flex items-center space-x-4">
-                <div className="p-3 bg-gradient-to-r from-orange-500 to-red-600 rounded-xl shadow-lg">
-                  <Settings size={24} className="text-white" />
+          <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg p-4 mb-4 transform transition-all duration-300 ease-in-out border border-gray-200">
+            <div className="flex justify-between items-center mb-4">
+              <div className="flex items-center space-x-3">
+                <div className="p-2 bg-gradient-to-r from-orange-500 to-red-600 rounded-lg shadow-md">
+                  <Settings size={20} className="text-white" />
                 </div>
                 <div>
-                  <div className="flex items-center space-x-3">
-                  <h2 className="text-2xl font-bold text-gray-900">Matching Weights Configuration</h2>
+                  <div className="flex items-center space-x-2">
+                  <h2 className="text-lg font-bold text-gray-900">Matching Weights Configuration</h2>
                     {hasUnsavedChanges && (
                       <span className="inline-flex items-center px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium animate-pulse">
                         <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -768,14 +768,14 @@ function RepMatchingPanel() {
             </div>
 
             {/* Weights Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-4">
               {Object.entries(weights).map(([key, value]) => (
-                <div key={`weight-${key}`} className="bg-white rounded-xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 group">
-                  <div className="flex justify-between items-center mb-4">
-                    <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">
+                <div key={`weight-${key}`} className="bg-white rounded-lg p-3 shadow-md border border-gray-200 hover:shadow-lg transition-all duration-200 group">
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="text-xs font-bold text-gray-700 uppercase tracking-wider">
                       {key}
                     </label>
-                    <div className={`px-3 py-1 rounded-lg text-sm font-bold ${
+                    <div className={`px-2 py-1 rounded text-xs font-bold ${
                       Math.round(value * 100) >= 20 ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white' :
                       Math.round(value * 100) >= 10 ? 'bg-orange-100 text-orange-800' :
                       'bg-gray-100 text-gray-600'
@@ -785,7 +785,7 @@ function RepMatchingPanel() {
                   </div>
                   
                   {/* Custom Slider */}
-                  <div className="relative mb-3">
+                  <div className="relative mb-2">
                     <input
                       type="range"
                       min="0"
@@ -795,19 +795,19 @@ function RepMatchingPanel() {
                       onChange={(e) =>
                         handleWeightChange(key, parseFloat(e.target.value))
                       }
-                      className="w-full h-3 bg-gray-200 rounded-full appearance-none cursor-pointer slider"
+                      className="w-full h-2 bg-gray-200 rounded-full appearance-none cursor-pointer slider"
                       style={{
                         background: `linear-gradient(to right, #f97316 0%, #dc2626 ${value * 100}%, #e5e7eb ${value * 100}%, #e5e7eb 100%)`
                       }}
                     />
                     <div 
-                      className="absolute top-1/2 transform -translate-y-1/2 w-6 h-6 bg-gradient-to-r from-orange-500 to-red-600 rounded-full shadow-lg border-2 border-white pointer-events-none transition-all duration-200 group-hover:scale-110"
-                      style={{ left: `calc(${value * 100}% - 12px)` }}
+                      className="absolute top-1/2 transform -translate-y-1/2 w-4 h-4 bg-gradient-to-r from-orange-500 to-red-600 rounded-full shadow-md border-2 border-white pointer-events-none transition-all duration-200 group-hover:scale-110"
+                      style={{ left: `calc(${value * 100}% - 8px)` }}
                     ></div>
                   </div>
                   
                   {/* Weight Description */}
-                  <div className="text-xs text-gray-500 text-center">
+                  <div className="text-xs text-gray-500 text-center leading-tight">
                     {key === 'experience' && 'Years of relevant experience'}
                     {key === 'skills' && 'Skill compatibility score'}
                     {key === 'industry' && 'Industry background match'}
@@ -821,20 +821,20 @@ function RepMatchingPanel() {
               ))}
             </div>
             {/* Info Box */}
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 mb-6">
-              <div className="flex items-start space-x-3">
-                <div className="p-2 bg-blue-500 rounded-lg">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-3 mb-3">
+              <div className="flex items-start space-x-2">
+                <div className="p-1 bg-blue-500 rounded">
+                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-blue-900 mb-1">How Weights Work</h4>
-                  <p className="text-sm text-blue-700 mb-2">
+                  <h4 className="text-xs font-bold text-blue-900 mb-1">How Weights Work</h4>
+                  <p className="text-xs text-blue-700 mb-1">
                     These weights determine how much each factor contributes to the overall matching score. 
                     Higher weights give more importance to that criteria when ranking reps.
                   </p>
-                  <p className="text-sm text-orange-700 font-medium">
+                  <p className="text-xs text-orange-700 font-medium">
                     ⚠️ All weights start at 0. You must set at least one weight above 0 to get meaningful matches.
                   </p>
                 </div>
@@ -850,7 +850,7 @@ function RepMatchingPanel() {
                     saveWeightsForGig();
                   }}
                   disabled={loading}
-                  className={`group relative px-10 py-4 rounded-2xl transition-all duration-300 flex items-center space-x-3 shadow-2xl transform hover:-translate-y-1 hover:shadow-3xl font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed ${
+                  className={`group relative px-6 py-2 rounded-lg transition-all duration-200 flex items-center space-x-2 shadow-lg transform hover:-translate-y-0.5 hover:shadow-xl font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed ${
                     hasUnsavedChanges
                       ? 'bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 text-white animate-pulse'
                       : gigHasWeights 
@@ -859,27 +859,27 @@ function RepMatchingPanel() {
                   }`}
                 >
                   {/* Animated Background */}
-                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
                   
                   {/* Icon */}
                   {loading ? (
-                    <div className="animate-spin w-6 h-6 border-2 border-white border-t-transparent rounded-full"></div>
+                    <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
                   ) : (
-                    <svg className="w-6 h-6 group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                     </svg>
                   )}
                   
                   {/* Text */}
                   <span className="relative z-10">
-                    {loading ? 'Saving weights...' : 
-                     hasUnsavedChanges ? `Save Changes for ${selectedGig.title}` :
-                     gigHasWeights ? `Update Weights for ${selectedGig.title}` : 
-                     `Save Weights for ${selectedGig.title}`}
+                    {loading ? 'Saving...' : 
+                     hasUnsavedChanges ? `Save Changes` :
+                     gigHasWeights ? `Update Weights` : 
+                     `Save Weights`}
                   </span>
                   
                   {/* Glow Effect */}
-                  <div className={`absolute inset-0 rounded-2xl blur-xl opacity-30 group-hover:opacity-60 transition-opacity duration-300 ${
+                  <div className={`absolute inset-0 rounded-lg blur-lg opacity-20 group-hover:opacity-40 transition-opacity duration-200 ${
                     hasUnsavedChanges
                       ? 'bg-gradient-to-r from-yellow-500 to-orange-600'
                       : gigHasWeights 
