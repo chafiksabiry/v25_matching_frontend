@@ -580,195 +580,235 @@ function RepMatchingPanel() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Modern Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="px-6 py-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+      {/* Floating Header */}
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200/50 shadow-sm">
+        <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className="p-2 bg-gradient-to-r from-orange-500 to-red-600 rounded-lg">
-                <Users size={24} className="text-white" />
+              <div className="relative">
+                <div className="w-12 h-12 bg-gradient-to-br from-orange-500 via-red-500 to-pink-500 rounded-2xl shadow-lg flex items-center justify-center">
+                  <Users size={24} className="text-white" />
+                </div>
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Reps Management</h1>
-                <p className="text-gray-600 text-sm">Smart matching & lifecycle management</p>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                  Reps Management
+                </h1>
+                <p className="text-sm text-gray-500">Intelligent matching & lifecycle management</p>
               </div>
             </div>
             
-            {/* Quick Stats - Compact */}
-            <div className="flex items-center space-x-6">
-              <div className="text-center">
-                <div className="text-lg font-bold text-gray-900">{reps.length}</div>
-                <div className="text-xs text-gray-500">Total</div>
+            {/* Stats Cards */}
+            <div className="flex items-center space-x-4">
+              <div className="bg-gradient-to-r from-blue-50 to-blue-100 px-4 py-2 rounded-xl border border-blue-200">
+                <div className="text-lg font-bold text-blue-700">{reps.length}</div>
+                <div className="text-xs text-blue-600">Total Reps</div>
               </div>
-              <div className="text-center">
-                <div className="text-lg font-bold text-blue-600">{invitedAgentsList.length}</div>
-                <div className="text-xs text-gray-500">Invited</div>
+              <div className="bg-gradient-to-r from-yellow-50 to-yellow-100 px-4 py-2 rounded-xl border border-yellow-200">
+                <div className="text-lg font-bold text-yellow-700">{invitedAgentsList.length}</div>
+                <div className="text-xs text-yellow-600">Invited</div>
               </div>
-              <div className="text-center">
-                <div className="text-lg font-bold text-yellow-600">{enrollmentRequests.length}</div>
-                <div className="text-xs text-gray-500">Pending</div>
+              <div className="bg-gradient-to-r from-orange-50 to-orange-100 px-4 py-2 rounded-xl border border-orange-200">
+                <div className="text-lg font-bold text-orange-700">{enrollmentRequests.length}</div>
+                <div className="text-xs text-orange-600">Pending</div>
               </div>
-              <div className="text-center">
-                <div className="text-lg font-bold text-green-600">{activeAgentsList.length}</div>
-                <div className="text-xs text-gray-500">Active</div>
+              <div className="bg-gradient-to-r from-green-50 to-green-100 px-4 py-2 rounded-xl border border-green-200">
+                <div className="text-lg font-bold text-green-700">{activeAgentsList.length}</div>
+                <div className="text-xs text-green-600">Active</div>
               </div>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Main Layout - 2 Columns */}
-      <div className="flex h-screen">
-        {/* Left Sidebar */}
-        <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
-          {/* Navigation */}
-          <div className="p-6 border-b border-gray-200">
-            <nav className="space-y-2">
-              {[
-                { id: 'matching', label: 'Smart Matching', icon: '🎯', color: 'text-orange-600' },
-                { id: 'invited', label: 'Invited Reps', icon: '📧', color: 'text-blue-600' },
-                { id: 'enrollment', label: 'Enrollment', icon: '📋', color: 'text-yellow-600' },
-                { id: 'active', label: 'Active Reps', icon: '✅', color: 'text-green-600' }
-              ].map(section => (
-                <button
-                  key={section.id}
-                  onClick={() => setActiveSection(section.id as any)}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${
-                    activeSection === section.id
-                      ? 'bg-orange-50 text-orange-700 border border-orange-200'
-                      : 'text-gray-600 hover:bg-gray-50'
-                  }`}
-                >
-                    <span className="text-xl">{section.icon}</span>
-                  <span className="font-medium">{section.label}</span>
-                </button>
-              ))}
-            </nav>
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-6 py-8">
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 bg-red-50 border-l-4 border-red-400 p-4 rounded-r-xl shadow-sm">
+            <div className="flex items-center">
+              <svg className="w-5 h-5 text-red-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+              <p className="text-red-700 font-medium">{error}</p>
+            </div>
           </div>
+        )}
 
-          {/* Weights Configuration - Always Visible */}
+        {/* Loading State */}
+        {initialLoading && (
+          <div className="flex justify-center items-center py-20">
+            <div className="relative">
+              <div className="w-16 h-16 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin"></div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Zap size={24} className="text-orange-500 animate-pulse" />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Content */}
+        {!initialLoading && (
+          <>
+            {/* Navigation Pills */}
+            <div className="mb-8">
+              <div className="flex space-x-2 bg-white/60 backdrop-blur-sm p-2 rounded-2xl border border-gray-200/50 shadow-sm">
+                {[
+                  { id: 'matching', label: 'Smart Matching', icon: '🎯', color: 'from-orange-500 to-red-500' },
+                  { id: 'invited', label: 'Invited Reps', icon: '📧', color: 'from-blue-500 to-cyan-500' },
+                  { id: 'enrollment', label: 'Enrollment', icon: '📋', color: 'from-yellow-500 to-orange-500' },
+                  { id: 'active', label: 'Active Reps', icon: '✅', color: 'from-green-500 to-emerald-500' }
+                ].map(section => (
+                  <button
+                    key={section.id}
+                    onClick={() => setActiveSection(section.id as any)}
+                    className={`flex-1 flex items-center justify-center space-x-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
+                      activeSection === section.id
+                        ? `bg-gradient-to-r ${section.color} text-white shadow-lg transform scale-105`
+                        : 'text-gray-600 hover:bg-white/80 hover:text-gray-900'
+                    }`}
+                  >
+                    <span className="text-lg">{section.icon}</span>
+                    <span>{section.label}</span>
+                  </button>
+                ))}
+              </div>
+        </div>
+
+            {/* Matching Section */}
             {activeSection === 'matching' && (
-            <div className="flex-1 p-6 overflow-y-auto">
-    <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-gray-900">Matching Weights</h3>
+              <div className="space-y-8">
+                {/* Header */}
+                <div className="text-center">
+                  <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-2">
+                    🎯 Smart Matching System
+                  </h2>
+                  <p className="text-gray-600 text-lg">Find and match the perfect reps for your gigs</p>
+                </div>
+
+                {/* Weights Configuration - Floating Card */}
+                <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200/50 p-8">
+                  <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center space-x-4">
+                      <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl flex items-center justify-center shadow-lg">
+                  <Settings size={24} className="text-white" />
+                </div>
+                <div>
+                        <h3 className="text-2xl font-bold text-gray-900">Matching Weights</h3>
+                        <p className="text-gray-600">Configure how each factor influences matching</p>
+                  </div>
+                </div>
                     {hasUnsavedChanges && (
-                    <span className="inline-flex items-center px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">
-                      Unsaved
-                      </span>
+                      <div className="flex items-center space-x-2 px-4 py-2 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium animate-pulse">
+                        <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                        <span>Unsaved Changes</span>
+              </div>
                     )}
             </div>
 
-                {/* Weights Grid - Compact */}
-                <div className="space-y-4">
+            {/* Weights Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               {Object.entries(weights).map(([key, value]) => (
-                    <div key={`weight-${key}`} className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <label className="text-sm font-medium text-gray-700 capitalize">
+                      <div key={`weight-${key}`} className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
+                  <div className="flex justify-between items-center mb-4">
+                    <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">
                       {key}
                     </label>
-                        <span className="text-sm font-bold text-gray-900">
+                          <div className={`px-3 py-1 rounded-full text-sm font-bold ${
+                            Math.round(value * 100) >= 20 ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white' :
+                      Math.round(value * 100) >= 10 ? 'bg-orange-100 text-orange-800' :
+                      'bg-gray-100 text-gray-600'
+                    }`}>
                       {Math.round(value * 100)}%
-                        </span>
                     </div>
+                  </div>
+                  
                     <input
                       type="range"
                       min="0"
                       max="1"
                       step="0.05"
                       value={value}
-                        onChange={(e) => handleWeightChange(key, parseFloat(e.target.value))}
-                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                          onChange={(e) => handleWeightChange(key, parseFloat(e.target.value))}
+                      className="w-full h-3 bg-gray-200 rounded-full appearance-none cursor-pointer slider"
                       style={{
                         background: `linear-gradient(to right, #f97316 0%, #dc2626 ${value * 100}%, #e5e7eb ${value * 100}%, #e5e7eb 100%)`
                       }}
                     />
+                  
+                        <div className="text-xs text-gray-500 text-center mt-2">
+                    {key === 'experience' && 'Years of relevant experience'}
+                    {key === 'skills' && 'Skill compatibility score'}
+                    {key === 'industry' && 'Industry background match'}
+                    {key === 'languages' && 'Language proficiency'}
+                    {key === 'availability' && 'Schedule availability'}
+                    {key === 'timezone' && 'Time zone compatibility'}
+                    {key === 'activities' && 'Activity performance'}
+                    {key === 'region' && 'Geographic location'}
+                  </div>
                 </div>
               ))}
             </div>
 
-                {/* Action Buttons */}
-                <div className="space-y-3">
-                  <button
-                    onClick={resetWeights}
-                    className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
-                  >
-                    Reset to Default
-                  </button>
-                  
-            {selectedGig && (
-                <button
-                      onClick={saveWeightsForGig}
-                  disabled={loading}
-                      className={`w-full px-4 py-2 rounded-lg transition-colors text-sm font-medium ${
-                    hasUnsavedChanges
-                          ? 'bg-orange-600 text-white hover:bg-orange-700'
-                      : gigHasWeights 
-                          ? 'bg-green-600 text-white hover:bg-green-700'
-                          : 'bg-orange-600 text-white hover:bg-orange-700'
-                      } disabled:opacity-50 disabled:cursor-not-allowed`}
+                  {/* Action Buttons */}
+                  <div className="flex justify-center space-x-4">
+                    <button
+                      onClick={resetWeights}
+                      className="px-8 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all duration-200 font-medium shadow-sm"
                     >
-                      {loading ? 'Saving...' : 
-                       hasUnsavedChanges ? 'Save Changes' :
-                       gigHasWeights ? 'Update Weights' : 
-                       'Save Weights'}
+                      Reset to Default
                     </button>
-                  )}
-                </div>
+                    
+                    {selectedGig && (
+                      <button
+                        onClick={saveWeightsForGig}
+                        disabled={loading}
+                        className={`px-8 py-3 rounded-xl font-medium shadow-lg transition-all duration-200 ${
+                          hasUnsavedChanges
+                            ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white hover:from-yellow-600 hover:to-orange-600 transform hover:scale-105'
+                            : gigHasWeights
+                            ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:from-green-600 hover:to-emerald-600'
+                            : 'bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600'
+                        } disabled:opacity-50 disabled:cursor-not-allowed`}
+                      >
+                        {loading ? 'Saving...' : 
+                         hasUnsavedChanges ? 'Save Changes' :
+                         gigHasWeights ? 'Update Weights' : 
+                         'Save Weights'}
+                      </button>
+                    )}
+                  </div>
 
-                {/* Info */}
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <p className="text-sm text-blue-800">
-                    <span className="font-medium">💡 Tip:</span> Set at least one weight above 0% to get meaningful matches.
+                  {/* Info Card */}
+                  <div className="mt-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-6">
+              <div className="flex items-start space-x-3">
+                      <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                        <h4 className="font-bold text-blue-900 mb-1">How Weights Work</h4>
+                        <p className="text-blue-700 text-sm mb-2">
+                    These weights determine how much each factor contributes to the overall matching score. 
+                    Higher weights give more importance to that criteria when ranking reps.
                   </p>
+                        <p className="text-orange-700 font-medium text-sm">
+                          ⚠️ All weights start at 0. You must set at least one weight above 0 to get meaningful matches.
+                        </p>
                 </div>
               </div>
             </div>
-          )}
-        </div>
-
-        {/* Main Content Area */}
-        <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Error Message */}
-          {error && (
-            <div className="mx-6 mt-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-              <p className="flex items-center">
-                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                </svg>
-                {error}
-              </p>
               </div>
-            )}
 
-          {/* Loading Indicators */}
-          {initialLoading && (
-            <div className="flex-1 flex justify-center items-center">
-              <div className="relative">
-                <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-orange-500"></div>
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                  <Zap size={24} className="text-orange-500 animate-pulse" />
-                </div>
-              </div>
-          </div>
-                )}
-
-          {/* Section Content */}
-          {!initialLoading && (
-            <div className="flex-1 overflow-y-auto">
-              {/* 1. SMART MATCHING SYSTEM */}
-              {activeSection === 'matching' && (
-                <div className="p-6 space-y-6">
-                  <div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">🎯 Smart Matching System</h2>
-                    <p className="text-gray-600">Find and match the perfect reps for your gigs</p>
-                  </div>
-
-                  {/* Gig Selection Section */}
-                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
-                    <Briefcase size={20} className="text-orange-600" />
+                {/* Gig Selection */}
+                <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200/50 p-8">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center">
+                      <Briefcase size={20} className="text-white" />
+                    </div>
                     <span>Select a Gig to Find Matching Reps</span>
                   </h3>
                   
@@ -1680,12 +1720,219 @@ function RepMatchingPanel() {
                     </div>
                   )}
                 </div>
+
+                {/* Other Sections */}
+                {activeSection === 'invited' && (
+                  <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200/50 p-8">
+                    <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-6 text-center">
+                      📧 Invited Reps
+                    </h2>
+                    <p className="text-gray-600 text-lg text-center mb-8">Reps who have been invited but haven't responded yet</p>
+                    
+                    {invitedAgentsList.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {invitedAgentsList.map((agent, index) => (
+                          <div key={`invited-${agent._id}-${index}`} className="bg-gradient-to-br from-yellow-50 to-orange-50 border border-yellow-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300">
+                            <div className="flex items-center space-x-4 mb-4">
+                              <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                                {agent.personalInfo?.name?.charAt(0) || 'U'}
+                              </div>
+                              <div className="flex-1">
+                                <h3 className="text-lg font-bold text-gray-900">{agent.personalInfo?.name}</h3>
+                                <p className="text-gray-600 text-sm">{agent.personalInfo?.email}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="inline-flex items-center px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">
+                                📧 Pending Response
+                              </span>
+                              <span className="text-xs text-gray-500">Waiting for response</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12">
+                        <div className="w-24 h-24 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <span className="text-4xl">📧</span>
+                        </div>
+                        <p className="text-gray-600 text-lg mb-2">No pending invitations</p>
+                        <p className="text-sm text-gray-400">All invitations have been responded to.</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {activeSection === 'enrollment' && (
+                  <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200/50 p-8">
+                    <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-6 text-center">
+                      📋 Enrollment Requests
+                    </h2>
+                    <p className="text-gray-600 text-lg text-center mb-8">Reps who accepted invitations and are requesting to join</p>
+                    
+                    {enrollmentRequests.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {enrollmentRequests.map((agent, index) => (
+                          <div key={`enrollment-${agent._id}-${index}`} className="bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300">
+                            <div className="flex items-center space-x-4 mb-4">
+                              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                                {agent.agentId?.personalInfo?.name?.charAt(0) || 'U'}
+                              </div>
+                              <div className="flex-1">
+                                <h3 className="text-lg font-bold text-gray-900">{agent.agentId?.personalInfo?.name}</h3>
+                                <p className="text-gray-600 text-sm">{agent.agentId?.personalInfo?.email}</p>
+                              </div>
+                            </div>
+                            <div className="space-y-3">
+                              <div className="flex items-center justify-between">
+                                <span className="text-sm text-gray-600">Status:</span>
+                                <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                                  {agent.enrollmentStatus}
+                                </span>
+                              </div>
+                              {agent.notes && (
+                                <p className="text-sm text-gray-600 italic bg-gray-50 p-3 rounded-lg">
+                                  "{agent.notes}"
+                                </p>
+                              )}
+                              <p className="text-xs text-gray-500">
+                                For: {agent.gigId?.title}
+                              </p>
+                              <div className="flex space-x-2">
+                                <button 
+                                  onClick={async () => {
+                                    try {
+                                      await acceptEnrollmentRequest(agent._id, "Welcome to the team! We are delighted to have you.");
+                                      // Refresh data
+                                      const companyId = Cookies.get('companyId') || '';
+                                      const [invitedAgentsData, enrollmentRequestsData, activeAgentsData] = await Promise.all([
+                                        getInvitedAgentsForCompany(companyId),
+                                        getEnrollmentRequestsForCompany(companyId),
+                                        getActiveAgentsForCompany(companyId)
+                                      ]);
+                                      setCompanyInvitedAgents(invitedAgentsData);
+                                      setEnrollmentRequests(enrollmentRequestsData);
+                                      setActiveAgentsList(activeAgentsData);
+                                    } catch (error) {
+                                      console.error('Error accepting enrollment request:', error);
+                                    }
+                                  }}
+                                  className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+                                >
+                                  ✅ Approve
+                                </button>
+                                <button 
+                                  onClick={async () => {
+                                    try {
+                                      await rejectEnrollmentRequest(agent._id, "Sorry, we cannot proceed with your application at this time.");
+                                      // Refresh data
+                                      const companyId = Cookies.get('companyId') || '';
+                                      const [invitedAgentsData, enrollmentRequestsData, activeAgentsData] = await Promise.all([
+                                        getInvitedAgentsForCompany(companyId),
+                                        getEnrollmentRequestsForCompany(companyId),
+                                        getActiveAgentsForCompany(companyId)
+                                      ]);
+                                      setCompanyInvitedAgents(invitedAgentsData);
+                                      setEnrollmentRequests(enrollmentRequestsData);
+                                      setActiveAgentsList(activeAgentsData);
+                                    } catch (error) {
+                                      console.error('Error rejecting enrollment request:', error);
+                                    }
+                                  }}
+                                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
+                                >
+                                  ❌ Reject
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12">
+                        <div className="w-24 h-24 bg-gradient-to-r from-blue-100 to-cyan-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <span className="text-4xl">📋</span>
+                        </div>
+                        <p className="text-gray-600 text-lg mb-2">No enrollment requests</p>
+                        <p className="text-sm text-gray-400">No reps are waiting for approval.</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {activeSection === 'active' && (
+                  <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200/50 p-8">
+                    <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-6 text-center">
+                      ✅ Active Reps
+                    </h2>
+                    <p className="text-gray-600 text-lg text-center mb-8">Reps who are approved and actively working</p>
+                    
+                    {activeAgentsList.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {activeAgentsList.map((agent, index) => (
+                          <div key={`active-${agent._id}-${index}`} className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300">
+                            <div className="flex items-center space-x-4 mb-4">
+                              <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                                {agent.agentId?.personalInfo?.name?.charAt(0) || 'U'}
+                              </div>
+                              <div className="flex-1">
+                                <h3 className="text-lg font-bold text-gray-900">{agent.agentId?.personalInfo?.name}</h3>
+                                <p className="text-gray-600 text-sm">{agent.agentId?.personalInfo?.email}</p>
+                              </div>
+                              <span className="inline-flex items-center px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+                                ✅ Active
+                              </span>
+                            </div>
+                            <div className="space-y-3">
+                              <div className="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                  <span className="text-gray-600">Experience:</span>
+                                  <p className="font-semibold">{agent.agentId?.professionalSummary?.yearsOfExperience} years</p>
+                                </div>
+                                <div>
+                                  <span className="text-gray-600">Role:</span>
+                                  <p className="font-semibold">{agent.agentId?.professionalSummary?.currentRole}</p>
+                                </div>
+                              </div>
+                              <div className="flex flex-wrap gap-2">
+                                {agent.agentId?.professionalSummary?.keyExpertise?.slice(0, 3).map((skill, i) => (
+                                  <span key={i} className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">
+                                    {skill}
+                                  </span>
+                                ))}
+                                {agent.agentId?.professionalSummary?.keyExpertise?.length > 3 && (
+                                  <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">
+                                    +{agent.agentId.professionalSummary.keyExpertise.length - 3} more
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex justify-between text-sm text-gray-600">
+                                <span>Availability: {agent.agentId?.availability?.schedule?.length} days/week</span>
+                                <span>Languages: {agent.agentId?.personalInfo?.languages?.length || 0}</span>
+                              </div>
+                              <button className="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium">
+                                Manage Profile
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12">
+                        <div className="w-24 h-24 bg-gradient-to-r from-green-100 to-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <span className="text-4xl">✅</span>
+                        </div>
+                        <p className="text-gray-600 text-lg mb-2">No active reps</p>
+                        <p className="text-sm text-gray-400">Start by finding matches and inviting reps.</p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
-            </div>
-          )}
-        </div>
-      </div>
+          </>
+        )}
+      </main>
     </div>
   );
 }
