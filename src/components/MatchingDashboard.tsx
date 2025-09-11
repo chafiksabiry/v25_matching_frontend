@@ -1573,7 +1573,9 @@ function RepMatchingPanel() {
                 <div className="bg-white rounded-xl shadow-lg p-6">
                   {invitedAgentsList.length > 0 ? (
                     <div className="space-y-4">
-                      {invitedAgentsList.map((agent, index) => (
+                      {invitedAgentsList.map((agent, index) => {
+                        console.log('🔍 Invited Agent Data:', agent);
+                        return (
                         <div key={`invited-${agent._id}-${index}`} className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                           <div className="flex items-center justify-between">
                             <div className="flex-1">
@@ -1583,9 +1585,15 @@ function RepMatchingPanel() {
                                 <p className="text-sm text-yellow-700">
                                   Invited • Waiting for response
                                 </p>
-                                {agent.gigId?.title && (
+                                {(agent.gigId?.title || agent.gig?.title) && (
                                   <p className="text-sm text-gray-600">
-                                    <span className="font-medium">Gig:</span> {agent.gigId.title}
+                                    <span className="font-medium">Gig:</span> {agent.gigId?.title || agent.gig?.title}
+                                  </p>
+                                )}
+                                {/* Debug: Show all available properties */}
+                                {!agent.gigId?.title && !agent.gig?.title && (
+                                  <p className="text-xs text-gray-400">
+                                    Debug: {JSON.stringify(Object.keys(agent))}
                                   </p>
                                 )}
                               </div>
@@ -1597,7 +1605,8 @@ function RepMatchingPanel() {
                             </div>
                           </div>
                         </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   ) : (
                     <div className="text-center py-12">
