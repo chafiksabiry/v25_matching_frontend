@@ -710,7 +710,7 @@ function RepMatchingPanel() {
 
                 {/* Weights Configuration Panel */}
                 {showWeights && (
-          <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg p-4 mb-4 transform transition-all duration-300 ease-in-out border border-gray-200">
+          <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg p-4 mb-4 transform transition-all duration-300 ease-in-out border border-gray-200 overflow-hidden">
             <div className="flex justify-between items-center mb-4">
               <div className="flex items-center space-x-3">
                 <div className="p-2 bg-gradient-to-r from-orange-500 to-red-600 rounded-lg shadow-md">
@@ -772,11 +772,11 @@ function RepMatchingPanel() {
             </div>
 
             {/* Weights Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
               {Object.entries(weights).map(([key, value]) => (
-                <div key={`weight-${key}`} className="bg-white rounded-lg p-4 shadow-md border border-gray-200 hover:shadow-lg transition-all duration-200 group min-w-[120px]">
+                <div key={`weight-${key}`} className="bg-white rounded-lg p-2 shadow-md border border-gray-200 hover:shadow-lg transition-all duration-200 group min-w-[90px]">
                   <div className="flex justify-between items-center mb-2">
-                    <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">
+                    <label className="text-xs font-bold text-gray-700 uppercase tracking-wider">
                       {key}
                     </label>
                     <div className={`px-2 py-1 rounded text-xs font-bold ${
