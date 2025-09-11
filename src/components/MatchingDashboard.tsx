@@ -820,26 +820,6 @@ function RepMatchingPanel() {
                 </div>
               ))}
             </div>
-            {/* Info Box */}
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-3 mb-3">
-              <div className="flex items-start space-x-2">
-                <div className="p-1 bg-blue-500 rounded">
-                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-blue-900 mb-1">How Weights Work</h4>
-                  <p className="text-xs text-blue-700 mb-1">
-                    These weights determine how much each factor contributes to the overall matching score. 
-                    Higher weights give more importance to that criteria when ranking reps.
-                  </p>
-                  <p className="text-xs text-orange-700 font-medium">
-                    ⚠️ All weights start at 0. You must set at least one weight above 0 to get meaningful matches.
-                  </p>
-                </div>
-              </div>
-            </div>
 
             {/* Save Button */}
             {selectedGig && (
@@ -895,12 +875,12 @@ function RepMatchingPanel() {
                 {/* Two Column Layout: Gigs and Reps */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Left Column: Gig Selection */}
-                  <div className="bg-white rounded-xl shadow-lg p-6">
-                    <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center space-x-2">
-                      <Briefcase size={20} className="text-orange-600" />
+                <div className="bg-white rounded-xl shadow-lg p-6">
+                  <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center space-x-2">
+                    <Briefcase size={20} className="text-orange-600" />
                       <span>Available Gigs</span>
-                    </h3>
-                    
+                  </h3>
+                  
                     <div className="space-y-3 max-h-96 overflow-y-auto">
                     {gigs.map((gig) => {
                       const isGigExpanded = expandedGigs.has(gig._id || '');
@@ -922,22 +902,22 @@ function RepMatchingPanel() {
                               }`}>
                                 <Briefcase size={16} className="text-white" />
                               </div>
-                              <div className="flex-1 min-w-0">
-                                <h4 className={`font-bold text-sm truncate ${
+                                <div className="flex-1 min-w-0">
+                                  <h4 className={`font-bold text-sm truncate ${
                                   selectedGig?._id === gig._id ? "text-orange-900" : "text-gray-800"
                                 }`}>
                                   {gig.title}
                                 </h4>
-                                <p className="text-xs text-gray-600 truncate">{gig.companyName}</p>
+                                  <p className="text-xs text-gray-600 truncate">{gig.companyName}</p>
                               </div>
                               <span className={`px-2 py-1 rounded text-xs font-medium flex-shrink-0 ${
-                                selectedGig?._id === gig._id
-                                  ? "bg-orange-500 text-white"
-                                  : "bg-blue-100 text-blue-800"
-                              }`}>
-                                {gig.category}
-                              </span>
-                            </div>
+                              selectedGig?._id === gig._id
+                                ? "bg-orange-500 text-white"
+                                : "bg-blue-100 text-blue-800"
+                            }`}>
+                              {gig.category}
+                            </span>
+          </div>
 
                           {selectedGig?._id === gig._id && (
                             <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
@@ -1108,23 +1088,23 @@ function RepMatchingPanel() {
                         </div>
                       );
                     })}
-                    </div>
-                  </div>
+          </div>
+        </div>
 
                   {/* Right Column: Matching Results */}
                   <div className="bg-white rounded-xl shadow-lg p-6">
                     <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center space-x-2">
-                      <Users size={20} className="text-orange-600" />
+                        <Users size={20} className="text-orange-600" />
                       <span>{selectedGig ? `Matches for "${selectedGig.title}"` : 'Select a Gig to See Matches'}</span>
-                    </h3>
-                    
+                      </h3>
+                      
                     {!selectedGig ? (
                       <div className="text-center py-12">
                         <div className="bg-gray-50 rounded-xl p-8 max-w-md mx-auto">
                           <Briefcase size={48} className="text-gray-400 mx-auto mb-4" />
                           <p className="text-gray-600 text-lg mb-2">No gig selected</p>
                           <p className="text-sm text-gray-400">Choose a gig from the left to see matching reps</p>
-                        </div>
+                    </div>
                       </div>
                     ) : loading ? (
                       <div className="flex justify-center items-center py-12">
