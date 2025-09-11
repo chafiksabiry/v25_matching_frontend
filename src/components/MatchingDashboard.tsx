@@ -679,46 +679,46 @@ function RepMatchingPanel() {
 
             {/* Matching Section */}
             {activeSection === 'matching' && (
-              <div className="space-y-8">
+              <div className="h-screen flex flex-col">
                 {/* Header */}
-                <div className="text-center">
+                <div className="text-center mb-6">
                   <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-2">
                     🎯 Smart Matching System
                   </h2>
-                  <p className="text-gray-600 text-lg">Configure weights, select gigs, and find matching reps</p>
+                  <p className="text-gray-600 text-lg">Find and match the perfect reps for your gigs</p>
                 </div>
 
-                {/* Main Content - Single Column Layout */}
-                <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200/50 p-8">
-                  {/* Weights Configuration Section */}
-                  <div className="mb-8">
-                    <div className="flex items-center justify-between mb-6">
-                      <div className="flex items-center space-x-4">
-                        <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl flex items-center justify-center shadow-lg">
-                          <Settings size={24} className="text-white" />
-                        </div>
-                        <div>
-                          <h3 className="text-2xl font-bold text-gray-900">Matching Weights</h3>
-                          <p className="text-gray-600">Configure how each factor influences matching</p>
-                        </div>
+                {/* 3-Column Layout */}
+                <div className="flex-1 grid grid-cols-12 gap-6 min-h-0">
+                  
+                  {/* Column 1: Weights Configuration */}
+                  <div className="col-span-3 bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200/50 p-6 flex flex-col">
+                    <div className="flex items-center space-x-3 mb-6">
+                      <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center shadow-lg">
+                        <Settings size={20} className="text-white" />
                       </div>
-                      {hasUnsavedChanges && (
-                        <div className="flex items-center space-x-2 px-4 py-2 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium animate-pulse">
-                          <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                          <span>Unsaved Changes</span>
-                        </div>
-                      )}
+                      <div>
+                        <h3 className="text-lg font-bold text-gray-900">Matching Weights</h3>
+                        <p className="text-sm text-gray-600">Configure factors</p>
+                      </div>
                     </div>
+                    
+                    {hasUnsavedChanges && (
+                      <div className="flex items-center space-x-2 px-3 py-2 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium animate-pulse mb-4">
+                        <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                        <span>Unsaved Changes</span>
+                      </div>
+                    )}
 
-                    {/* Weights Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                    {/* Weights List - Compact */}
+                    <div className="flex-1 space-y-4 overflow-y-auto">
                       {Object.entries(weights).map(([key, value]) => (
-                        <div key={`weight-${key}`} className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
-                          <div className="flex justify-between items-center mb-4">
+                        <div key={`weight-${key}`} className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-4 border border-gray-200 shadow-sm">
+                          <div className="flex justify-between items-center mb-3">
                             <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">
                               {key}
                             </label>
-                            <div className={`px-3 py-1 rounded-full text-sm font-bold ${
+                            <div className={`px-2 py-1 rounded-full text-xs font-bold ${
                               Math.round(value * 100) >= 20 ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white' :
                               Math.round(value * 100) >= 10 ? 'bg-orange-100 text-orange-800' :
                               'bg-gray-100 text-gray-600'
@@ -734,31 +734,20 @@ function RepMatchingPanel() {
                             step="0.05"
                             value={value}
                             onChange={(e) => handleWeightChange(key, parseFloat(e.target.value))}
-                            className="w-full h-3 bg-gray-200 rounded-full appearance-none cursor-pointer slider"
+                            className="w-full h-2 bg-gray-200 rounded-full appearance-none cursor-pointer slider"
                             style={{
                               background: `linear-gradient(to right, #f97316 0%, #dc2626 ${value * 100}%, #e5e7eb ${value * 100}%, #e5e7eb 100%)`
                             }}
                           />
-                          
-                          <div className="text-xs text-gray-500 text-center mt-2">
-                            {key === 'experience' && 'Years of relevant experience'}
-                            {key === 'skills' && 'Skill compatibility score'}
-                            {key === 'industry' && 'Industry background match'}
-                            {key === 'languages' && 'Language proficiency'}
-                            {key === 'availability' && 'Schedule availability'}
-                            {key === 'timezone' && 'Time zone compatibility'}
-                            {key === 'activities' && 'Activity performance'}
-                            {key === 'region' && 'Geographic location'}
-                          </div>
                         </div>
                       ))}
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex justify-center space-x-4 mb-6">
+                    <div className="space-y-3 mt-6">
                       <button
                         onClick={resetWeights}
-                        className="px-8 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all duration-200 font-medium shadow-sm"
+                        className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all duration-200 font-medium text-sm"
                       >
                         Reset to Default
                       </button>
@@ -767,9 +756,9 @@ function RepMatchingPanel() {
                         <button
                           onClick={saveWeightsForGig}
                           disabled={loading}
-                          className={`px-8 py-3 rounded-xl font-medium shadow-lg transition-all duration-200 ${
+                          className={`w-full px-4 py-2 rounded-xl font-medium text-sm transition-all duration-200 ${
                             hasUnsavedChanges
-                              ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white hover:from-yellow-600 hover:to-orange-600 transform hover:scale-105'
+                              ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white hover:from-yellow-600 hover:to-orange-600'
                               : gigHasWeights
                               ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:from-green-600 hover:to-emerald-600'
                               : 'bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600'
@@ -782,934 +771,903 @@ function RepMatchingPanel() {
                         </button>
                       )}
                     </div>
-
-                    {/* Info Card */}
-                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-6">
-                      <div className="flex items-start space-x-3">
-                        <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-blue-900 mb-1">How Weights Work</h4>
-                          <p className="text-blue-700 text-sm mb-2">
-                            These weights determine how much each factor contributes to the overall matching score. 
-                            Higher weights give more importance to that criteria when ranking reps.
-                          </p>
-                          <p className="text-orange-700 font-medium text-sm">
-                            ⚠️ All weights start at 0. You must set at least one weight above 0 to get meaningful matches.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
                   </div>
 
-                  {/* Divider */}
-                  <div className="border-t border-gray-200 my-8"></div>
-
-                  {/* Gig Selection Section */}
-                  <div className="mb-8">
-                    <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center">
-                        <Briefcase size={20} className="text-white" />
+                  {/* Column 2: Gigs Selection */}
+                  <div className="col-span-4 bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200/50 p-6 flex flex-col">
+                    <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center space-x-2">
+                      <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
+                        <Briefcase size={16} className="text-white" />
                       </div>
-                      <span>Select a Gig to Find Matching Reps</span>
+                      <span>Available Gigs</span>
                     </h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {gigs.map((gig) => {
-                      const isGigExpanded = expandedGigs.has(gig._id || '');
-                      
-                      return (
-                        <div key={gig._id} className={`bg-white rounded-lg border-2 transition-all duration-200 ${
-                          selectedGig?._id === gig._id
-                            ? "border-orange-400 shadow-lg bg-orange-50"
-                            : "border-gray-200 hover:border-orange-300 hover:shadow-md"
-                        }`}>
-                          {/* Gig Header - Clickable for selection */}
-                          <div
-                            className="cursor-pointer p-4"
-                            onClick={() => handleGigSelect(gig)}
-                          >
-                          <div className="flex justify-between items-start mb-3">
-                              <div className="flex items-center space-x-2 flex-1">
-                              <div className={`p-2 rounded-lg ${
-                                selectedGig?._id === gig._id ? "bg-orange-500" : "bg-gray-400"
-                              }`}>
-                                <Briefcase size={16} className="text-white" />
-                              </div>
-                                <div className="flex-1 min-w-0">
-                                  <h4 className={`font-bold text-sm truncate ${
-                                  selectedGig?._id === gig._id ? "text-orange-900" : "text-gray-800"
-                                }`}>
-                                  {gig.title}
-                                </h4>
-                                  <p className="text-xs text-gray-600 truncate">{gig.companyName}</p>
-                              </div>
-            </div>
-                            
-                              <span className={`px-2 py-1 rounded text-xs font-medium flex-shrink-0 ml-2 ${
-                              selectedGig?._id === gig._id
-                                ? "bg-orange-500 text-white"
-                                : "bg-blue-100 text-blue-800"
-                            }`}>
-                              {gig.category}
-                            </span>
-          </div>
-
-                          {selectedGig?._id === gig._id && (
-                            <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
-                              <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                              </svg>
-            </div>
-                          )}
-          </div>
-
-                          {/* View Details Button */}
-                          <div className="px-4 pb-4">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                toggleGigDetails(gig._id || '');
-                              }}
-                              className="w-full flex items-center justify-center space-x-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all duration-200 text-sm font-medium text-gray-700"
-                            >
-                              <span>View Details</span>
-                              <svg 
-                                className={`w-4 h-4 transform transition-transform duration-200 ${isGigExpanded ? 'rotate-180' : ''}`} 
-                                fill="none" 
-                                stroke="currentColor" 
-                                viewBox="0 0 24 24"
-                              >
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                              </svg>
-                            </button>
-            </div>
-
-                                                    {/* Expanded Details */}
-                          {isGigExpanded && (
-                            <div className="px-4 pb-4 border-t border-gray-200 bg-gray-50">
-                              <div className="pt-4 space-y-4 text-sm">
-                                
-                                {/* 1. Industries */}
-                                {gig.industries && gig.industries.length > 0 && (
-                                  <div>
-                                    <p className="text-gray-700 font-medium mb-2">Industries:</p>
-                                    <div className="flex flex-wrap gap-1">
-                                      {gig.industries.map((industry: any, i: number) => {
-                                        const displayName = industry.name || 
-                                                           (typeof industry === 'string' && !industry.match(/^[0-9a-fA-F]{24}$/) ? industry : 'Industry');
-                                        return (
-                                          <span key={i} className="px-2 py-1 bg-orange-100 text-orange-800 rounded text-xs">
-                                            {displayName}
-                                          </span>
-                                        );
-                                      })}
-                                    </div>
-                                  </div>
-                                )}
-
-                                {/* 2. Activities */}
-                                {gig.activities && gig.activities.length > 0 && (
-                                  <div>
-                                    <p className="text-gray-700 font-medium mb-2">Activities:</p>
-                                    <div className="flex flex-wrap gap-1">
-                                      {gig.activities.map((activity: any, i: number) => {
-                                        const displayName = activity.name || 
-                                                           (typeof activity === 'string' && !activity.match(/^[0-9a-fA-F]{24}$/) ? activity : 'Activity');
-                                        return (
-                                          <span key={i} className="px-2 py-1 bg-teal-100 text-teal-800 rounded text-xs">
-                                            {displayName}
-                                          </span>
-                                        );
-                                      })}
-                                    </div>
-                                  </div>
-                                )}
-
-                                {/* 3. Experience */}
-                                <div className="flex items-center justify-between">
-                                  <span className="text-gray-600 font-medium">Experience:</span>
-                                  <span className="font-semibold">{gig.seniority?.yearsExperience || 'N/A'} years</span>
-                                </div>
-
-                                {/* 4. Languages */}
-                                {gig.skills?.languages && gig.skills.languages.length > 0 && (
-                                  <div>
-                                    <p className="text-gray-700 font-medium mb-2">Languages:</p>
-                                    <div className="flex flex-wrap gap-1">
-                                      {gig.skills.languages.map((lang: any, i: number) => (
-                                        <span key={i} className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs">
-                                          {getLanguageNameByCode(lang.language || lang.iso639_1 || lang)}
-                                          {lang.proficiency && <span className="ml-1 text-purple-600">({lang.proficiency})</span>}
-                                        </span>
-                                      ))}
-                                    </div>
-                                  </div>
-                                )}
-
-                                {/* 5. Availability */}
-                                {gig.availability && (
-                                  <div>
-                                    <span className="text-gray-600 font-medium">Availability:</span>
-                                    <p className="font-semibold">
-                                      {gig.availability.schedule ? `${gig.availability.schedule.length} days/week` : 
-                                       gig.availability.hoursPerWeek ? `${gig.availability.hoursPerWeek}h/week` :
-                                       gig.availability.workingHours ? gig.availability.workingHours :
-                                       'Flexible'}
-                                    </p>
-                                  </div>
-                                )}
-
-                                {/* 6. Skills - Professional */}
-                                {gig.skills?.professional && gig.skills.professional.length > 0 && (
-                                  <div>
-                                    <p className="text-gray-700 font-medium mb-2">Professional Skills:</p>
-                                    <div className="flex flex-wrap gap-1">
-                                      {gig.skills.professional.map((skillItem: any, i: number) => (
-                                        <span key={`prof-${i}`} className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
-                                          {getSkillNameById(skillItem.skill || skillItem, 'professional')}
-                                        </span>
-                                      ))}
-                                    </div>
-                                  </div>
-                                )}
-
-                                {/* 6. Skills - Technical */}
-                                {gig.skills?.technical && gig.skills.technical.length > 0 && (
-                                  <div>
-                                    <p className="text-gray-700 font-medium mb-2">Technical Skills:</p>
-                                    <div className="flex flex-wrap gap-1">
-                                      {gig.skills.technical.map((skillItem: any, i: number) => (
-                                        <span key={`tech-${i}`} className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">
-                                          {getSkillNameById(skillItem.skill || skillItem, 'technical')}
-                                        </span>
-                                      ))}
-                                    </div>
-                                  </div>
-                                )}
-
-                                {/* 6. Skills - Soft */}
-                                {gig.skills?.soft && gig.skills.soft.length > 0 && (
-                                  <div>
-                                    <p className="text-gray-700 font-medium mb-2">Soft Skills:</p>
-                                    <div className="flex flex-wrap gap-1">
-                                      {gig.skills.soft.map((skillItem: any, i: number) => (
-                                        <span key={`soft-${i}`} className="px-2 py-1 bg-pink-100 text-pink-800 rounded text-xs">
-                                          {getSkillNameById(skillItem.skill || skillItem, 'soft')}
-                                        </span>
-                                      ))}
-                                    </div>
-                                  </div>
-                                )}
-
-                                {/* Region & Timezone */}
-                                <div className="grid grid-cols-2 gap-4 text-sm">
-                                  {gig.region && (
-                                    <div>
-                                      <span className="text-gray-600 font-medium">Region:</span>
-                                      <p className="font-semibold">{gig.region}</p>
-                                    </div>
-                                  )}
-                                  {gig.timezone && (
-                                    <div>
-                                      <span className="text-gray-600 font-medium">Timezone:</span>
-                                      <p className="font-semibold">{gig.timezone}</p>
-                                    </div>
-                                  )}
-                                </div>
-
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  {/* Divider */}
-                  <div className="border-t border-gray-200 my-8"></div>
-
-                  {/* Matching Results Section */}
-                  {selectedGig && (
-                    <div>
-                      <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center">
-                          <Users size={20} className="text-white" />
-                        </div>
-                        <span>Matches for "{selectedGig?.title}"</span>
-                      </h3>
                     
-                    {loading ? (
-                      <div className="flex justify-center items-center py-12">
-                        <div className="relative">
-                          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
-                          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                            <Zap size={16} className="text-orange-500 animate-pulse" />
-                          </div>
-                        </div>
-                      </div>
-                    ) : matches.length > 0 ? (
-                      <div className="space-y-3">
-                        {matches.map((match, index) => {
-                          // Check if agent is already enrolled in this specific gig
-                          const isAlreadyEnrolledInThisGig = activeAgentsList.some(
-                            agent => agent.agentId._id === match.agentId && agent.gigId._id === selectedGig?._id
-                          );
-                          
-                          const isInvited = match.isInvited !== undefined ? match.isInvited : invitedAgents.has(match.agentId);
-                          const isEnrolled = isAlreadyEnrolledInThisGig || 
-                                           match.isEnrolled || 
-                                           match.status === 'accepted' || 
-                                           match.agentResponse === 'accepted' || 
-                                           match.enrollmentStatus === 'accepted' || 
-                                           match.agentInfo?.status === 'accepted';
-                          
-
-
-                          const matchScore = Math.round((match.totalMatchingScore || 0) * 100);
-                          const cardBgColor = matchScore >= 70 ? 'bg-green-50 border-green-200' :
-                                            matchScore >= 50 ? 'bg-yellow-50 border-yellow-200' :
-                                            'bg-red-50 border-red-200';
-                          
-                          const isExpanded = expandedReps.has(match.agentId);
-                          
-                          return (
-                            <div key={`match-${match.agentId}-${index}`} className={`rounded-xl p-6 border-2 hover:shadow-lg transition-all duration-300 ${cardBgColor}`}>
-                              {/* Rep Header */}
-                              <div className="flex items-center justify-between mb-4">
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-3 mb-2">
-                                    <h4 className="text-lg font-bold text-gray-900 truncate">{match.agentInfo?.name}</h4>
-                                    <div className={`px-4 py-2 rounded-full text-sm font-bold shadow-sm ${
-                                      matchScore >= 70 ? 'bg-green-500 text-white' :
-                                      matchScore >= 50 ? 'bg-yellow-500 text-white' :
-                                      'bg-red-500 text-white'
+                    <div className="flex-1 overflow-y-auto space-y-3">
+                      {gigs.map((gig) => {
+                        const isGigExpanded = expandedGigs.has(gig._id || '');
+                        
+                        return (
+                          <div key={gig._id} className={`rounded-xl border-2 transition-all duration-200 ${
+                            selectedGig?._id === gig._id
+                              ? "border-orange-400 shadow-lg bg-orange-50"
+                              : "border-gray-200 hover:border-orange-300 hover:shadow-md bg-white"
+                          }`}>
+                            {/* Gig Header - Clickable for selection */}
+                            <div
+                              className="cursor-pointer p-4"
+                              onClick={() => handleGigSelect(gig)}
+                            >
+                              <div className="flex justify-between items-start mb-2">
+                                <div className="flex items-center space-x-2 flex-1">
+                                  <div className={`p-2 rounded-lg ${
+                                    selectedGig?._id === gig._id ? "bg-orange-500" : "bg-gray-400"
+                                  }`}>
+                                    <Briefcase size={14} className="text-white" />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <h4 className={`font-bold text-sm truncate ${
+                                      selectedGig?._id === gig._id ? "text-orange-900" : "text-gray-800"
                                     }`}>
-                                      {matchScore}% Match
-                                    </div>
+                                      {gig.title}
+                                    </h4>
+                                    <p className="text-xs text-gray-600 truncate">{gig.companyName}</p>
                                   </div>
-                                  <p className="text-sm text-gray-600 truncate">{match.agentInfo?.email}</p>
-                                  <div className="flex items-center gap-4 text-xs text-gray-500 mt-1">
-                                    {(match.agentInfo?.timezone?.countryName || match.agentInfo?.location) && (
-                                      <span>📍 {match.agentInfo?.timezone?.countryName || match.agentInfo?.location}</span>
-                                    )}
-                                    {match.agentInfo?.timezone?.gmtDisplay && match.agentInfo.timezone.gmtDisplay !== 'Unknown' && (
-                                      <span>🕒 {match.agentInfo.timezone.gmtDisplay}</span>
-                                    )}
-                                    {match.agentInfo?.professionalSummary?.yearsOfExperience && (
-                                      <span>💼 {match.agentInfo.professionalSummary.yearsOfExperience.toString().replace(/\s+years?/gi, '')} years exp.</span>
-                                    )}
-                                    {match.agentInfo?.personalInfo?.languages && match.agentInfo.personalInfo.languages.length > 0 && (
-                                      <span>🗣️ {match.agentInfo.personalInfo.languages.length} languages</span>
-                                    )}
-                                  </div>
-
-                                  {/* Rep Languages */}
-                                  {match.agentInfo?.personalInfo?.languages && match.agentInfo.personalInfo.languages.length > 0 && (
-                                    <div className="mt-2">
-                                      <div className="flex flex-wrap gap-1">
-                                        {match.agentInfo.personalInfo.languages.slice(0, 4).map((lang: any, i: number) => (
-                                          <span key={i} className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs">
-                                            {lang.language?.name || lang.languageName || getLanguageNameByCode(lang.language || lang.code || lang)}
-                                            {lang.proficiency && <span className="ml-1 text-purple-600">({lang.proficiency})</span>}
-                                          </span>
-                                        ))}
-                                        {match.agentInfo.personalInfo.languages.length > 4 && (
-                                          <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">
-                                            +{match.agentInfo.personalInfo.languages.length - 4}
-                                          </span>
-                                        )}
-                                      </div>
-                                    </div>
-                                  )}
                                 </div>
                                 
-                                <div className="flex-shrink-0 ml-4">
-                                  {isEnrolled ? (
-                                    <span className="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
-                                      Enrolled
-                                    </span>
-                                  ) : match.alreadyEnrolled ? (
-                                    <span className="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm font-medium">
-                                      Already Enrolled
-                                    </span>
-                                  ) : isInvited ? (
-                                    <span className="inline-flex items-center px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
-                                      Invited
-                                    </span>
-                                  ) : (
-                                    <button
-                                      className="inline-flex items-center px-3 py-1 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-all duration-200 text-sm font-medium gap-1"
-                                      onClick={() => handleCreateGigAgent(match)}
-                                      disabled={creatingGigAgent}
-                                    >
-                                      <Zap className="w-4 h-4" />
-                                      Invite
-                                    </button>
-                                  )}
-                                </div>
+                                <span className={`px-2 py-1 rounded text-xs font-medium flex-shrink-0 ml-2 ${
+                                  selectedGig?._id === gig._id
+                                    ? "bg-orange-500 text-white"
+                                    : "bg-blue-100 text-blue-800"
+                                }`}>
+                                  {gig.category}
+                                </span>
                               </div>
 
-                              {/* View Details Button */}
-                              <div className="flex justify-center mt-4">
-                                <button
-                                  onClick={() => toggleRepDetails(match.agentId)}
-                                  className="flex items-center space-x-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all duration-200 text-sm font-medium text-gray-700"
-                                >
-                                  <span>View Details</span>
-                                  <svg 
-                                    className={`w-4 h-4 transform transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} 
-                                    fill="none" 
-                                    stroke="currentColor" 
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                              {selectedGig?._id === gig._id && (
+                                <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full flex items-center justify-center">
+                                  <svg className="w-2 h-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                                   </svg>
-                                </button>
-                              </div>
-
-                              {/* Expanded Details */}
-                              {isExpanded && (
-                                <div className="mt-6 pt-6 border-t border-gray-200 space-y-6">
-                                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                    
-                                    {/* Skills Match */}
-                                    {match.skillsMatch && (
-                                      <div className="bg-white rounded-lg p-4 shadow-sm">
-                                        <div className="flex items-center justify-between mb-2">
-                                          <h5 className="font-semibold text-gray-800">Skills Match</h5>
-                                          <span className={`px-2 py-1 rounded text-xs font-bold ${
-                                            Math.round((match.skillsMatch.score || 0) * 100) >= 70 ? 'bg-green-100 text-green-800' :
-                                            Math.round((match.skillsMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
-                                            'bg-red-100 text-red-800'
-                                          }`}>
-                                            {Math.round((match.skillsMatch.score || 0) * 100)}%
-                                          </span>
-                                        </div>
-                                        {match.skillsMatch.details?.matchingSkills && match.skillsMatch.details.matchingSkills.length > 0 && (
-                                          <div className="space-y-1">
-                                            <p className="text-xs text-gray-600 mb-2">Matched Skills:</p>
-                                            <div className="flex flex-wrap gap-1">
-                                              {match.skillsMatch.details.matchingSkills.slice(0, 3).map((skill: any, i: number) => (
-                                                <span key={i} className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
-                                                  {skill.skill?.name || skill.skillName || getSkillNameById(skill._id || skill.skillId || skill, skill.category || 'professional')}
-                                                </span>
-                                              ))}
-                                              {match.skillsMatch.details.matchingSkills.length > 3 && (
-                                                <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">
-                                                  +{match.skillsMatch.details.matchingSkills.length - 3}
-                                                </span>
-                                              )}
-                                            </div>
-                                          </div>
-                                        )}
-                                        {/* Fallback for old API structure */}
-                                        {!match.skillsMatch.details?.matchingSkills && match.skillsMatch.matchedSkills && match.skillsMatch.matchedSkills.length > 0 && (
-                                          <div className="space-y-1">
-                                            <p className="text-xs text-gray-600 mb-2">Matched Skills:</p>
-                                            <div className="flex flex-wrap gap-1">
-                                              {match.skillsMatch.matchedSkills.slice(0, 3).map((skill: any, i: number) => (
-                                                <span key={i} className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
-                                                  {getSkillNameById(skill._id || skill.skillId || skill, skill.category || 'professional')}
-                                                </span>
-                                              ))}
-                                              {match.skillsMatch.matchedSkills.length > 3 && (
-                                                <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">
-                                                  +{match.skillsMatch.matchedSkills.length - 3}
-                                                </span>
-                                              )}
-                                            </div>
-                                          </div>
-                                        )}
-                                      </div>
-                                    )}
-
-                                    {/* Languages Match */}
-                                    {match.languageMatch && (
-                                      <div className="bg-white rounded-lg p-4 shadow-sm">
-                                        <div className="flex items-center justify-between mb-2">
-                                          <h5 className="font-semibold text-gray-800">Languages</h5>
-                                          <span className={`px-2 py-1 rounded text-xs font-bold ${
-                                            Math.round((match.languageMatch.score || 0) * 100) >= 70 ? 'bg-green-100 text-green-800' :
-                                            Math.round((match.languageMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
-                                            'bg-red-100 text-red-800'
-                                          }`}>
-                                            {Math.round((match.languageMatch.score || 0) * 100)}%
-                                          </span>
-                                        </div>
-                                        {match.languageMatch.details?.matchingLanguages && match.languageMatch.details.matchingLanguages.length > 0 && (
-                                          <div className="space-y-1">
-                                            <p className="text-xs text-gray-600 mb-2">Matched Languages:</p>
-                                            <div className="flex flex-wrap gap-1">
-                                              {match.languageMatch.details.matchingLanguages.slice(0, 3).map((lang: any, i: number) => (
-                                                <span key={i} className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs">
-                                                  {lang.language?.name || lang.languageName || getLanguageNameByCode(lang.language || lang.code || lang)}
-                                                  {lang.agentLevel && <span className="ml-1 text-purple-600">({lang.agentLevel})</span>}
-                                                </span>
-                                              ))}
-                                              {match.languageMatch.details.matchingLanguages.length > 3 && (
-                                                <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">
-                                                  +{match.languageMatch.details.matchingLanguages.length - 3}
-                                                </span>
-                                              )}
-                                            </div>
-                                          </div>
-                                        )}
-                                        {/* Fallback for old API structure */}
-                                        {!match.languageMatch.details?.matchingLanguages && match.languageMatch.matchedLanguages && match.languageMatch.matchedLanguages.length > 0 && (
-                                          <div className="space-y-1">
-                                            <p className="text-xs text-gray-600 mb-2">Matched Languages:</p>
-                                            <div className="flex flex-wrap gap-1">
-                                              {match.languageMatch.matchedLanguages.slice(0, 3).map((lang: any, i: number) => (
-                                                <span key={i} className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs">
-                                                  {getLanguageNameByCode(lang.language || lang.code || lang)}
-                                                </span>
-                                              ))}
-                                              {match.languageMatch.matchedLanguages.length > 3 && (
-                                                <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">
-                                                  +{match.languageMatch.matchedLanguages.length - 3}
-                                                </span>
-                                              )}
-                                            </div>
-                                          </div>
-                                        )}
-                                      </div>
-                                    )}
-
-                                    {/* Industry Match */}
-                                    {match.industryMatch && (
-                                      <div className="bg-white rounded-lg p-4 shadow-sm">
-                                        <div className="flex items-center justify-between mb-2">
-                                          <h5 className="font-semibold text-gray-800">Industry</h5>
-                                          <span className={`px-2 py-1 rounded text-xs font-bold ${
-                                            Math.round((match.industryMatch.score || 0) * 100) >= 70 ? 'bg-green-100 text-green-800' :
-                                            Math.round((match.industryMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
-                                            'bg-red-100 text-red-800'
-                                          }`}>
-                                            {Math.round((match.industryMatch.score || 0) * 100)}%
-                                          </span>
-                                        </div>
-                                        {match.industryMatch.details?.matchingIndustries && match.industryMatch.details.matchingIndustries.length > 0 && (
-                                          <div className="space-y-1">
-                                            <p className="text-xs text-gray-600 mb-2">Matched Industries:</p>
-                                            <div className="flex flex-wrap gap-1">
-                                              {match.industryMatch.details.matchingIndustries.slice(0, 2).map((industry: any, i: number) => (
-                                                <span key={i} className="px-2 py-1 bg-orange-100 text-orange-800 rounded text-xs">
-                                                  {industry.industry?.name || industry.industryName || industry.name || industry}
-                                                </span>
-                                              ))}
-                                              {match.industryMatch.details.matchingIndustries.length > 2 && (
-                                                <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">
-                                                  +{match.industryMatch.details.matchingIndustries.length - 2}
-                                                </span>
-                                              )}
-                                            </div>
-                                          </div>
-                                        )}
-                                        {/* Fallback for old API structure */}
-                                        {!match.industryMatch.details?.matchingIndustries && match.industryMatch.matchedIndustries && match.industryMatch.matchedIndustries.length > 0 && (
-                                          <div className="space-y-1">
-                                            <p className="text-xs text-gray-600 mb-2">Industries:</p>
-                                            <div className="flex flex-wrap gap-1">
-                                              {match.industryMatch.matchedIndustries.slice(0, 2).map((industry: any, i: number) => (
-                                                <span key={i} className="px-2 py-1 bg-orange-100 text-orange-800 rounded text-xs">
-                                                  {industry.name || industry}
-                                                </span>
-                                              ))}
-                                              {match.industryMatch.matchedIndustries.length > 2 && (
-                                                <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">
-                                                  +{match.industryMatch.matchedIndustries.length - 2}
-                                                </span>
-                                              )}
-                                            </div>
-                                          </div>
-                                        )}
-                                      </div>
-                                    )}
-
-                                    {/* Experience Match */}
-                                    {match.experienceMatch && (
-                                      <div className="bg-white rounded-lg p-4 shadow-sm">
-                                        <div className="flex items-center justify-between mb-2">
-                                          <h5 className="font-semibold text-gray-800">Experience</h5>
-                                          <span className={`px-2 py-1 rounded text-xs font-bold ${
-                                            Math.round((match.experienceMatch.score || 0) * 100) >= 70 ? 'bg-green-100 text-green-800' :
-                                            Math.round((match.experienceMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
-                                            'bg-red-100 text-red-800'
-                                          }`}>
-                                            {Math.round((match.experienceMatch.score || 0) * 100)}%
-                                          </span>
-                                        </div>
-                                        <div className="text-xs text-gray-600">
-                                          <p>Rep: {match.agentInfo?.professionalSummary?.yearsOfExperience || 'N/A'} years</p>
-                                          <p>Required: {selectedGig?.seniority?.yearsExperience || 'N/A'} years</p>
-                                        </div>
-                                      </div>
-                                    )}
-
-                                  </div>
-
-                                  {/* Second Row */}
-                                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                    
-                                    {/* Timezone Match */}
-                                    {match.timezoneMatch && (
-                                      <div className="bg-white rounded-lg p-4 shadow-sm">
-                                        <div className="flex items-center justify-between mb-2">
-                                          <h5 className="font-semibold text-gray-800">Timezone</h5>
-                                          <span className={`px-2 py-1 rounded text-xs font-bold ${
-                                            Math.round((match.timezoneMatch.score || 0) * 100) >= 70 ? 'bg-green-100 text-green-800' :
-                                            Math.round((match.timezoneMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
-                                            'bg-red-100 text-red-800'
-                                          }`}>
-                                            {Math.round((match.timezoneMatch.score || 0) * 100)}%
-                                          </span>
-                                        </div>
-                                        <div className="text-xs text-gray-600">
-                                          <p>Rep: {match.agentInfo?.timezone?.gmtDisplay || 'N/A'}</p>
-                                          <p>Zone: {match.agentInfo?.timezone?.timezoneName || match.agentInfo?.availability?.timeZone?.zoneName || 'N/A'}</p>
-                                          <p>Location: {match.agentInfo?.timezone?.countryName || match.agentInfo?.personalInfo?.country?.name || match.agentInfo?.location || 'N/A'}</p>
-                                        </div>
-                                      </div>
-                                    )}
-
-                                    {/* Region Match */}
-                                    {match.regionMatch && (
-                                      <div className="bg-white rounded-lg p-4 shadow-sm">
-                                        <div className="flex items-center justify-between mb-2">
-                                          <h5 className="font-semibold text-gray-800">Region</h5>
-                                          <span className={`px-2 py-1 rounded text-xs font-bold ${
-                                            Math.round((match.regionMatch.score || 0) * 100) >= 70 ? 'bg-green-100 text-green-800' :
-                                            Math.round((match.regionMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
-                                            'bg-red-100 text-red-800'
-                                          }`}>
-                                            {Math.round((match.regionMatch.score || 0) * 100)}%
-                                          </span>
-                                        </div>
-                                        <div className="text-xs text-gray-600">
-                                          <p>Country: {match.agentInfo?.timezone?.countryName || match.agentInfo?.personalInfo?.country?.name || 'N/A'}</p>
-                                          <p>Code: {match.agentInfo?.timezone?.countryCode || match.agentInfo?.personalInfo?.country?.code || 'N/A'}</p>
-                                        </div>
-                                      </div>
-                                    )}
-
-                                    {/* Availability Match */}
-                                    {match.availabilityMatch && (
-                                      <div className="bg-white rounded-lg p-4 shadow-sm">
-                                        <div className="flex items-center justify-between mb-2">
-                                          <h5 className="font-semibold text-gray-800">Availability</h5>
-                                          <span className={`px-2 py-1 rounded text-xs font-bold ${
-                                            Math.round((match.availabilityMatch.score || 0) * 100) >= 70 ? 'bg-green-100 text-green-800' :
-                                            Math.round((match.availabilityMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
-                                            'bg-red-100 text-red-800'
-                                          }`}>
-                                            {Math.round((match.availabilityMatch.score || 0) * 100)}%
-                                          </span>
-                                        </div>
-                                        <div className="text-xs text-gray-600">
-                                          <p>Schedule: {match.agentInfo?.availability?.schedule?.length || 0} days/week</p>
-                                        </div>
-                                      </div>
-                                    )}
-
-                                    {/* Activity Match */}
-                                    {match.activityMatch && (
-                                      <div className="bg-white rounded-lg p-4 shadow-sm">
-                                        <div className="flex items-center justify-between mb-2">
-                                          <h5 className="font-semibold text-gray-800">Activities</h5>
-                                          <span className={`px-2 py-1 rounded text-xs font-bold ${
-                                            Math.round((match.activityMatch.score || 0) * 100) >= 70 ? 'bg-green-100 text-green-800' :
-                                            Math.round((match.activityMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
-                                            'bg-red-100 text-red-800'
-                                          }`}>
-                                            {Math.round((match.activityMatch.score || 0) * 100)}%
-                                          </span>
-                                        </div>
-                                        {match.activityMatch.details?.matchingActivities && match.activityMatch.details.matchingActivities.length > 0 && (
-                                          <div className="space-y-1">
-                                            <p className="text-xs text-gray-600 mb-2">Matched Activities:</p>
-                                            <div className="flex flex-wrap gap-1">
-                                              {match.activityMatch.details.matchingActivities.slice(0, 2).map((activity: any, i: number) => (
-                                                <span key={i} className="px-2 py-1 bg-teal-100 text-teal-800 rounded text-xs">
-                                                  {activity.activity?.name || activity.activityName || activity.name || activity}
-                                                </span>
-                                              ))}
-                                              {match.activityMatch.details.matchingActivities.length > 2 && (
-                                                <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">
-                                                  +{match.activityMatch.details.matchingActivities.length - 2}
-                                                </span>
-                                              )}
-                                            </div>
-                                          </div>
-                                        )}
-                                        {/* Fallback for old API structure */}
-                                        {!match.activityMatch.details?.matchingActivities && match.activityMatch.matchedActivities && match.activityMatch.matchedActivities.length > 0 && (
-                                          <div className="space-y-1">
-                                            <p className="text-xs text-gray-600 mb-2">Activities:</p>
-                                            <div className="flex flex-wrap gap-1">
-                                              {match.activityMatch.matchedActivities.slice(0, 2).map((activity: any, i: number) => (
-                                                <span key={i} className="px-2 py-1 bg-teal-100 text-teal-800 rounded text-xs">
-                                                  {activity.name || activity}
-                                                </span>
-                                              ))}
-                                              {match.activityMatch.matchedActivities.length > 2 && (
-                                                <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">
-                                                  +{match.activityMatch.matchedActivities.length - 2}
-                                                </span>
-                                              )}
-                                            </div>
-                                          </div>
-                                        )}
-                                      </div>
-                                    )}
-
-                                  </div>
                                 </div>
                               )}
                             </div>
-                          );
-                        })}
+
+                            {/* View Details Button */}
+                            <div className="px-4 pb-4">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleGigDetails(gig._id || '');
+                                }}
+                                className="w-full flex items-center justify-center space-x-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all duration-200 text-xs font-medium text-gray-700"
+                              >
+                                <span>View Details</span>
+                                <svg 
+                                  className={`w-3 h-3 transform transition-transform duration-200 ${isGigExpanded ? 'rotate-180' : ''}`} 
+                                  fill="none" 
+                                  stroke="currentColor" 
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                              </button>
+                            </div>
+
+                            {/* Expanded Details */}
+                            {isGigExpanded && (
+                              <div className="px-4 pb-4 border-t border-gray-200 bg-gray-50">
+                                <div className="pt-4 space-y-3 text-xs">
+                                  
+                                  {/* Industries */}
+                                  {gig.industries && gig.industries.length > 0 && (
+                                    <div>
+                                      <p className="text-gray-700 font-medium mb-1">Industries:</p>
+                                      <div className="flex flex-wrap gap-1">
+                                        {gig.industries.map((industry: any, i: number) => {
+                                          const displayName = industry.name || 
+                                                             (typeof industry === 'string' && !industry.match(/^[0-9a-fA-F]{24}$/) ? industry : 'Industry');
+                                          return (
+                                            <span key={i} className="px-2 py-1 bg-orange-100 text-orange-800 rounded text-xs">
+                                              {displayName}
+                                            </span>
+                                          );
+                                        })}
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* Activities */}
+                                  {gig.activities && gig.activities.length > 0 && (
+                                    <div>
+                                      <p className="text-gray-700 font-medium mb-1">Activities:</p>
+                                      <div className="flex flex-wrap gap-1">
+                                        {gig.activities.map((activity: any, i: number) => {
+                                          const displayName = activity.name || 
+                                                             (typeof activity === 'string' && !activity.match(/^[0-9a-fA-F]{24}$/) ? activity : 'Activity');
+                                          return (
+                                            <span key={i} className="px-2 py-1 bg-teal-100 text-teal-800 rounded text-xs">
+                                              {displayName}
+                                            </span>
+                                          );
+                                        })}
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* Experience */}
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-gray-600 font-medium">Experience:</span>
+                                    <span className="font-semibold">{gig.seniority?.yearsExperience || 'N/A'} years</span>
+                                  </div>
+
+                                  {/* Languages */}
+                                  {gig.skills?.languages && gig.skills.languages.length > 0 && (
+                                    <div>
+                                      <p className="text-gray-700 font-medium mb-1">Languages:</p>
+                                      <div className="flex flex-wrap gap-1">
+                                        {gig.skills.languages.map((lang: any, i: number) => (
+                                          <span key={i} className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs">
+                                            {getLanguageNameByCode(lang.language || lang.iso639_1 || lang)}
+                                            {lang.proficiency && <span className="ml-1 text-purple-600">({lang.proficiency})</span>}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* Skills - Professional */}
+                                  {gig.skills?.professional && gig.skills.professional.length > 0 && (
+                                    <div>
+                                      <p className="text-gray-700 font-medium mb-1">Professional Skills:</p>
+                                      <div className="flex flex-wrap gap-1">
+                                        {gig.skills.professional.slice(0, 3).map((skillItem: any, i: number) => (
+                                          <span key={`prof-${i}`} className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
+                                            {getSkillNameById(skillItem.skill || skillItem, 'professional')}
+                                          </span>
+                                        ))}
+                                        {gig.skills.professional.length > 3 && (
+                                          <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">
+                                            +{gig.skills.professional.length - 3}
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* Region & Timezone */}
+                                  <div className="grid grid-cols-2 gap-2 text-xs">
+                                    {gig.region && (
+                                      <div>
+                                        <span className="text-gray-600 font-medium">Region:</span>
+                                        <p className="font-semibold">{gig.region}</p>
+                                      </div>
+                                    )}
+                                    {gig.timezone && (
+                                      <div>
+                                        <span className="text-gray-600 font-medium">Timezone:</span>
+                                        <p className="font-semibold">{gig.timezone}</p>
+                                      </div>
+                                    )}
+                                  </div>
+
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Column 3: Matching Results */}
+                  <div className="col-span-5 bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200/50 p-6 flex flex-col">
+                    <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center space-x-2">
+                      <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
+                        <Users size={16} className="text-white" />
                       </div>
-                    ) : (
-                      <div className="text-center py-8">
-                        <div className="bg-gray-50 rounded-xl p-6 max-w-md mx-auto">
-                          <Briefcase size={24} className="text-gray-400 mx-auto mb-2" />
-                          <p className="text-gray-600">No matches found for this gig.</p>
+                      <span>Matching Results</span>
+                      {selectedGig && (
+                        <span className="text-sm text-gray-600">for "{selectedGig?.title}"</span>
+                      )}
+                    </h3>
+                    
+                    <div className="flex-1 overflow-y-auto">
+                      {!selectedGig ? (
+                        <div className="flex items-center justify-center h-full">
+                          <div className="text-center">
+                            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                              <Briefcase size={24} className="text-gray-400" />
+                            </div>
+                            <p className="text-gray-600">Select a gig to see matching reps</p>
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      ) : loading ? (
+                        <div className="flex justify-center items-center h-full">
+                          <div className="relative">
+                            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
+                            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                              <Zap size={16} className="text-orange-500 animate-pulse" />
+                            </div>
+                          </div>
+                        </div>
+                      ) : matches.length > 0 ? (
+                        <div className="space-y-3">
+                          {matches.map((match, index) => {
+                            // Check if agent is already enrolled in this specific gig
+                            const isAlreadyEnrolledInThisGig = activeAgentsList.some(
+                              agent => agent.agentId._id === match.agentId && agent.gigId._id === selectedGig?._id
+                            );
+                            
+                            const isInvited = match.isInvited !== undefined ? match.isInvited : invitedAgents.has(match.agentId);
+                            const isEnrolled = isAlreadyEnrolledInThisGig || 
+                                             match.isEnrolled || 
+                                             match.status === 'accepted' || 
+                                             match.agentResponse === 'accepted' || 
+                                             match.enrollmentStatus === 'accepted' || 
+                                             match.agentInfo?.status === 'accepted';
+                            
+                            const matchScore = Math.round((match.totalMatchingScore || 0) * 100);
+                            const cardBgColor = matchScore >= 70 ? 'bg-green-50 border-green-200' :
+                                              matchScore >= 50 ? 'bg-yellow-50 border-yellow-200' :
+                                              'bg-red-50 border-red-200';
+                            
+                            const isExpanded = expandedReps.has(match.agentId);
+                            
+                            return (
+                              <div key={`match-${match.agentId}-${index}`} className={`rounded-xl p-4 border-2 hover:shadow-lg transition-all duration-300 ${cardBgColor}`}>
+                                {/* Rep Header */}
+                                <div className="flex items-center justify-between mb-3">
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <h4 className="text-sm font-bold text-gray-900 truncate">{match.agentInfo?.name}</h4>
+                                      <div className={`px-2 py-1 rounded-full text-xs font-bold ${
+                                        matchScore >= 70 ? 'bg-green-500 text-white' :
+                                        matchScore >= 50 ? 'bg-yellow-500 text-white' :
+                                        'bg-red-500 text-white'
+                                      }`}>
+                                        {matchScore}% Match
+                                      </div>
+                                    </div>
+                                    <p className="text-xs text-gray-600 truncate">{match.agentInfo?.email}</p>
+                                    <div className="flex items-center gap-3 text-xs text-gray-500 mt-1">
+                                      {(match.agentInfo?.timezone?.countryName || match.agentInfo?.location) && (
+                                        <span>📍 {match.agentInfo?.timezone?.countryName || match.agentInfo?.location}</span>
+                                      )}
+                                      {match.agentInfo?.professionalSummary?.yearsOfExperience && (
+                                        <span>💼 {match.agentInfo.professionalSummary.yearsOfExperience.toString().replace(/\s+years?/gi, '')} years</span>
+                                      )}
+                                    </div>
+                                  </div>
+                                  
+                                  <div className="flex-shrink-0 ml-2">
+                                    {isEnrolled ? (
+                                      <span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+                                        Enrolled
+                                      </span>
+                                    ) : match.alreadyEnrolled ? (
+                                      <span className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs font-medium">
+                                        Already Enrolled
+                                      </span>
+                                    ) : isInvited ? (
+                                      <span className="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
+                                        Invited
+                                      </span>
+                                    ) : (
+                                      <button
+                                        className="inline-flex items-center px-2 py-1 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-all duration-200 text-xs font-medium gap-1"
+                                        onClick={() => handleCreateGigAgent(match)}
+                                        disabled={creatingGigAgent}
+                                      >
+                                        <Zap className="w-3 h-3" />
+                                        Invite
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* View Details Button */}
+                                <div className="flex justify-center">
+                                  <button
+                                    onClick={() => toggleRepDetails(match.agentId)}
+                                    className="flex items-center space-x-1 px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all duration-200 text-xs font-medium text-gray-700"
+                                  >
+                                    <span>View Details</span>
+                                    <svg 
+                                      className={`w-3 h-3 transform transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} 
+                                      fill="none" 
+                                      stroke="currentColor" 
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                  </button>
+                                </div>
+
+                                {/* Expanded Details */}
+                                {isExpanded && (
+                                  <div className="mt-3 pt-3 border-t border-gray-200 space-y-3">
+                                    <div className="grid grid-cols-2 gap-2">
+                                      
+                                      {/* Skills Match */}
+                                      {match.skillsMatch && (
+                                        <div className="bg-white rounded-lg p-3 shadow-sm">
+                                          <div className="flex items-center justify-between mb-1">
+                                            <h5 className="font-semibold text-gray-800 text-xs">Skills</h5>
+                                            <span className={`px-2 py-1 rounded text-xs font-bold ${
+                                              Math.round((match.skillsMatch.score || 0) * 100) >= 70 ? 'bg-green-100 text-green-800' :
+                                              Math.round((match.skillsMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
+                                              'bg-red-100 text-red-800'
+                                            }`}>
+                                              {Math.round((match.skillsMatch.score || 0) * 100)}%
+                                            </span>
+                                          </div>
+                                          {match.skillsMatch.details?.matchingSkills && match.skillsMatch.details.matchingSkills.length > 0 && (
+                                            <div className="flex flex-wrap gap-1">
+                                              {match.skillsMatch.details.matchingSkills.slice(0, 2).map((skill: any, i: number) => (
+                                                <span key={i} className="px-1 py-1 bg-blue-100 text-blue-800 rounded text-xs">
+                                                  {skill.skill?.name || skill.skillName || getSkillNameById(skill._id || skill.skillId || skill, skill.category || 'professional')}
+                                                </span>
+                                              ))}
+                                              {match.skillsMatch.details.matchingSkills.length > 2 && (
+                                                <span className="px-1 py-1 bg-gray-100 text-gray-600 rounded text-xs">
+                                                  +{match.skillsMatch.details.matchingSkills.length - 2}
+                                                </span>
+                                              )}
+                                            </div>
+                                          )}
+                                        </div>
+                                      )}
+
+                                      {/* Languages Match */}
+                                      {match.languageMatch && (
+                                        <div className="bg-white rounded-lg p-3 shadow-sm">
+                                          <div className="flex items-center justify-between mb-1">
+                                            <h5 className="font-semibold text-gray-800 text-xs">Languages</h5>
+                                            <span className={`px-2 py-1 rounded text-xs font-bold ${
+                                              Math.round((match.languageMatch.score || 0) * 100) >= 70 ? 'bg-green-100 text-green-800' :
+                                              Math.round((match.languageMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
+                                              'bg-red-100 text-red-800'
+                                            }`}>
+                                              {Math.round((match.languageMatch.score || 0) * 100)}%
+                                            </span>
+                                          </div>
+                                          {match.languageMatch.details?.matchingLanguages && match.languageMatch.details.matchingLanguages.length > 0 && (
+                                            <div className="flex flex-wrap gap-1">
+                                              {match.languageMatch.details.matchingLanguages.slice(0, 2).map((lang: any, i: number) => (
+                                                <span key={i} className="px-1 py-1 bg-purple-100 text-purple-800 rounded text-xs">
+                                                  {lang.language?.name || lang.languageName || getLanguageNameByCode(lang.language || lang.code || lang)}
+                                                </span>
+                                              ))}
+                                              {match.languageMatch.details.matchingLanguages.length > 2 && (
+                                                <span className="px-1 py-1 bg-gray-100 text-gray-600 rounded text-xs">
+                                                  +{match.languageMatch.details.matchingLanguages.length - 2}
+                                                </span>
+                                              )}
+                                            </div>
+                                          )}
+                                        </div>
+                                      )}
+
+                                      {/* Industry Match */}
+                                      {match.industryMatch && (
+                                        <div className="bg-white rounded-lg p-3 shadow-sm">
+                                          <div className="flex items-center justify-between mb-1">
+                                            <h5 className="font-semibold text-gray-800 text-xs">Industry</h5>
+                                            <span className={`px-2 py-1 rounded text-xs font-bold ${
+                                              Math.round((match.industryMatch.score || 0) * 100) >= 70 ? 'bg-green-100 text-green-800' :
+                                              Math.round((match.industryMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
+                                              'bg-red-100 text-red-800'
+                                            }`}>
+                                              {Math.round((match.industryMatch.score || 0) * 100)}%
+                                            </span>
+                                          </div>
+                                          {match.industryMatch.details?.matchingIndustries && match.industryMatch.details.matchingIndustries.length > 0 && (
+                                            <div className="flex flex-wrap gap-1">
+                                              {match.industryMatch.details.matchingIndustries.slice(0, 1).map((industry: any, i: number) => (
+                                                <span key={i} className="px-1 py-1 bg-orange-100 text-orange-800 rounded text-xs">
+                                                  {industry.industry?.name || industry.industryName || industry.name || industry}
+                                                </span>
+                                              ))}
+                                              {match.industryMatch.details.matchingIndustries.length > 1 && (
+                                                <span className="px-1 py-1 bg-gray-100 text-gray-600 rounded text-xs">
+                                                  +{match.industryMatch.details.matchingIndustries.length - 1}
+                                                </span>
+                                              )}
+                                            </div>
+                                          )}
+                                        </div>
+                                      )}
+
+                                      {/* Experience Match */}
+                                      {match.experienceMatch && (
+                                        <div className="bg-white rounded-lg p-3 shadow-sm">
+                                          <div className="flex items-center justify-between mb-1">
+                                            <h5 className="font-semibold text-gray-800 text-xs">Experience</h5>
+                                            <span className={`px-2 py-1 rounded text-xs font-bold ${
+                                              Math.round((match.experienceMatch.score || 0) * 100) >= 70 ? 'bg-green-100 text-green-800' :
+                                              Math.round((match.experienceMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
+                                              'bg-red-100 text-red-800'
+                                            }`}>
+                                              {Math.round((match.experienceMatch.score || 0) * 100)}%
+                                            </span>
+                                          </div>
+                                          <div className="text-xs text-gray-600">
+                                            <p>Rep: {match.agentInfo?.professionalSummary?.yearsOfExperience || 'N/A'} years</p>
+                                            <p>Required: {selectedGig?.seniority?.yearsExperience || 'N/A'} years</p>
+                                          </div>
+                                        </div>
+                                      )}
+
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center h-full">
+                          <div className="text-center">
+                            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                              <Briefcase size={24} className="text-gray-400" />
+                            </div>
+                            <p className="text-gray-600">No matches found for this gig.</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
 
                     {/* Success/Error Messages */}
                     {gigAgentSuccess && (
-                      <div className="mt-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+                      <div className="mt-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg">
                         <div className="flex items-center">
-                          <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                          <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                           </svg>
-                          {gigAgentSuccess}
+                          <span className="text-sm">{gigAgentSuccess}</span>
                         </div>
                       </div>
                     )}
 
                     {gigAgentError && (
-                      <div className="mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                      <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
                         <div className="flex items-center">
-                          <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                          <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                           </svg>
-                          {gigAgentError}
+                          <span className="text-sm">{gigAgentError}</span>
                         </div>
                       </div>
                     )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 2. INVITED REPS */}
+            {activeSection === 'invited' && (
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">📧 Invited Reps</h2>
+                  <p className="text-gray-600">Reps who have been invited but haven't responded yet</p>
+                </div>
+
+                <div className="bg-white rounded-xl shadow-lg p-6">
+                  {invitedAgentsList.length > 0 ? (
+                    <div className="space-y-4">
+                      {invitedAgentsList.map((agent, index) => (
+                        <div key={`invited-${agent._id}-${index}`} className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                              <h3 className="text-lg font-bold text-gray-900">{agent.personalInfo?.name}</h3>
+                              <p className="text-gray-600">{agent.personalInfo?.email}</p>
+                              <p className="text-sm text-yellow-700 mt-1">
+                                Invited • Waiting for response
+                              </p>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <span className="inline-flex items-center px-3 py-2 bg-yellow-100 text-yellow-800 rounded-lg text-sm font-medium">
+                                📧 Pending
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <div className="bg-gray-50 rounded-xl p-8 max-w-md mx-auto">
+                        <div className="text-6xl mb-4">📧</div>
+                        <p className="text-gray-600 text-lg mb-2">No pending invitations</p>
+                        <p className="text-sm text-gray-400">All invitations have been responded to.</p>
+                      </div>
                     </div>
                   )}
                 </div>
               </div>
             )}
 
-            {/* Other Sections */}
-            {activeSection === 'invited' && (
-              <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200/50 p-8">
-                <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-6 text-center">
-                  📧 Invited Reps
-                </h2>
-                <p className="text-gray-600 text-lg text-center mb-8">Reps who have been invited but haven't responded yet</p>
-                {invitedAgentsList.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {invitedAgentsList.map((agent, index) => (
-                      <div key={`invited-${agent._id}-${index}`} className="bg-gradient-to-br from-yellow-50 to-orange-50 border border-yellow-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300">
-                        <div className="flex items-center space-x-4 mb-4">
-                          <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                            {agent.personalInfo?.name?.charAt(0) || 'U'}
-                          </div>
-                          <div className="flex-1">
-                            <h3 className="text-lg font-bold text-gray-900">{agent.personalInfo?.name}</h3>
-                            <p className="text-gray-600 text-sm">{agent.personalInfo?.email}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="inline-flex items-center px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">
-                            📧 Pending Response
-                          </span>
-                          <span className="text-xs text-gray-500">Waiting for response</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <div className="w-24 h-24 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <span className="text-4xl">📧</span>
-                    </div>
-                    <p className="text-gray-600 text-lg mb-2">No pending invitations</p>
-                    <p className="text-sm text-gray-400">All invitations have been responded to.</p>
-                  </div>
-                )}
-              </div>
-            )}
-
+            {/* 3. ENROLLMENT REQUESTS */}
             {activeSection === 'enrollment' && (
-              <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200/50 p-8">
-                <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-6 text-center">
-                  📋 Enrollment Requests
-                </h2>
-                <p className="text-gray-600 text-lg text-center mb-8">Reps who accepted invitations and are requesting to join</p>
-                {enrollmentRequests.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {enrollmentRequests.map((agent, index) => (
-                      <div key={`enrollment-${agent._id}-${index}`} className="bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300">
-                        <div className="flex items-center space-x-4 mb-4">
-                          <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                            {agent.agentId?.personalInfo?.name?.charAt(0) || 'U'}
-                          </div>
-                          <div className="flex-1">
-                            <h3 className="text-lg font-bold text-gray-900">{agent.agentId?.personalInfo?.name}</h3>
-                            <p className="text-gray-600 text-sm">{agent.agentId?.personalInfo?.email}</p>
-                          </div>
-                        </div>
-                        <div className="space-y-3">
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">📋 Enrollment Requests</h2>
+                  <p className="text-gray-600">Reps who accepted invitations and are requesting to join</p>
+                </div>
+
+                <div className="bg-white rounded-xl shadow-lg p-6">
+                  {enrollmentRequests.length > 0 ? (
+                    <div className="space-y-4">
+                      {enrollmentRequests.map((agent, index) => (
+                        <div key={`enrollment-${agent._id}-${index}`} className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                           <div className="flex items-center justify-between">
-                            <span className="text-sm text-gray-600">Status:</span>
-                            <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
-                              {agent.enrollmentStatus}
-                            </span>
-                          </div>
-                          {agent.notes && (
-                            <p className="text-sm text-gray-600 italic bg-gray-50 p-3 rounded-lg">
-                              "{agent.notes}"
-                            </p>
-                          )}
-                          <p className="text-xs text-gray-500">
-                            For: {agent.gigId?.title}
-                          </p>
-                          <div className="flex space-x-2">
-                            <button 
-                              onClick={async () => {
-                                try {
-                                  await acceptEnrollmentRequest(agent._id, "Welcome to the team! We are delighted to have you.");
-                                  // Refresh data
-                                  const companyId = Cookies.get('companyId') || '';
-                                  const [invitedAgentsData, enrollmentRequestsData, activeAgentsData] = await Promise.all([
-                                    getInvitedAgentsForCompany(companyId),
-                                    getEnrollmentRequestsForCompany(companyId),
-                                    getActiveAgentsForCompany(companyId)
-                                  ]);
-                                  setCompanyInvitedAgents(invitedAgentsData);
-                                  setEnrollmentRequests(enrollmentRequestsData);
-                                  setActiveAgentsList(activeAgentsData);
-                                } catch (error) {
-                                  console.error('Error accepting enrollment request:', error);
-                                }
-                              }}
-                              className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
-                            >
-                              ✅ Approve
-                            </button>
-                            <button 
-                              onClick={async () => {
-                                try {
-                                  await rejectEnrollmentRequest(agent._id, "Sorry, we cannot proceed with your application at this time.");
-                                  // Refresh data
-                                  const companyId = Cookies.get('companyId') || '';
-                                  const [invitedAgentsData, enrollmentRequestsData, activeAgentsData] = await Promise.all([
-                                    getInvitedAgentsForCompany(companyId),
-                                    getEnrollmentRequestsForCompany(companyId),
-                                    getActiveAgentsForCompany(companyId)
-                                  ]);
-                                  setCompanyInvitedAgents(invitedAgentsData);
-                                  setEnrollmentRequests(enrollmentRequestsData);
-                                  setActiveAgentsList(activeAgentsData);
-                                } catch (error) {
-                                  console.error('Error rejecting enrollment request:', error);
-                                }
-                              }}
-                              className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
-                            >
-                              ❌ Reject
-                            </button>
+                            <div className="flex-1">
+                              <h3 className="text-lg font-bold text-gray-900">{agent.agentId?.personalInfo?.name}</h3>
+                              <p className="text-gray-600">{agent.agentId?.personalInfo?.email}</p>
+                              <div className="mt-2 space-y-1">
+                                <p className="text-sm text-blue-700">
+                                  <span className="font-medium">Status:</span> {agent.enrollmentStatus}
+                                </p>
+                                {agent.notes && (
+                                  <p className="text-sm text-gray-600 italic">
+                                    "{agent.notes}"
+                                  </p>
+                                )}
+                                <p className="text-xs text-gray-500">
+                                  For: {agent.gigId?.title}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <button 
+                                onClick={async () => {
+                                  try {
+                                    await acceptEnrollmentRequest(agent._id, "Welcome to the team! We are delighted to have you.");
+                                    // Refresh data
+                                    const companyId = Cookies.get('companyId') || '';
+                                    const [invitedAgentsData, enrollmentRequestsData, activeAgentsData] = await Promise.all([
+                                      getInvitedAgentsForCompany(companyId),
+                                      getEnrollmentRequestsForCompany(companyId),
+                                      getActiveAgentsForCompany(companyId)
+                                    ]);
+                                    setCompanyInvitedAgents(invitedAgentsData);
+                                    setEnrollmentRequests(enrollmentRequestsData);
+                                    setActiveAgentsList(activeAgentsData);
+                                  } catch (error) {
+                                    console.error('Error accepting enrollment request:', error);
+                                    // TODO: Show error toast
+                                  }
+                                }}
+                                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-200 text-sm font-medium"
+                              >
+                                ✅ Approve
+                              </button>
+                              <button 
+                                onClick={async () => {
+                                  try {
+                                    await rejectEnrollmentRequest(agent._id, "Sorry, we cannot proceed with your application at this time.");
+                                    // Refresh data
+                                    const companyId = Cookies.get('companyId') || '';
+                                    const [invitedAgentsData, enrollmentRequestsData, activeAgentsData] = await Promise.all([
+                                      getInvitedAgentsForCompany(companyId),
+                                      getEnrollmentRequestsForCompany(companyId),
+                                      getActiveAgentsForCompany(companyId)
+                                    ]);
+                                    setCompanyInvitedAgents(invitedAgentsData);
+                                    setEnrollmentRequests(enrollmentRequestsData);
+                                    setActiveAgentsList(activeAgentsData);
+                                  } catch (error) {
+                                    console.error('Error rejecting enrollment request:', error);
+                                    // TODO: Show error toast
+                                  }
+                                }}
+                                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-200 text-sm font-medium"
+                              >
+                                ❌ Reject
+                              </button>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <div className="w-24 h-24 bg-gradient-to-r from-blue-100 to-cyan-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <span className="text-4xl">📋</span>
+                      ))}
                     </div>
-                    <p className="text-gray-600 text-lg mb-2">No enrollment requests</p>
-                    <p className="text-sm text-gray-400">No reps are waiting for approval.</p>
-                  </div>
-                )}
+                  ) : (
+                    <div className="text-center py-12">
+                      <div className="bg-gray-50 rounded-xl p-8 max-w-md mx-auto">
+                        <div className="text-6xl mb-4">📋</div>
+                        <p className="text-gray-600 text-lg mb-2">No enrollment requests</p>
+                        <p className="text-sm text-gray-400">No reps are waiting for approval.</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
+            {/* 4. ACTIVE REPS */}
             {activeSection === 'active' && (
-              <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200/50 p-8">
-                <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-6 text-center">
-                  ✅ Active Reps
-                </h2>
-                <p className="text-gray-600 text-lg text-center mb-8">Reps who are approved and actively working</p>
-                {activeAgentsList.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {activeAgentsList.map((agent, index) => (
-                      <div key={`active-${agent._id}-${index}`} className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300">
-                        <div className="flex items-center space-x-4 mb-4">
-                          <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                            {agent.agentId?.personalInfo?.name?.charAt(0) || 'U'}
-                          </div>
-                          <div className="flex-1">
-                            <h3 className="text-lg font-bold text-gray-900">{agent.agentId?.personalInfo?.name}</h3>
-                            <p className="text-gray-600 text-sm">{agent.agentId?.personalInfo?.email}</p>
-                          </div>
-                          <span className="inline-flex items-center px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
-                            ✅ Active
-                          </span>
-                        </div>
-                        <div className="space-y-3">
-                          <div className="grid grid-cols-2 gap-4 text-sm">
-                            <div>
-                              <span className="text-gray-600">Experience:</span>
-                              <p className="font-semibold">{agent.agentId?.professionalSummary?.yearsOfExperience} years</p>
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">✅ Active Reps</h2>
+                  <p className="text-gray-600">Reps who are approved and actively working</p>
+                </div>
+
+                <div className="bg-white rounded-xl shadow-lg p-6">
+                  {activeAgentsList.length > 0 ? (
+                    <div className="space-y-4">
+                      {activeAgentsList.map((agent, index) => (
+                        <div key={`active-${agent._id}-${index}`} className="bg-green-50 border border-green-200 rounded-lg p-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-2">
+                                <h3 className="text-lg font-bold text-gray-900">{agent.agentId?.personalInfo?.name}</h3>
+                                <span className="inline-flex items-center px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+                                  ✅ Active
+                                </span>
+                              </div>
+                              <p className="text-gray-600 mb-2">{agent.agentId?.personalInfo?.email}</p>
+                              
+                              <div className="mt-3 space-y-2">
+                                <div className="flex items-center gap-4 text-sm">
+                                  <span className="text-gray-600">
+                                    <span className="font-medium">Experience:</span> {agent.agentId?.professionalSummary?.yearsOfExperience} years
+                                  </span>
+                                  <span className="text-gray-600">
+                                    <span className="font-medium">Role:</span> {agent.agentId?.professionalSummary?.currentRole}
+                                  </span>
+                                </div>
+                                
+                                <div className="flex flex-wrap gap-2">
+                                  {agent.agentId?.professionalSummary?.keyExpertise?.slice(0, 5).map((skill, i) => (
+                                    <span key={i} className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">
+                                      {skill}
+                                    </span>
+                                  ))}
+                                  {agent.agentId?.professionalSummary?.keyExpertise?.length > 5 && (
+                                    <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">
+                                      +{agent.agentId.professionalSummary.keyExpertise.length - 5} more
+                                    </span>
+                                  )}
+                                </div>
+                                
+                                <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                                  <div>
+                                    <span className="font-medium">Availability:</span> {agent.agentId?.availability?.schedule?.length} days/week
+                                  </div>
+                                  <div>
+                                    <span className="font-medium">Status:</span> {agent.agentId?.onboardingProgress?.currentPhase === 4 ? 'Fully Onboarded' : 'In Progress'}
+                                  </div>
+                                  <div>
+                                    <span className="font-medium">Languages:</span> {agent.agentId?.personalInfo?.languages?.length || 0}
+                                  </div>
+                                </div>
+                              </div>
                             </div>
-                            <div>
-                              <span className="text-gray-600">Role:</span>
-                              <p className="font-semibold">{agent.agentId?.professionalSummary?.currentRole}</p>
+                            
+                            <div className="flex flex-col items-end space-y-2">
+                              <button className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-all duration-200 text-sm font-medium">
+                                Manage Profile
+                              </button>
                             </div>
                           </div>
-                          <div className="flex flex-wrap gap-2">
-                            {agent.agentId?.professionalSummary?.keyExpertise?.slice(0, 3).map((skill, i) => (
-                              <span key={i} className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">
-                                {skill}
-                              </span>
-                            ))}
-                            {agent.agentId?.professionalSummary?.keyExpertise?.length > 3 && (
-                              <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">
-                                +{agent.agentId.professionalSummary.keyExpertise.length - 3} more
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex justify-between text-sm text-gray-600">
-                            <span>Availability: {agent.agentId?.availability?.schedule?.length} days/week</span>
-                            <span>Languages: {agent.agentId?.personalInfo?.languages?.length || 0}</span>
-                          </div>
-                          <button className="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium">
-                            Manage Profile
-                          </button>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <div className="w-24 h-24 bg-gradient-to-r from-green-100 to-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <span className="text-4xl">✅</span>
+                      ))}
                     </div>
-                    <p className="text-gray-600 text-lg mb-2">No active reps</p>
-                    <p className="text-sm text-gray-400">Start by finding matches and inviting reps.</p>
+                  ) : (
+                    <div className="text-center py-12">
+                      <div className="bg-gray-50 rounded-xl p-8 max-w-md mx-auto">
+                        <div className="text-6xl mb-4">✅</div>
+                        <p className="text-gray-600 text-lg mb-2">No active reps</p>
+                        <p className="text-sm text-gray-400">Start by finding matches and inviting reps.</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Other Sections */}
+                {activeSection === 'invited' && (
+                  <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200/50 p-8">
+                    <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-6 text-center">
+                      📧 Invited Reps
+                    </h2>
+                    <p className="text-gray-600 text-lg text-center mb-8">Reps who have been invited but haven't responded yet</p>
+                    
+                    {invitedAgentsList.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {invitedAgentsList.map((agent, index) => (
+                          <div key={`invited-${agent._id}-${index}`} className="bg-gradient-to-br from-yellow-50 to-orange-50 border border-yellow-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300">
+                            <div className="flex items-center space-x-4 mb-4">
+                              <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                                {agent.personalInfo?.name?.charAt(0) || 'U'}
+                              </div>
+                              <div className="flex-1">
+                                <h3 className="text-lg font-bold text-gray-900">{agent.personalInfo?.name}</h3>
+                                <p className="text-gray-600 text-sm">{agent.personalInfo?.email}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="inline-flex items-center px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">
+                                📧 Pending Response
+                              </span>
+                              <span className="text-xs text-gray-500">Waiting for response</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12">
+                        <div className="w-24 h-24 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <span className="text-4xl">📧</span>
+                        </div>
+                        <p className="text-gray-600 text-lg mb-2">No pending invitations</p>
+                        <p className="text-sm text-gray-400">All invitations have been responded to.</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {activeSection === 'enrollment' && (
+                  <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200/50 p-8">
+                    <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-6 text-center">
+                      📋 Enrollment Requests
+                    </h2>
+                    <p className="text-gray-600 text-lg text-center mb-8">Reps who accepted invitations and are requesting to join</p>
+                    
+                    {enrollmentRequests.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {enrollmentRequests.map((agent, index) => (
+                          <div key={`enrollment-${agent._id}-${index}`} className="bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300">
+                            <div className="flex items-center space-x-4 mb-4">
+                              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                                {agent.agentId?.personalInfo?.name?.charAt(0) || 'U'}
+                              </div>
+                              <div className="flex-1">
+                                <h3 className="text-lg font-bold text-gray-900">{agent.agentId?.personalInfo?.name}</h3>
+                                <p className="text-gray-600 text-sm">{agent.agentId?.personalInfo?.email}</p>
+                              </div>
+                            </div>
+                            <div className="space-y-3">
+                              <div className="flex items-center justify-between">
+                                <span className="text-sm text-gray-600">Status:</span>
+                                <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                                  {agent.enrollmentStatus}
+                                </span>
+                              </div>
+                              {agent.notes && (
+                                <p className="text-sm text-gray-600 italic bg-gray-50 p-3 rounded-lg">
+                                  "{agent.notes}"
+                                </p>
+                              )}
+                              <p className="text-xs text-gray-500">
+                                For: {agent.gigId?.title}
+                              </p>
+                              <div className="flex space-x-2">
+                                <button 
+                                  onClick={async () => {
+                                    try {
+                                      await acceptEnrollmentRequest(agent._id, "Welcome to the team! We are delighted to have you.");
+                                      // Refresh data
+                                      const companyId = Cookies.get('companyId') || '';
+                                      const [invitedAgentsData, enrollmentRequestsData, activeAgentsData] = await Promise.all([
+                                        getInvitedAgentsForCompany(companyId),
+                                        getEnrollmentRequestsForCompany(companyId),
+                                        getActiveAgentsForCompany(companyId)
+                                      ]);
+                                      setCompanyInvitedAgents(invitedAgentsData);
+                                      setEnrollmentRequests(enrollmentRequestsData);
+                                      setActiveAgentsList(activeAgentsData);
+                                    } catch (error) {
+                                      console.error('Error accepting enrollment request:', error);
+                                    }
+                                  }}
+                                  className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+                                >
+                                  ✅ Approve
+                                </button>
+                                <button 
+                                  onClick={async () => {
+                                    try {
+                                      await rejectEnrollmentRequest(agent._id, "Sorry, we cannot proceed with your application at this time.");
+                                      // Refresh data
+                                      const companyId = Cookies.get('companyId') || '';
+                                      const [invitedAgentsData, enrollmentRequestsData, activeAgentsData] = await Promise.all([
+                                        getInvitedAgentsForCompany(companyId),
+                                        getEnrollmentRequestsForCompany(companyId),
+                                        getActiveAgentsForCompany(companyId)
+                                      ]);
+                                      setCompanyInvitedAgents(invitedAgentsData);
+                                      setEnrollmentRequests(enrollmentRequestsData);
+                                      setActiveAgentsList(activeAgentsData);
+                                    } catch (error) {
+                                      console.error('Error rejecting enrollment request:', error);
+                                    }
+                                  }}
+                                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
+                                >
+                                  ❌ Reject
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12">
+                        <div className="w-24 h-24 bg-gradient-to-r from-blue-100 to-cyan-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <span className="text-4xl">📋</span>
+                        </div>
+                        <p className="text-gray-600 text-lg mb-2">No enrollment requests</p>
+                        <p className="text-sm text-gray-400">No reps are waiting for approval.</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {activeSection === 'active' && (
+                  <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200/50 p-8">
+                    <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-6 text-center">
+                      ✅ Active Reps
+                    </h2>
+                    <p className="text-gray-600 text-lg text-center mb-8">Reps who are approved and actively working</p>
+                    
+                    {activeAgentsList.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {activeAgentsList.map((agent, index) => (
+                          <div key={`active-${agent._id}-${index}`} className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300">
+                            <div className="flex items-center space-x-4 mb-4">
+                              <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                                {agent.agentId?.personalInfo?.name?.charAt(0) || 'U'}
+                              </div>
+                              <div className="flex-1">
+                                <h3 className="text-lg font-bold text-gray-900">{agent.agentId?.personalInfo?.name}</h3>
+                                <p className="text-gray-600 text-sm">{agent.agentId?.personalInfo?.email}</p>
+                              </div>
+                              <span className="inline-flex items-center px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+                                ✅ Active
+                              </span>
+                            </div>
+                            <div className="space-y-3">
+                              <div className="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                  <span className="text-gray-600">Experience:</span>
+                                  <p className="font-semibold">{agent.agentId?.professionalSummary?.yearsOfExperience} years</p>
+                                </div>
+                                <div>
+                                  <span className="text-gray-600">Role:</span>
+                                  <p className="font-semibold">{agent.agentId?.professionalSummary?.currentRole}</p>
+                                </div>
+                              </div>
+                              <div className="flex flex-wrap gap-2">
+                                {agent.agentId?.professionalSummary?.keyExpertise?.slice(0, 3).map((skill, i) => (
+                                  <span key={i} className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">
+                                    {skill}
+                                  </span>
+                                ))}
+                                {agent.agentId?.professionalSummary?.keyExpertise?.length > 3 && (
+                                  <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">
+                                    +{agent.agentId.professionalSummary.keyExpertise.length - 3} more
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex justify-between text-sm text-gray-600">
+                                <span>Availability: {agent.agentId?.availability?.schedule?.length} days/week</span>
+                                <span>Languages: {agent.agentId?.personalInfo?.languages?.length || 0}</span>
+                              </div>
+                              <button className="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium">
+                                Manage Profile
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12">
+                        <div className="w-24 h-24 bg-gradient-to-r from-green-100 to-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <span className="text-4xl">✅</span>
+                        </div>
+                        <p className="text-gray-600 text-lg mb-2">No active reps</p>
+                        <p className="text-sm text-gray-400">Start by finding matches and inviting reps.</p>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
