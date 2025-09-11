@@ -1653,75 +1653,65 @@ function RepMatchingPanel() {
                   ✅ Active Reps
                 </h2>
                 <p className="text-gray-600 text-lg text-center mb-8">Reps who are approved and actively working</p>
-                  {activeAgentsList.length > 0 ? (
-                    <div className="space-y-4">
-                      {activeAgentsList.map((agent, index) => (
-                        <div key={`active-${agent._id}-${index}`} className="bg-green-50 border border-green-200 rounded-lg p-4">
-                          <div className="flex items-center justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-3 mb-2">
-                                <h3 className="text-lg font-bold text-gray-900">{agent.agentId?.personalInfo?.name}</h3>
-                                <span className="inline-flex items-center px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
-                                  ✅ Active
-                                </span>
-                              </div>
-                              <p className="text-gray-600 mb-2">{agent.agentId?.personalInfo?.email}</p>
-                              
-                              <div className="mt-3 space-y-2">
-                                <div className="flex items-center gap-4 text-sm">
-                                  <span className="text-gray-600">
-                                    <span className="font-medium">Experience:</span> {agent.agentId?.professionalSummary?.yearsOfExperience} years
-                                  </span>
-                                  <span className="text-gray-600">
-                                    <span className="font-medium">Role:</span> {agent.agentId?.professionalSummary?.currentRole}
-                                  </span>
-                                </div>
-                                
-                                <div className="flex flex-wrap gap-2">
-                                  {agent.agentId?.professionalSummary?.keyExpertise?.slice(0, 5).map((skill, i) => (
-                                    <span key={i} className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">
-                                      {skill}
-                                    </span>
-                                  ))}
-                                  {agent.agentId?.professionalSummary?.keyExpertise?.length > 5 && (
-                                    <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">
-                                      +{agent.agentId.professionalSummary.keyExpertise.length - 5} more
-                                    </span>
-                                  )}
-                                </div>
-                                
-                                <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-                                  <div>
-                                    <span className="font-medium">Availability:</span> {agent.agentId?.availability?.schedule?.length} days/week
-                                  </div>
-                                  <div>
-                                    <span className="font-medium">Status:</span> {agent.agentId?.onboardingProgress?.currentPhase === 4 ? 'Fully Onboarded' : 'In Progress'}
-                                  </div>
-                                  <div>
-                                    <span className="font-medium">Languages:</span> {agent.agentId?.personalInfo?.languages?.length || 0}
-                                  </div>
-                                </div>
-                              </div>
+                {activeAgentsList.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {activeAgentsList.map((agent, index) => (
+                      <div key={`active-${agent._id}-${index}`} className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300">
+                        <div className="flex items-center space-x-4 mb-4">
+                          <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                            {agent.agentId?.personalInfo?.name?.charAt(0) || 'U'}
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="text-lg font-bold text-gray-900">{agent.agentId?.personalInfo?.name}</h3>
+                            <p className="text-gray-600 text-sm">{agent.agentId?.personalInfo?.email}</p>
+                          </div>
+                          <span className="inline-flex items-center px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+                            ✅ Active
+                          </span>
+                        </div>
+                        <div className="space-y-3">
+                          <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                              <span className="text-gray-600">Experience:</span>
+                              <p className="font-semibold">{agent.agentId?.professionalSummary?.yearsOfExperience} years</p>
                             </div>
-                            
-                            <div className="flex flex-col items-end space-y-2">
-                              <button className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-all duration-200 text-sm font-medium">
-                                Manage Profile
-                              </button>
+                            <div>
+                              <span className="text-gray-600">Role:</span>
+                              <p className="font-semibold">{agent.agentId?.professionalSummary?.currentRole}</p>
                             </div>
                           </div>
+                          <div className="flex flex-wrap gap-2">
+                            {agent.agentId?.professionalSummary?.keyExpertise?.slice(0, 3).map((skill, i) => (
+                              <span key={i} className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">
+                                {skill}
+                              </span>
+                            ))}
+                            {agent.agentId?.professionalSummary?.keyExpertise?.length > 3 && (
+                              <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">
+                                +{agent.agentId.professionalSummary.keyExpertise.length - 3} more
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex justify-between text-sm text-gray-600">
+                            <span>Availability: {agent.agentId?.availability?.schedule?.length} days/week</span>
+                            <span>Languages: {agent.agentId?.personalInfo?.languages?.length || 0}</span>
+                          </div>
+                          <button className="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium">
+                            Manage Profile
+                          </button>
                         </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-12">
-                      <div className="bg-gray-50 rounded-xl p-8 max-w-md mx-auto">
-                        <div className="text-6xl mb-4">✅</div>
-                        <p className="text-gray-600 text-lg mb-2">No active reps</p>
-                        <p className="text-sm text-gray-400">Start by finding matches and inviting reps.</p>
                       </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <div className="w-24 h-24 bg-gradient-to-r from-green-100 to-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <span className="text-4xl">✅</span>
                     </div>
-                  )}
+                    <p className="text-gray-600 text-lg mb-2">No active reps</p>
+                    <p className="text-sm text-gray-400">Start by finding matches and inviting reps.</p>
+                  </div>
+                )}
               </div>
             )}
           </>
