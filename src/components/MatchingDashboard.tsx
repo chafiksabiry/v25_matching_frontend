@@ -658,7 +658,7 @@ function RepMatchingPanel() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto p-6">
+      <main className="container mx-auto p-6 overflow-hidden">
         
         {/* Error Message */}
         {error && (
@@ -866,9 +866,9 @@ function RepMatchingPanel() {
                 )}
 
                 {/* Two Column Layout: Gigs and Reps */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 overflow-hidden">
                   {/* Left Column: Gig Selection */}
-                <div className="lg:col-span-3 bg-white rounded-xl shadow-lg p-6">
+                <div className="lg:col-span-3 bg-white rounded-xl shadow-lg p-6 overflow-hidden">
                   <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center space-x-2">
                     <Briefcase size={20} className="text-orange-600" />
                       <span>Available Gigs</span>
@@ -944,8 +944,8 @@ function RepMatchingPanel() {
 
                                                     {/* Expanded Details */}
                           {isGigExpanded && (
-                            <div className="px-4 pb-4 border-t border-gray-200 bg-gray-50">
-                              <div className="pt-4 space-y-4 text-sm">
+                            <div className="px-4 pb-4 border-t border-gray-200 bg-gray-50 overflow-hidden">
+                              <div className="pt-4 space-y-4 text-sm overflow-hidden">
                                 
                                 {/* 1. Industries */}
                                 {gig.industries && gig.industries.length > 0 && (
@@ -1085,7 +1085,7 @@ function RepMatchingPanel() {
         </div>
 
                   {/* Right Column: Matching Results */}
-                  <div className="lg:col-span-9 bg-white rounded-xl shadow-lg p-6">
+                  <div className="lg:col-span-9 bg-white rounded-xl shadow-lg p-6 overflow-hidden">
                     <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center space-x-2">
                         <Users size={20} className="text-orange-600" />
                       <span>{selectedGig ? `Matches for "${selectedGig.title}"` : 'Select a Gig to See Matches'}</span>
@@ -1230,7 +1230,7 @@ function RepMatchingPanel() {
 
                               {/* Expanded Details */}
                               {isExpanded && (
-                                <div className="mt-6 pt-6 border-t border-gray-200 space-y-6">
+                                <div className="mt-6 pt-6 border-t border-gray-200 space-y-6 overflow-hidden">
                                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                                     
                                     {/* Skills Match */}
