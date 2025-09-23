@@ -620,7 +620,7 @@ function RepMatchingPanel() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 w-full max-w-full overflow-x-hidden">
       {/* Header with Navigation Tabs */}
       <header className="bg-gradient-to-r from-harx-600 to-harx-700 text-white shadow-lg">
         {/* Top Header */}
@@ -704,7 +704,7 @@ function RepMatchingPanel() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto p-6 overflow-hidden">
+      <main className="container mx-auto p-6 w-full max-w-full overflow-hidden">
         
         {/* Error Message */}
         {error && (
@@ -818,9 +818,9 @@ function RepMatchingPanel() {
             </div>
 
             {/* Weights Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4 w-full overflow-hidden">
               {Object.entries(weights).map(([key, value]) => (
-                <div key={`weight-${key}`} className="bg-white rounded-lg p-2 shadow-md border border-gray-200 hover:shadow-lg transition-all duration-200 group min-w-[90px]">
+                <div key={`weight-${key}`} className="bg-white rounded-lg p-2 shadow-md border border-gray-200 hover:shadow-lg transition-all duration-200 group w-full max-w-full">
                   <div className="flex justify-between items-center mb-2">
                     <label className="text-xs font-bold text-gray-700 uppercase tracking-wider">
                       {key}
@@ -942,7 +942,7 @@ function RepMatchingPanel() {
                 )}
 
                 {/* Two Column Layout: Gigs and Reps */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 overflow-hidden">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full max-w-full overflow-hidden">
                   {/* Left Column: Gig Selection */}
                 <div className="lg:col-span-3 bg-white rounded-xl shadow-lg p-6 overflow-hidden">
                   <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center space-x-2">
@@ -1161,7 +1161,7 @@ function RepMatchingPanel() {
         </div>
 
                   {/* Right Column: Matching Results */}
-                  <div className="lg:col-span-9 bg-white rounded-xl shadow-lg p-6 overflow-hidden">
+                  <div className="lg:col-span-9 bg-white rounded-xl shadow-lg p-6 overflow-hidden w-full max-w-full">
                     <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center space-x-2">
                         <Users size={20} className="text-harx-600" />
                       <span>{selectedGig ? `Matches for "${selectedGig.title}"` : 'Select a Gig to See Matches'}</span>
@@ -1307,7 +1307,7 @@ function RepMatchingPanel() {
                               {/* Expanded Details */}
                               {isExpanded && (
                                 <div className="mt-6 pt-6 border-t border-gray-200 space-y-6 overflow-hidden">
-                                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full max-w-full overflow-hidden">
                                     
                                     {/* Skills Match */}
                                     {match.skillsMatch && (
@@ -1486,7 +1486,7 @@ function RepMatchingPanel() {
                                   </div>
 
                                   {/* Second Row */}
-                                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full max-w-full overflow-hidden">
                                     
                                     {/* Timezone Match */}
                                     {match.timezoneMatch && (
