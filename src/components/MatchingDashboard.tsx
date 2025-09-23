@@ -100,8 +100,8 @@ function RepMatchingPanel() {
     const containerRect = container.getBoundingClientRect();
     const newWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
     
-    // Limit width between 20% and 60%
-    const clampedWidth = Math.max(20, Math.min(60, newWidth));
+    // Limit width between 20% and 50% to prevent overflow
+    const clampedWidth = Math.max(20, Math.min(50, newWidth));
     setLeftColumnWidth(clampedWidth);
   };
 
@@ -981,11 +981,11 @@ function RepMatchingPanel() {
                 )}
 
                 {/* Two Column Layout: Gigs and Reps */}
-                <div className="resizable-container flex gap-6 w-full max-w-full overflow-hidden">
+                <div className="resizable-container flex gap-4 w-full max-w-full overflow-hidden">
                   {/* Left Column: Gig Selection */}
                 <div 
-                  className="bg-white rounded-xl shadow-lg p-6 overflow-hidden transition-all duration-200"
-                  style={{ width: `${leftColumnWidth}%`, minWidth: '300px' }}
+                  className="bg-white rounded-xl shadow-lg p-6 overflow-hidden transition-all duration-200 flex-shrink-0"
+                  style={{ width: `${leftColumnWidth}%`, minWidth: '280px', maxWidth: '50%' }}
                 >
                   <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center space-x-2">
                     <Briefcase size={20} className="text-harx-600" />
@@ -1197,17 +1197,16 @@ function RepMatchingPanel() {
 
                   {/* Resize Handle */}
                   <div 
-                    className={`flex-shrink-0 w-2 bg-gray-200 hover:bg-harx-400 cursor-col-resize transition-colors duration-200 rounded-full flex items-center justify-center group ${isResizing ? 'bg-harx-500' : ''}`}
+                    className={`flex-shrink-0 w-1 bg-gray-200 hover:bg-harx-400 cursor-col-resize transition-colors duration-200 rounded-full flex items-center justify-center group ${isResizing ? 'bg-harx-500' : ''}`}
                     onMouseDown={handleMouseDown}
                     title="Drag to resize"
                   >
-                    <div className="w-1 h-8 bg-gray-400 group-hover:bg-white rounded-full transition-colors duration-200"></div>
+                    <div className="w-0.5 h-8 bg-gray-400 group-hover:bg-white rounded-full transition-colors duration-200"></div>
                   </div>
 
                   {/* Right Column: Matching Results */}
                   <div 
-                    className="bg-white rounded-xl shadow-lg p-6 overflow-hidden transition-all duration-200"
-                    style={{ width: `${100 - leftColumnWidth}%`, minWidth: '400px' }}
+                    className="bg-white rounded-xl shadow-lg p-6 overflow-hidden transition-all duration-200 flex-1 min-w-0"
                   >
                     <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center space-x-2">
                         <Users size={20} className="text-harx-600" />
