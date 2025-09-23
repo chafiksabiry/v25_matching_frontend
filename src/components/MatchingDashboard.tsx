@@ -82,6 +82,27 @@ function RepMatchingPanel() {
   const [enrollmentRequests, setEnrollmentRequests] = useState<any[]>([]);
   const [activeAgentsList, setActiveAgentsList] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [gigsHeight, setGigsHeight] = useState<'sm' | 'md' | 'lg' | 'xl'>('md');
+
+  // Height options for gigs section
+  const heightOptions = {
+    sm: 'max-h-64',   // ~256px
+    md: 'max-h-96',   // ~384px (default)
+    lg: 'max-h-[32rem]', // ~512px
+    xl: 'max-h-[40rem]'  // ~640px
+  };
+
+  const getNextHeight = () => {
+    const heights: ('sm' | 'md' | 'lg' | 'xl')[] = ['sm', 'md', 'lg', 'xl'];
+    const currentIndex = heights.indexOf(gigsHeight);
+    const nextIndex = (currentIndex + 1) % heights.length;
+    return heights[nextIndex];
+  };
+
+  const getHeightLabel = () => {
+    const labels = { sm: 'Small', md: 'Medium', lg: 'Large', xl: 'X-Large' };
+    return labels[gigsHeight];
+  };
 
   // Filter functions
   const filteredGigs = gigs; // No filtering for gigs
@@ -945,12 +966,24 @@ function RepMatchingPanel() {
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full max-w-full overflow-hidden">
                   {/* Left Column: Gig Selection */}
                 <div className="lg:col-span-3 bg-white rounded-xl shadow-lg p-6 overflow-hidden">
-                  <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center space-x-2">
-                    <Briefcase size={20} className="text-harx-600" />
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xl font-semibold text-gray-800 flex items-center space-x-2">
+                      <Briefcase size={20} className="text-harx-600" />
                       <span>Available Gigs</span>
-                  </h3>
+                    </h3>
+                    <button
+                      onClick={() => setGigsHeight(getNextHeight())}
+                      className="flex items-center space-x-1 px-3 py-1 bg-harx-100 text-harx-700 rounded-lg hover:bg-harx-200 transition-colors duration-200 text-xs font-medium"
+                      title="Adjust gigs section height"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                      </svg>
+                      <span>{getHeightLabel()}</span>
+                    </button>
+                  </div>
                   
-                    <div className="space-y-3 max-h-96 overflow-y-auto">
+                    <div className={`space-y-3 ${heightOptions[gigsHeight]} overflow-y-auto transition-all duration-300`}>
                     {gigs.map((gig) => {
                       const isGigExpanded = expandedGigs.has(gig._id || '');
                       
@@ -972,7 +1005,7 @@ function RepMatchingPanel() {
                                 <Briefcase size={16} className="text-white" />
                               </div>
                                 <div className="flex-1 min-w-0">
-                                  <h4 className={`font-bold text-sm truncate ${
+                                  <h4 className={`font-bold text-sm leading-tight ${
                                   selectedGig?._id === gig._id ? "text-harx-900" : "text-gray-800"
                                 }`}>
                                   {gig.title}
