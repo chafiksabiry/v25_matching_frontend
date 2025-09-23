@@ -82,6 +82,45 @@ function RepMatchingPanel() {
   const [enrollmentRequests, setEnrollmentRequests] = useState<any[]>([]);
   const [activeAgentsList, setActiveAgentsList] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [leftColumnWidth, setLeftColumnWidth] = useState<number>(25); // percentage
+  const [isResizing, setIsResizing] = useState<boolean>(false);
+
+  // Handle column resizing
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsResizing(true);
+    e.preventDefault();
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!isResizing) return;
+    
+    const container = document.querySelector('.resizable-container');
+    if (!container) return;
+    
+    const containerRect = container.getBoundingClientRect();
+    const newWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
+    
+    // Limit width between 20% and 50% to prevent overflow
+    const clampedWidth = Math.max(20, Math.min(50, newWidth));
+    setLeftColumnWidth(clampedWidth);
+  };
+
+  const handleMouseUp = () => {
+    setIsResizing(false);
+  };
+
+  // Add event listeners for resizing
+  React.useEffect(() => {
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isResizing]);
 
   // Filter functions
   const filteredGigs = gigs; // No filtering for gigs
@@ -942,9 +981,12 @@ function RepMatchingPanel() {
                 )}
 
                 {/* Two Column Layout: Gigs and Reps */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full max-w-full overflow-hidden">
+                <div className="resizable-container flex gap-4 w-full max-w-full overflow-hidden">
                   {/* Left Column: Gig Selection */}
-                <div className="lg:col-span-3 bg-white rounded-xl shadow-lg p-6 overflow-hidden">
+                <div 
+                  className="bg-white rounded-xl shadow-lg p-6 overflow-hidden transition-all duration-200 flex-shrink-0"
+                  style={{ width: `${leftColumnWidth}%`, minWidth: '280px', maxWidth: '50%' }}
+                >
                   <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center space-x-2">
                     <Briefcase size={20} className="text-harx-600" />
                       <span>Available Gigs</span>
@@ -972,20 +1014,13 @@ function RepMatchingPanel() {
                                 <Briefcase size={16} className="text-white" />
                               </div>
                                 <div className="flex-1 min-w-0">
-                                  <h4 className={`font-bold text-sm truncate ${
+                                  <h4 className={`font-bold text-sm ${
                                   selectedGig?._id === gig._id ? "text-harx-900" : "text-gray-800"
                                 }`}>
                                   {gig.title}
                                 </h4>
                                   <p className="text-xs text-gray-600 truncate">{gig.companyName}</p>
                               </div>
-                              <span className={`px-2 py-1 rounded text-xs font-medium flex-shrink-0 ${
-                              selectedGig?._id === gig._id
-                                ? "bg-harx-500 text-white"
-                                : "bg-blue-100 text-blue-800"
-                            }`}>
-                              {gig.category}
-                            </span>
           </div>
 
                           {selectedGig?._id === gig._id && (
@@ -1160,8 +1195,19 @@ function RepMatchingPanel() {
           </div>
         </div>
 
+                  {/* Resize Handle */}
+                  <div 
+                    className={`flex-shrink-0 w-1 bg-gray-200 hover:bg-harx-400 cursor-col-resize transition-colors duration-200 rounded-full flex items-center justify-center group ${isResizing ? 'bg-harx-500' : ''}`}
+                    onMouseDown={handleMouseDown}
+                    title="Drag to resize"
+                  >
+                    <div className="w-0.5 h-8 bg-gray-400 group-hover:bg-white rounded-full transition-colors duration-200"></div>
+                  </div>
+
                   {/* Right Column: Matching Results */}
-                  <div className="lg:col-span-9 bg-white rounded-xl shadow-lg p-6 overflow-hidden w-full max-w-full">
+                  <div 
+                    className="bg-white rounded-xl shadow-lg p-6 overflow-hidden transition-all duration-200 flex-1 min-w-0"
+                  >
                     <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center space-x-2">
                         <Users size={20} className="text-harx-600" />
                       <span>{selectedGig ? `Matches for "${selectedGig.title}"` : 'Select a Gig to See Matches'}</span>
