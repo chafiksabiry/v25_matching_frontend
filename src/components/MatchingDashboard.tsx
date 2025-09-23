@@ -979,13 +979,6 @@ function RepMatchingPanel() {
                                 </h4>
                                   <p className="text-xs text-gray-600 truncate">{gig.companyName}</p>
                               </div>
-                              <span className={`px-2 py-1 rounded text-xs font-medium flex-shrink-0 ${
-                              selectedGig?._id === gig._id
-                                ? "bg-harx-500 text-white"
-                                : "bg-blue-100 text-blue-800"
-                            }`}>
-                              {gig.category}
-                            </span>
           </div>
 
                           {selectedGig?._id === gig._id && (
