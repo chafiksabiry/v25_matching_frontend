@@ -82,27 +82,45 @@ function RepMatchingPanel() {
   const [enrollmentRequests, setEnrollmentRequests] = useState<any[]>([]);
   const [activeAgentsList, setActiveAgentsList] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [gigsHeight, setGigsHeight] = useState<'sm' | 'md' | 'lg' | 'xl'>('md');
+  const [leftColumnWidth, setLeftColumnWidth] = useState<number>(25); // percentage
+  const [isResizing, setIsResizing] = useState<boolean>(false);
 
-  // Height options for gigs section
-  const heightOptions = {
-    sm: 'max-h-64',   // ~256px
-    md: 'max-h-96',   // ~384px (default)
-    lg: 'max-h-[32rem]', // ~512px
-    xl: 'max-h-[40rem]'  // ~640px
+  // Handle column resizing
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsResizing(true);
+    e.preventDefault();
   };
 
-  const getNextHeight = () => {
-    const heights: ('sm' | 'md' | 'lg' | 'xl')[] = ['sm', 'md', 'lg', 'xl'];
-    const currentIndex = heights.indexOf(gigsHeight);
-    const nextIndex = (currentIndex + 1) % heights.length;
-    return heights[nextIndex];
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!isResizing) return;
+    
+    const container = document.querySelector('.resizable-container');
+    if (!container) return;
+    
+    const containerRect = container.getBoundingClientRect();
+    const newWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
+    
+    // Limit width between 20% and 60%
+    const clampedWidth = Math.max(20, Math.min(60, newWidth));
+    setLeftColumnWidth(clampedWidth);
   };
 
-  const getHeightLabel = () => {
-    const labels = { sm: 'Small', md: 'Medium', lg: 'Large', xl: 'X-Large' };
-    return labels[gigsHeight];
+  const handleMouseUp = () => {
+    setIsResizing(false);
   };
+
+  // Add event listeners for resizing
+  React.useEffect(() => {
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isResizing]);
 
   // Filter functions
   const filteredGigs = gigs; // No filtering for gigs
@@ -963,27 +981,18 @@ function RepMatchingPanel() {
                 )}
 
                 {/* Two Column Layout: Gigs and Reps */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full max-w-full overflow-hidden">
+                <div className="resizable-container flex gap-6 w-full max-w-full overflow-hidden">
                   {/* Left Column: Gig Selection */}
-                <div className="lg:col-span-3 bg-white rounded-xl shadow-lg p-6 overflow-hidden">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-xl font-semibold text-gray-800 flex items-center space-x-2">
-                      <Briefcase size={20} className="text-harx-600" />
+                <div 
+                  className="bg-white rounded-xl shadow-lg p-6 overflow-hidden transition-all duration-200"
+                  style={{ width: `${leftColumnWidth}%`, minWidth: '300px' }}
+                >
+                  <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center space-x-2">
+                    <Briefcase size={20} className="text-harx-600" />
                       <span>Available Gigs</span>
-                    </h3>
-                    <button
-                      onClick={() => setGigsHeight(getNextHeight())}
-                      className="flex items-center space-x-1 px-3 py-1 bg-harx-100 text-harx-700 rounded-lg hover:bg-harx-200 transition-colors duration-200 text-xs font-medium"
-                      title="Adjust gigs section height"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-                      </svg>
-                      <span>{getHeightLabel()}</span>
-                    </button>
-                  </div>
+                  </h3>
                   
-                    <div className={`space-y-3 ${heightOptions[gigsHeight]} overflow-y-auto transition-all duration-300`}>
+                    <div className="space-y-3 max-h-96 overflow-y-auto">
                     {gigs.map((gig) => {
                       const isGigExpanded = expandedGigs.has(gig._id || '');
                       
@@ -1005,7 +1014,7 @@ function RepMatchingPanel() {
                                 <Briefcase size={16} className="text-white" />
                               </div>
                                 <div className="flex-1 min-w-0">
-                                  <h4 className={`font-bold text-sm leading-tight ${
+                                  <h4 className={`font-bold text-sm ${
                                   selectedGig?._id === gig._id ? "text-harx-900" : "text-gray-800"
                                 }`}>
                                   {gig.title}
@@ -1186,8 +1195,20 @@ function RepMatchingPanel() {
           </div>
         </div>
 
+                  {/* Resize Handle */}
+                  <div 
+                    className={`flex-shrink-0 w-2 bg-gray-200 hover:bg-harx-400 cursor-col-resize transition-colors duration-200 rounded-full flex items-center justify-center group ${isResizing ? 'bg-harx-500' : ''}`}
+                    onMouseDown={handleMouseDown}
+                    title="Drag to resize"
+                  >
+                    <div className="w-1 h-8 bg-gray-400 group-hover:bg-white rounded-full transition-colors duration-200"></div>
+                  </div>
+
                   {/* Right Column: Matching Results */}
-                  <div className="lg:col-span-9 bg-white rounded-xl shadow-lg p-6 overflow-hidden w-full max-w-full">
+                  <div 
+                    className="bg-white rounded-xl shadow-lg p-6 overflow-hidden transition-all duration-200"
+                    style={{ width: `${100 - leftColumnWidth}%`, minWidth: '400px' }}
+                  >
                     <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center space-x-2">
                         <Users size={20} className="text-harx-600" />
                       <span>{selectedGig ? `Matches for "${selectedGig.title}"` : 'Select a Gig to See Matches'}</span>
