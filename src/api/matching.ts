@@ -448,6 +448,62 @@ export const getLanguages = async (): Promise<Language[]> => {
   */
 };
 
+// ===== NEW SIMPLIFIED ENDPOINTS =====
+
+/**
+ * 🆕 Get all gigs for an agent with their status (invited, enrolled, etc.)
+ * @param agentId - Agent ID
+ * @param status - Optional status filter (invited, enrolled, requested, rejected)
+ */
+export const getAgentGigs = async (agentId: string, status?: string): Promise<any> => {
+  console.log('🆕 getAgentGigs called with:', { agentId, status });
+  try {
+    const url = status 
+      ? `${MATCHING_API_URL}/gig-agents/agents/${agentId}/gigs?status=${status}`
+      : `${MATCHING_API_URL}/gig-agents/agents/${agentId}/gigs`;
+      
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log('✅ Agent gigs retrieved:', data);
+    return data;
+  } catch (error) {
+    console.error('❌ Error fetching agent gigs:', error);
+    throw error;
+  }
+};
+
+/**
+ * 🆕 Get all agents for a gig with their status (invited, enrolled, etc.)
+ * @param gigId - Gig ID
+ * @param status - Optional status filter (invited, enrolled, requested, rejected)
+ */
+export const getGigAgents = async (gigId: string, status?: string): Promise<any> => {
+  console.log('🆕 getGigAgents called with:', { gigId, status });
+  try {
+    const url = status 
+      ? `${MATCHING_API_URL}/gig-agents/gigs/${gigId}/agents?status=${status}`
+      : `${MATCHING_API_URL}/gig-agents/gigs/${gigId}/agents`;
+      
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log('✅ Gig agents retrieved:', data);
+    return data;
+  } catch (error) {
+    console.error('❌ Error fetching gig agents:', error);
+    throw error;
+  }
+};
+
 // ===== GIG WEIGHTS API =====
 export interface GigWeights {
   _id?: string;
