@@ -42,7 +42,7 @@ export const getGigs = async (): Promise<Gig[]> => {
 };
 
 export const getGigsByCompanyId = async (companyId: string): Promise<Gig[]> => {
-  const GIGS_API_URL = import.meta.env.VITE_API_URL_GIGS || 'https://api-gigsmanual.harx.ai/api';
+  const GIGS_API_URL = import.meta.env.VITE_API_URL_GIGS || 'https://prod-api-gigsmanual.harx.ai/api';
   const response = await axios.get(`${GIGS_API_URL}/gigs/company/${companyId}`);
   return response.data;
 };
@@ -170,7 +170,7 @@ interface GigAgentResponse {
 
 export const createGigAgent = async (data: GigAgentRequest): Promise<GigAgentResponse> => {
   try {
-    const MATCHING_API_URL = import.meta.env.VITE_MATCHING_API_URL || 'https://api-matching.harx.ai/api';
+    const MATCHING_API_URL = import.meta.env.VITE_MATCHING_API_URL || 'https://prod-api-matching.harx.ai/api';
     
     console.log('Creating gig-agent with URL:', `${MATCHING_API_URL}/gig-agents`);
     console.log('Request data:', data);

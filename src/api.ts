@@ -179,7 +179,7 @@ interface GigAgentResponse {
 
 export const createGigAgent = async (data: GigAgentRequest): Promise<GigAgentResponse> => {
   try {
-    const MATCHING_API_URL = import.meta.env.VITE_MATCHING_API_URL || 'https://api-matching.harx.ai/api';
+    const MATCHING_API_URL = import.meta.env.VITE_MATCHING_API_URL || 'https://prod-api-matching.harx.ai/api';
     const response = await fetch(`${MATCHING_API_URL}/gig-agents`, {
       method: 'POST',
       headers: {
