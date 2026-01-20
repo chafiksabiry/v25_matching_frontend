@@ -20,8 +20,8 @@ const GigAgentList: React.FC<GigAgentListProps> = ({ gigId, agentId }) => {
   const fetchGigAgents = async () => {
     try {
       setLoading(true);
-      const MATCHING_API_URL = import.meta.env.VITE_MATCHING_API_URL || 'https://api-matching.harx.ai/api';
-      
+      const MATCHING_API_URL = import.meta.env.VITE_MATCHING_API_URL || 'https://v25matchingbackend-production.up.railway.app/api';
+
       let url = `${MATCHING_API_URL}/gig-agents`;
       if (gigId) {
         url = `${MATCHING_API_URL}/gig-agents/gig/${gigId}`;
@@ -118,9 +118,9 @@ const GigAgentList: React.FC<GigAgentListProps> = ({ gigId, agentId }) => {
       {selectedGigAgent && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
           <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-6xl shadow-lg rounded-md bg-white">
-            <GigAgentDetails 
-              gigAgent={selectedGigAgent} 
-              onClose={() => setSelectedGigAgent(null)} 
+            <GigAgentDetails
+              gigAgent={selectedGigAgent}
+              onClose={() => setSelectedGigAgent(null)}
             />
           </div>
         </div>

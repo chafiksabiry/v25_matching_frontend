@@ -20,11 +20,11 @@ export const getReps = async (): Promise<Rep[]> => {
 
     const data = await response.json();
     console.log('Parsed getReps response:', data);
-    
+
     if (!Array.isArray(data)) {
       throw new Error('Invalid response format: expected an array of reps');
     }
-    
+
     return data;
   } catch (error) {
     console.error('Error in getReps:', error);
@@ -37,19 +37,19 @@ export const getGigs = async (): Promise<Gig[]> => {
   console.log('getGigs called');
   try {
     const response = await fetch(`${API_BASE_URL}/gigs`);
-    
+
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.message || 'Failed to fetch gigs');
     }
-    
+
     const data = await response.json();
     console.log('Parsed getGigs response:', data);
-    
+
     if (!Array.isArray(data)) {
       throw new Error('Invalid response format: expected an array of gigs');
     }
-    
+
     return data;
   } catch (error) {
     console.error('Error in getGigs:', error);
@@ -71,7 +71,7 @@ export const findMatchesForGig = async (gigId: string, weights: MatchingWeights)
   partialMatches: number;
   perfectMatches: number;
   totalMatches: number;
-  preferedmatches: never[]; matches: Match[] 
+  preferedmatches: never[]; matches: Match[]
 }> => {
   console.log('findMatchesForGig called with:', { gigId, weights });
   try {
@@ -82,19 +82,19 @@ export const findMatchesForGig = async (gigId: string, weights: MatchingWeights)
       },
       body: JSON.stringify({ weights }),
     });
-    
+
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.message || 'Failed to find matches for gig');
     }
-    
+
     const data = await response.json();
     console.log('Parsed API response:', data);
-    
+
     if (!data.preferedmatches || !Array.isArray(data.preferedmatches)) {
       throw new Error('Invalid response format: expected preferedmatches array');
     }
-    
+
     return { matches: data.preferedmatches };
   } catch (error) {
     console.error('Error in findMatchesForGig:', error);
@@ -113,19 +113,19 @@ export const findGigsForRep = async (repId: string, weights: MatchingWeights): P
       },
       body: JSON.stringify({ weights }),
     });
-    
+
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.message || 'Failed to find gigs for rep');
     }
-    
+
     const data = await response.json();
     console.log('Parsed API response:', data);
-    
+
     if (!data.matches || !Array.isArray(data.matches)) {
       throw new Error('Invalid response format: expected matches array');
     }
-    
+
     return data;
   } catch (error) {
     console.error('Error in findGigsForRep:', error);
@@ -144,19 +144,19 @@ export const generateOptimalMatches = async (weights: MatchingWeights): Promise<
       },
       body: JSON.stringify({ weights }),
     });
-    
+
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.message || 'Failed to generate optimal matches');
     }
-    
+
     const data = await response.json();
     console.log('Parsed API response:', data);
-    
+
     if (!data.matches || !Array.isArray(data.matches)) {
       throw new Error('Invalid response format: expected matches array');
     }
-    
+
     return data;
   } catch (error) {
     console.error('Error in generateOptimalMatches:', error);
@@ -179,7 +179,7 @@ interface GigAgentResponse {
 
 export const createGigAgent = async (data: GigAgentRequest): Promise<GigAgentResponse> => {
   try {
-    const MATCHING_API_URL = import.meta.env.VITE_MATCHING_API_URL || 'https://api-matching.harx.ai/api';
+    const MATCHING_API_URL = import.meta.env.VITE_MATCHING_API_URL || 'https://v25matchingbackend-production.up.railway.app/api';
     const response = await fetch(`${MATCHING_API_URL}/gig-agents`, {
       method: 'POST',
       headers: {
@@ -187,12 +187,12 @@ export const createGigAgent = async (data: GigAgentRequest): Promise<GigAgentRes
       },
       body: JSON.stringify(data)
     });
-    
+
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.message || 'Failed to create gig-agent assignment');
     }
-    
+
     return await response.json();
   } catch (error) {
     console.error('Error creating gig-agent assignment:', error);

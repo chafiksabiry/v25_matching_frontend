@@ -37,7 +37,7 @@ interface LanguagesResponse {
 
 export const getProfessionalSkills = async (): Promise<Skill[]> => {
   try {
-    const REP_CREATION_API_URL = import.meta.env.VITE_REP_CREATION_API_URL || 'https://api-repcreationwizard.harx.ai/api';
+    const REP_CREATION_API_URL = import.meta.env.VITE_REP_CREATION_API_URL || '/api';
     console.log('Using REP_CREATION_API_URL:', REP_CREATION_API_URL);
     const response = await axios.get<SkillsResponse>(`${REP_CREATION_API_URL}/skills/professional`);
     return response.data.data;
@@ -49,7 +49,7 @@ export const getProfessionalSkills = async (): Promise<Skill[]> => {
 
 export const getTechnicalSkills = async (): Promise<Skill[]> => {
   try {
-    const REP_CREATION_API_URL = import.meta.env.VITE_REP_CREATION_API_URL || 'https://api-repcreationwizard.harx.ai/api';
+    const REP_CREATION_API_URL = import.meta.env.VITE_REP_CREATION_API_URL || '/api';
     const response = await axios.get<SkillsResponse>(`${REP_CREATION_API_URL}/skills/technical`);
     return response.data.data;
   } catch (error) {
@@ -60,7 +60,7 @@ export const getTechnicalSkills = async (): Promise<Skill[]> => {
 
 export const getSoftSkills = async (): Promise<Skill[]> => {
   try {
-    const REP_CREATION_API_URL = import.meta.env.VITE_REP_CREATION_API_URL || 'https://api-repcreationwizard.harx.ai/api';
+    const REP_CREATION_API_URL = import.meta.env.VITE_REP_CREATION_API_URL || '/api';
     const response = await axios.get<SkillsResponse>(`${REP_CREATION_API_URL}/skills/soft`);
     return response.data.data;
   } catch (error) {
@@ -75,15 +75,15 @@ export const getAllSkills = async (): Promise<{
   soft: Skill[];
 }> => {
   try {
-    const REP_CREATION_API_URL = import.meta.env.VITE_REP_CREATION_API_URL || 'https://api-repcreationwizard.harx.ai/api';
+    const REP_CREATION_API_URL = import.meta.env.VITE_REP_CREATION_API_URL || '/api';
     console.log('getAllSkills - Using REP_CREATION_API_URL:', REP_CREATION_API_URL);
-    
+
     const [professional, technical, soft] = await Promise.all([
       getProfessionalSkills(),
       getTechnicalSkills(),
       getSoftSkills()
     ]);
-    
+
     return {
       professional,
       technical,
@@ -97,7 +97,7 @@ export const getAllSkills = async (): Promise<{
 
 export const getLanguages = async (): Promise<Language[]> => {
   try {
-    const REP_CREATION_API_URL = import.meta.env.VITE_REP_CREATION_API_URL || 'https://api-repcreationwizard.harx.ai/api';
+    const REP_CREATION_API_URL = import.meta.env.VITE_REP_CREATION_API_URL || '/api';
     const response = await axios.get<LanguagesResponse>(`${REP_CREATION_API_URL}/languages`);
     return response.data.data;
   } catch (error) {

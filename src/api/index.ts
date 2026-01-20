@@ -42,7 +42,7 @@ export const getGigs = async (): Promise<Gig[]> => {
 };
 
 export const getGigsByCompanyId = async (companyId: string): Promise<Gig[]> => {
-  const GIGS_API_URL = import.meta.env.VITE_API_URL_GIGS || 'https://api-gigsmanual.harx.ai/api';
+  const GIGS_API_URL = import.meta.env.VITE_API_URL_GIGS || 'https://v25gigsmanualcreationbackend-production.up.railway.app/api';
   const response = await axios.get(`${GIGS_API_URL}/gigs/company/${companyId}`);
   return response.data;
 };
@@ -142,8 +142,8 @@ export const findMatchesForGig = async (gigId: string, weights: MatchingWeights)
 };
 
 export const findGigsForRep = async (
-  repId: string, 
-  weights: MatchingWeights, 
+  repId: string,
+  weights: MatchingWeights,
   limit: number = 10
 ): Promise<Match[]> => {
   const response = await api.post(`/matches/rep/${repId}`, { weights, limit });
@@ -207,11 +207,11 @@ interface GigAgentResponse {
 
 export const createGigAgent = async (data: GigAgentRequest): Promise<GigAgentResponse> => {
   try {
-    const MATCHING_API_URL = import.meta.env.VITE_MATCHING_API_URL || 'https://api-matching.harx.ai/api';
-    
+    const MATCHING_API_URL = import.meta.env.VITE_MATCHING_API_URL || 'https://v25matchingbackend-production.up.railway.app/api';
+
     console.log('Creating gig-agent with URL:', `${MATCHING_API_URL}/gig-agents`);
     console.log('Request data:', data);
-    
+
     const response = await axios.post<GigAgentResponse>(`${MATCHING_API_URL}/gig-agents`, data);
     return response.data;
   } catch (error: any) {
@@ -231,7 +231,7 @@ export const createGigAgent = async (data: GigAgentRequest): Promise<GigAgentRes
 // Get gig agents for a specific gig
 export const getGigAgentsForGig = async (gigId: string): Promise<any[]> => {
   try {
-    const MATCHING_API_URL = import.meta.env.VITE_MATCHING_API_URL || 'https://api-matching.harx.ai/api';
+    const MATCHING_API_URL = import.meta.env.VITE_MATCHING_API_URL || 'https://v25matchingbackend-production.up.railway.app/api';
     const response = await axios.get(`${MATCHING_API_URL}/gig-agents/gig/${gigId}`);
     return response.data;
   } catch (error: any) {
