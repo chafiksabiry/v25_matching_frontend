@@ -187,6 +187,18 @@ function RepMatchingPanel() {
     fetchData();
   }, []);
 
+  // Restore selected gig from localStorage when gigs are available
+  useEffect(() => {
+    const savedGigId = localStorage.getItem('selectedGigId');
+    if (savedGigId && gigs.length > 0 && !selectedGig) {
+      console.log("Restoring selected gig from localStorage:", savedGigId);
+      const savedGig = gigs.find((g: Gig) => g._id === savedGigId);
+      if (savedGig) {
+        handleGigSelect(savedGig);
+      }
+    }
+  }, [gigs]);
+
   // Update agent lists when data changes
   useEffect(() => {
     // Skip if no data yet
@@ -206,6 +218,9 @@ function RepMatchingPanel() {
   const handleGigSelect = async (gig: Gig) => {
     console.log('🎯 GIG SELECTED:', gig.title, 'ID:', gig._id);
     setSelectedGig(gig);
+    if (gig._id) {
+      localStorage.setItem('selectedGigId', gig._id);
+    }
     setLoading(true);
     setError(null);
     setMatches([]);

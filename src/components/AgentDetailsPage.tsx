@@ -19,12 +19,15 @@ import {
     Calendar,
     Shield,
     Target,
-    Video
+    Video,
+    Zap
 } from 'lucide-react';
+import { createGigAgent } from '../api/matching';
 
 interface AgentDetailsPageProps {
     agentId?: string; // Optional prop if used directly
     onBack?: () => void;
+    gigId?: string;
 }
 
 export default function AgentDetailsPage({ agentId: propAgentId, onBack }: AgentDetailsPageProps) {
@@ -34,12 +37,18 @@ export default function AgentDetailsPage({ agentId: propAgentId, onBack }: Agent
     const [activeTab, setActiveTab] = useState<'overview' | 'experience' | 'skills'>('overview');
     const [isAvailable, setIsAvailable] = useState(false);
 
+    // Invite state
+    const [gigId, setGigId] = useState<string | null>(propAgentId ? null : (localStorage.getItem('selectedGigId') || null));
+    const [inviteStatus, setInviteStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
+    const [inviteMessage, setInviteMessage] = useState<string | null>(null);
+
     // Use prop or URL param (manual parsing as fallback)
     const [idToUse, setIdToUse] = useState<string | undefined>(propAgentId);
 
     useEffect(() => {
         if (propAgentId) {
             setIdToUse(propAgentId);
+            // If passed as prop, we might want to prioritize prop gigId if it existed, but here we use localStorage
         } else {
             // Fallback: try to get ID from URL if not provided via prop
             try {
@@ -117,6 +126,35 @@ export default function AgentDetailsPage({ agentId: propAgentId, onBack }: Agent
         }
     };
 
+    const handleInviteToGig = async () => {
+        if (!gigId || !agent) return;
+
+        setInviteStatus('sending');
+        setInviteMessage(null);
+
+        try {
+            // Need to pass the agent ID and gig ID
+            await createGigAgent({
+                agentId: agent._id || agent.id,
+                gigId: gigId
+            });
+
+            setInviteStatus('success');
+            setInviteMessage('Agent invited successfully');
+
+            // Reset status after a delay
+            setTimeout(() => {
+                setInviteStatus('idle');
+                setInviteMessage(null);
+            }, 3000);
+
+        } catch (err) {
+            console.error("Error inviting agent:", err);
+            setInviteStatus('error');
+            setInviteMessage('Failed to invite agent');
+        }
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -174,8 +212,8 @@ export default function AgentDetailsPage({ agentId: propAgentId, onBack }: Agent
                             onClick={handleInviteToGig}
                             disabled={inviteStatus === 'sending' || inviteStatus === 'success'}
                             className={`flex items-center justify-center px-4 py-2 rounded-lg font-semibold shadow-sm transition-all transform active:scale-95 ${inviteStatus === 'success'
-                                    ? 'bg-green-600 hover:bg-green-700 text-white'
-                                    : 'bg-[#0F172A] hover:bg-[#1E293B] text-white'
+                                ? 'bg-green-600 hover:bg-green-700 text-white'
+                                : 'bg-[#0F172A] hover:bg-[#1E293B] text-white'
                                 }`}
                         >
                             {inviteStatus === 'sending' ? (
