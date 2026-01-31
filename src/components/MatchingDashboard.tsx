@@ -10,12 +10,12 @@ import {
   Filter,
   ArrowLeft
 } from 'lucide-react';
-import { 
-  Rep, 
-  Gig, 
-  Match, 
-  MatchingWeights, 
-  MatchResponse 
+import {
+  Rep,
+  Gig,
+  Match,
+  MatchingWeights,
+  MatchResponse
 } from '../types/matching';
 import {
   getReps,
@@ -93,13 +93,13 @@ function RepMatchingPanel() {
 
   const handleMouseMove = (e: MouseEvent) => {
     if (!isResizing) return;
-    
+
     const container = document.querySelector('.resizable-container');
     if (!container) return;
-    
+
     const containerRect = container.getBoundingClientRect();
     const newWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
-    
+
     // Limit width between 20% and 50% to prevent overflow
     const clampedWidth = Math.max(20, Math.min(50, newWidth));
     setLeftColumnWidth(clampedWidth);
@@ -125,7 +125,7 @@ function RepMatchingPanel() {
   // Filter functions
   const filteredGigs = gigs; // No filtering for gigs
 
-  const filteredMatches = matches.filter(match => 
+  const filteredMatches = matches.filter(match =>
     match.agentInfo?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     match.agentInfo?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     match.agentInfo?.personalInfo?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -139,12 +139,12 @@ function RepMatchingPanel() {
     const fetchData = async () => {
       setInitialLoading(true);
       setError(null);
-      
+
       try {
         console.log("Fetching data from backend...");
-        
+
         const companyId = Cookies.get('companyId') || '685abf28641398dc582f4c95';
-        
+
         // Load essential data first
         const [gigsData, invitedAgentsData, enrollmentRequestsData, activeAgentsData] = await Promise.all([
           companyId ? getGigsByCompanyId(companyId) : getGigs(),
@@ -152,30 +152,30 @@ function RepMatchingPanel() {
           getEnrollmentRequestsForCompany(companyId),
           getActiveAgentsForCompany(companyId)
         ]);
-        
+
         // Set essential data
         setGigs(gigsData);
         setCompanyInvitedAgents(invitedAgentsData);
         setEnrollmentRequests(enrollmentRequestsData);
         setActiveAgentsList(activeAgentsData);
-        
+
         // Then load secondary data
         const [representativesData, skillsData, languagesData] = await Promise.all([
           getReps(),
           getAllSkills(),
           getLanguages()
         ]);
-        
+
         // Set secondary data
         setReps(representativesData);
         setSkills(skillsData);
         setLanguages(languagesData);
-        
+
         console.log("=== BACKEND DATA ===");
         console.log("Gigs:", gigsData);
         console.log("Company Invited Agents:", invitedAgentsData);
         console.log("Enrollment Requests:", enrollmentRequestsData);
-        
+
       } catch (error) {
         console.error("Error fetching data:", error);
         setError("Failed to fetch data. Please try again.");
@@ -191,11 +191,11 @@ function RepMatchingPanel() {
   useEffect(() => {
     // Skip if no data yet
     if (!companyInvitedAgents || !enrollmentRequests || !activeAgentsList) return;
-    
+
     console.log('🔍 Company Invited Agents Structure:', companyInvitedAgents);
     console.log('🔍 Enrollment Requests Structure:', enrollmentRequests);
     console.log('🔍 Active Agents Structure:', activeAgentsList);
-    
+
     // Directly set the lists without filtering again
     setInvitedAgentsList(companyInvitedAgents.filter(agent => !agent.isActive && !agent.hasCompletedOnboarding));
     setEnrollmentRequests(enrollmentRequests);
@@ -211,14 +211,14 @@ function RepMatchingPanel() {
     setMatches([]);
     setMatchStats(null);
     setSearchTerm(''); // Clear search when selecting a new gig
-    
+
     // Reset weights state
     setGigHasWeights(false);
     setHasUnsavedChanges(false);
     setOriginalWeights(null);
-    
+
     let currentWeights = weights;
-    
+
     try {
       // Try to load saved weights for this gig
       try {
@@ -241,24 +241,24 @@ function RepMatchingPanel() {
         setGigHasWeights(false);
         // Keep current weights
       }
-      
+
       // Fetch invited reps for this gig
       const gigAgents = await getGigAgentsForGig(gig._id || '');
       const invitedAgentIds = new Set<string>(gigAgents.map((ga: any) => ga.agentId as string));
       setInvitedAgents(invitedAgentIds);
       console.log('📧 Invited reps for gig:', invitedAgentIds);
-      
+
       // Find matches for the selected gig using current or loaded weights
       console.log("Searching for reps matching gig:", gig.title);
       console.log("🎯 WEIGHTS BEING SENT TO API:", currentWeights);
-      
+
       let matchesData;
       try {
         matchesData = await findMatchesForGig(gig._id || '', currentWeights);
-      console.log("=== MATCHES DATA ===", matchesData);
+        console.log("=== MATCHES DATA ===", matchesData);
       } catch (error: any) {
         console.error("❌ Error finding matches for gig:", error);
-        
+
         // Provide user-friendly error message
         if (error.message?.includes('Failed to fetch')) {
           console.error("🌐 Network error: Unable to connect to matching service");
@@ -267,7 +267,7 @@ function RepMatchingPanel() {
         } else {
           console.error("❓ Unexpected error:", error.message);
         }
-        
+
         // Set empty matches data to prevent crashes
         matchesData = {
           preferedmatches: [],
@@ -277,7 +277,7 @@ function RepMatchingPanel() {
           noMatches: 0
         };
       }
-      
+
       // Debug first match score calculation
       if (matchesData.preferedmatches && matchesData.preferedmatches.length > 0) {
         const firstMatch = matchesData.preferedmatches[0];
@@ -292,8 +292,8 @@ function RepMatchingPanel() {
         console.log("- Timezone Score:", firstMatch.timezoneMatch?.score, "× Weight:", currentWeights.timezone, "=", (firstMatch.timezoneMatch?.score || 0) * currentWeights.timezone);
         console.log("- Region Score:", firstMatch.regionMatch?.score, "× Weight:", currentWeights.region, "=", (firstMatch.regionMatch?.score || 0) * currentWeights.region);
         console.log("- Availability Score:", firstMatch.availabilityMatch?.score, "× Weight:", currentWeights.availability, "=", (firstMatch.availabilityMatch?.score || 0) * currentWeights.availability);
-        
-        const calculatedTotal = 
+
+        const calculatedTotal =
           (firstMatch.skillsMatch?.score || 0) * currentWeights.skills +
           (firstMatch.languageMatch?.score || 0) * currentWeights.languages +
           (firstMatch.industryMatch?.score || 0) * currentWeights.industry +
@@ -302,18 +302,18 @@ function RepMatchingPanel() {
           (firstMatch.timezoneMatch?.score || 0) * currentWeights.timezone +
           (firstMatch.regionMatch?.score || 0) * currentWeights.region +
           (firstMatch.availabilityMatch?.score || 0) * currentWeights.availability;
-          
+
         console.log("🧮 CALCULATED TOTAL:", calculatedTotal);
         console.log("📊 API TOTAL:", firstMatch.totalMatchingScore);
         console.log("❓ DIFFERENCE:", Math.abs(calculatedTotal - firstMatch.totalMatchingScore));
       }
-      
+
       setMatches(matchesData.preferedmatches || matchesData.matches || []);
       setMatchStats(matchesData);
-      
+
       // Organize agents by status after fetching matches
       setTimeout(() => organizeAgentsByStatus(), 100);
-      
+
     } catch (error) {
       console.error("Error getting matches:", error);
       setError("Failed to get matches. Please try again.");
@@ -329,9 +329,9 @@ function RepMatchingPanel() {
       ...weights,
       [key]: value,
     };
-    
+
     setWeights(newWeights);
-    
+
     // Check if weights have been modified from original
     if (originalWeights && gigHasWeights) {
       const hasChanges = Object.keys(newWeights).some(
@@ -339,7 +339,7 @@ function RepMatchingPanel() {
       );
       setHasUnsavedChanges(hasChanges);
     }
-    
+
     // Auto-search when weights change if a gig is selected (without reloading saved weights)
     if (selectedGig) {
       searchWithCurrentWeights();
@@ -349,23 +349,23 @@ function RepMatchingPanel() {
   // New function to search with current weights without reloading from DB
   const searchWithCurrentWeights = async () => {
     if (!selectedGig) return;
-    
+
     setLoading(true);
     setError(null);
-    
+
     try {
       console.log("Searching with current weights (no DB reload):", weights);
       const matchesData = await findMatchesForGig(selectedGig._id || '', weights);
       console.log("=== MATCHES DATA WITH CURRENT WEIGHTS ===", matchesData);
-      
+
       setMatches(matchesData.preferedmatches || matchesData.matches || []);
       setMatchStats(matchesData);
-      
+
       // Fetch invited reps for this gig
       const gigAgents = await getGigAgentsForGig(selectedGig._id || '');
       const invitedAgentIds = new Set<string>(gigAgents.map((ga: any) => ga.agentId as string));
       setInvitedAgents(invitedAgentIds);
-      
+
     } catch (error) {
       console.error("Error searching with current weights:", error);
       setError("Failed to get matches. Please try again.");
@@ -388,7 +388,7 @@ function RepMatchingPanel() {
       region: 0,
     };
     setWeights(defaultWeights);
-    
+
     // Check if we have unsaved changes after reset
     if (originalWeights && gigHasWeights) {
       const hasChanges = Object.keys(defaultWeights).some(
@@ -396,7 +396,7 @@ function RepMatchingPanel() {
       );
       setHasUnsavedChanges(hasChanges);
     }
-    
+
     // Auto-search when weights are reset if a gig is selected (without reloading saved weights)
     if (selectedGig) {
       searchWithCurrentWeights();
@@ -406,7 +406,7 @@ function RepMatchingPanel() {
   // Save weights for selected gig and search
   const saveWeightsForGig = async () => {
     console.log('🚨 SAVE WEIGHTS FOR GIG CALLED');
-    
+
     if (!selectedGig) {
       console.error('No gig selected');
       setError('No gig selected');
@@ -416,7 +416,7 @@ function RepMatchingPanel() {
     console.log('🔄 MANUAL SAVE TRIGGERED - User clicked save button');
     setLoading(true);
     setError(null);
-    
+
     try {
       // Save weights to backend
       await saveGigWeights(selectedGig._id || '', weights);
@@ -424,10 +424,10 @@ function RepMatchingPanel() {
       setGigHasWeights(true);
       setOriginalWeights(weights);
       setHasUnsavedChanges(false);
-      
+
       // Trigger new search with saved weights using the new function
       await searchWithCurrentWeights();
-      
+
     } catch (error) {
       console.error('❌ Error saving weights or searching:', error);
       setError('Failed to save weights or search. Please try again.');
@@ -459,27 +459,27 @@ function RepMatchingPanel() {
       gigId: selectedGig._id || ''
       // Removed matchDetails completely to avoid backend language processing
     };
-    
+
     console.log('🚀 Sending minimal request data:', requestData);
-    
+
     try {
       const response = await createGigAgent(requestData);
       console.log('Gig-Rep created successfully:', response);
-      
+
       // Add rep to invited list
       setInvitedAgents(prev => new Set([...prev, match.agentId]));
-      
+
       // Update the match object to mark it as invited
-      setMatches(prevMatches => 
-        prevMatches.map(m => 
-          m.agentId === match.agentId 
+      setMatches(prevMatches =>
+        prevMatches.map(m =>
+          m.agentId === match.agentId
             ? { ...m, isInvited: true }
             : m
         )
       );
-      
+
       setGigAgentSuccess(`Successfully invited ${match.agentInfo?.name} to ${selectedGig.title}`);
-      
+
       // Clear success message after 3 seconds
       setTimeout(() => {
         setGigAgentSuccess(null);
@@ -487,19 +487,19 @@ function RepMatchingPanel() {
 
       // Refresh only essential data
       const companyId = Cookies.get('companyId') || '685abf28641398dc582f4c95';
-      
+
       // Fetch only what we need
       const [invitedAgentsData, enrollmentRequestsData, activeAgentsData] = await Promise.all([
         getInvitedAgentsForCompany(companyId),
         getEnrollmentRequestsForCompany(companyId),
         getActiveAgentsForCompany(companyId)
       ]);
-      
+
       // Update essential state
       setCompanyInvitedAgents(invitedAgentsData);
       setEnrollmentRequests(enrollmentRequestsData);
       setActiveAgentsList(activeAgentsData);
-      
+
       // If a gig is selected, refresh its matches
       if (selectedGig) {
         const matchesData = await findMatchesForGig(selectedGig._id || '', weights);
@@ -520,13 +520,13 @@ function RepMatchingPanel() {
     console.log('🔍 DEBUG: All matches data:', matches);
     console.log('🔍 DEBUG: invitedAgents Set:', invitedAgents);
     console.log('🔍 DEBUG: Company Invited Reps:', companyInvitedAgents);
-    
+
     // Use company invited reps from API endpoint
     const invited = companyInvitedAgents.filter(agent => {
       // Show all reps who are not yet active, regardless of their status
-      const isInvited = !agent.isActive && 
-                       !agent.hasCompletedOnboarding;
-      
+      const isInvited = !agent.isActive &&
+        !agent.hasCompletedOnboarding;
+
       console.log(`🔍 Company Invited Rep ${agent.personalInfo?.name}:`, {
         status: agent.status,
         isActive: agent.isActive,
@@ -534,14 +534,14 @@ function RepMatchingPanel() {
         isInvited,
         fullData: agent
       });
-      
+
       return isInvited;
     });
-    
+
     // Use enrollment requests from API endpoint
     const enrollmentReqs = enrollmentRequests;
     console.log('📋 Enrollment Requests from API:', enrollmentReqs);
-    
+
     // Use active reps from API endpoint
     const active = activeAgentsList;
     console.log('✅ Active Reps from API:', active);
@@ -559,54 +559,54 @@ function RepMatchingPanel() {
   // Helper functions to get skill and language names
   const getSkillNameById = (skillId: string | any, skillType: 'professional' | 'technical' | 'soft') => {
     if (!skillId) return 'Unknown Skill';
-    
+
     // If it's already an object with name, return the name
     if (typeof skillId === 'object' && skillId.name) {
       return skillId.name;
     }
-    
+
     // Convert to string if it's an ObjectId
     const idString = typeof skillId === 'string' ? skillId : skillId.toString();
-    
+
     // Don't display ObjectIds
     if (idString.match(/^[0-9a-fA-F]{24}$/)) {
-    const skillArray = skills[skillType];
+      const skillArray = skills[skillType];
       const skill = skillArray.find(s => s._id === idString);
       return skill ? skill.name : `${skillType.charAt(0).toUpperCase() + skillType.slice(1)} Skill`;
     }
-    
+
     return idString;
   };
 
   const getLanguageNameByCode = (languageCode: string | any) => {
     if (!languageCode) return 'Unknown Language';
-    
+
     // If it's already an object with name, return the name
     if (typeof languageCode === 'object' && languageCode.name) {
       return languageCode.name;
     }
-    
+
     // Convert to string if it's an ObjectId
     const codeString = typeof languageCode === 'string' ? languageCode : languageCode.toString();
-    
+
     // Don't display ObjectIds
     if (codeString.match(/^[0-9a-fA-F]{24}$/)) {
       let language = languages.find(l => l._id === codeString);
       if (language) return language.name;
       return 'Language';
     }
-    
+
     // Try to find by code
     let language = languages.find(l => l.code === codeString);
-    
+
     if (!language) {
       language = languages.find(l => l._id === codeString);
     }
-    
+
     if (!language) {
       language = languages.find(l => l.name?.toLowerCase() === codeString.toLowerCase());
     }
-    
+
     return language ? language.name : codeString;
   };
 
@@ -649,7 +649,7 @@ function RepMatchingPanel() {
         `${import.meta.env.VITE_COMPANY_API_URL}/onboarding/companies/${companyId}/onboarding/phases/3/steps/10`,
         { status: "completed" }
       );
-      
+
       console.log('Successfully marked step as completed');
       // Redirect to app11
       window.location.href = '/app11';
@@ -675,7 +675,7 @@ function RepMatchingPanel() {
                 <ArrowLeft size={18} />
                 <span className="text-sm font-medium">Back to Onboarding</span>
               </button>
-              
+
               <div className="p-2 bg-white/20 rounded-lg">
                 <Users size={24} className="text-harx-accent-300" />
               </div>
@@ -684,7 +684,7 @@ function RepMatchingPanel() {
                 <p className="text-harx-200 text-sm">Manage reps through their complete lifecycle</p>
               </div>
             </div>
-            
+
             {/* Quick Stats */}
             <div className="hidden lg:flex items-center space-x-6 px-4 py-2 bg-white/10 rounded-lg text-sm">
               <div className="text-center">
@@ -720,11 +720,10 @@ function RepMatchingPanel() {
                 <button
                   key={section.id}
                   onClick={() => setActiveSection(section.id as any)}
-                  className={`flex-1 px-4 py-4 text-left transition-all duration-200 border-b-2 ${
-                    activeSection === section.id
+                  className={`flex-1 px-4 py-4 text-left transition-all duration-200 border-b-2 ${activeSection === section.id
                       ? 'border-harx-accent-300 bg-white/10'
                       : 'border-transparent hover:bg-white/5'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center space-x-3">
                     <span className="text-xl">{section.icon}</span>
@@ -744,7 +743,7 @@ function RepMatchingPanel() {
 
       {/* Main Content */}
       <main className="container mx-auto p-6 w-full max-w-full overflow-hidden">
-        
+
         {/* Error Message */}
         {error && (
           <div className="mb-6 bg-red-100 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-lg shadow-md">
@@ -774,180 +773,176 @@ function RepMatchingPanel() {
           <>
             {/* 1. SMART MATCHING SYSTEM */}
             {activeSection === 'matching' && (
-    <div className="space-y-6">
+              <div className="space-y-6">
                 <div className="flex justify-between items-center">
                   <div>
                     <h2 className="text-2xl font-bold text-gray-900">🎯 Smart Matching System</h2>
                     <p className="text-gray-600">Find and match the perfect reps for your gigs</p>
-            </div>
+                  </div>
                   <button
-                        onClick={() => setShowWeights(!showWeights)}
-                        className={`px-4 py-2 rounded-lg transition-all duration-200 flex items-center space-x-2 text-sm font-medium ${
-                          showWeights 
-                            ? 'bg-harx-600 text-white' 
-                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                        }`}
-                      >
-                        <Settings size={16} className={showWeights ? 'rotate-180' : ''} />
-                        <span>{showWeights ? 'Close Weights' : 'Adjust Weights'}</span>
+                    onClick={() => setShowWeights(!showWeights)}
+                    className={`px-4 py-2 rounded-lg transition-all duration-200 flex items-center space-x-2 text-sm font-medium ${showWeights
+                        ? 'bg-harx-600 text-white'
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      }`}
+                  >
+                    <Settings size={16} className={showWeights ? 'rotate-180' : ''} />
+                    <span>{showWeights ? 'Close Weights' : 'Adjust Weights'}</span>
                   </button>
-        </div>
+                </div>
 
                 {/* Weights Configuration Panel */}
                 {showWeights && (
-          <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg p-4 mb-4 transform transition-all duration-300 ease-in-out border border-gray-200 overflow-hidden">
-            <div className="flex justify-between items-center mb-4">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 bg-gradient-to-r from-harx-500 to-harx-600 rounded-lg shadow-md">
-                  <Settings size={20} className="text-white" />
-                </div>
-                <div>
-                  <div className="flex items-center space-x-2">
-                  <h2 className="text-lg font-bold text-gray-900">Matching Weights Configuration</h2>
-                    {hasUnsavedChanges && (
-                      <span className="inline-flex items-center px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium animate-pulse">
-                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                        </svg>
-                        Unsaved changes
-                      </span>
+                  <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg p-4 mb-4 transform transition-all duration-300 ease-in-out border border-gray-200 overflow-hidden">
+                    <div className="flex justify-between items-center mb-4">
+                      <div className="flex items-center space-x-3">
+                        <div className="p-2 bg-gradient-to-r from-harx-500 to-harx-600 rounded-lg shadow-md">
+                          <Settings size={20} className="text-white" />
+                        </div>
+                        <div>
+                          <div className="flex items-center space-x-2">
+                            <h2 className="text-lg font-bold text-gray-900">Matching Weights Configuration</h2>
+                            {hasUnsavedChanges && (
+                              <span className="inline-flex items-center px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium animate-pulse">
+                                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                </svg>
+                                Unsaved changes
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-gray-600 text-sm mt-1">Customize how each factor influences the matching algorithm</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-4">
+                        <button
+                          onClick={resetWeights}
+                          disabled={loading}
+                          className="px-6 py-3 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-xl shadow-lg hover:from-gray-600 hover:to-gray-700 transition-all duration-200 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5 hover:shadow-xl"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                          </svg>
+                          <span className="font-semibold">Reset to Default</span>
+                        </button>
+                        {selectedGig && gigHasWeights && (
+                          <button
+                            onClick={async () => {
+                              if (!selectedGig) return;
+                              try {
+                                setLoading(true);
+                                await resetGigWeights(selectedGig._id || '');
+                                setGigHasWeights(false);
+                                resetWeights(); // Reset UI weights to default
+                                console.log('✅ Gig weights reset successfully');
+                              } catch (error) {
+                                console.error('❌ Error resetting gig weights:', error);
+                                setError('Failed to reset gig weights');
+                              } finally {
+                                setLoading(false);
+                              }
+                            }}
+                            disabled={loading}
+                            className="px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl shadow-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5 hover:shadow-xl"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            <span className="font-semibold">Delete Saved Weights</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Weights Grid */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4 w-full overflow-hidden">
+                      {Object.entries(weights).map(([key, value]) => (
+                        <div key={`weight-${key}`} className="bg-white rounded-lg p-2 shadow-md border border-gray-200 hover:shadow-lg transition-all duration-200 group w-full max-w-full">
+                          <div className="flex justify-between items-center mb-2">
+                            <label className="text-xs font-bold text-gray-700 uppercase tracking-wider">
+                              {key}
+                            </label>
+                            <div className={`px-2 py-1 rounded text-xs font-bold ${Math.round(value * 100) >= 20 ? 'bg-gradient-to-r from-harx-500 to-harx-600 text-white' :
+                                Math.round(value * 100) >= 10 ? 'bg-harx-100 text-harx-800' :
+                                  'bg-gray-100 text-gray-600'
+                              }`}>
+                              {Math.round(value * 100)}%
+                            </div>
+                          </div>
+
+                          {/* Custom Slider */}
+                          <div className="relative mb-2">
+                            <input
+                              type="range"
+                              min="0"
+                              max="1"
+                              step="0.05"
+                              value={value}
+                              onChange={(e) =>
+                                handleWeightChange(key, parseFloat(e.target.value))
+                              }
+                              className="w-full h-2 bg-gray-200 rounded-full appearance-none cursor-pointer slider"
+                              style={{
+                                background: `linear-gradient(to right, #6366f1 0%, #4338ca ${value * 100}%, #e5e7eb ${value * 100}%, #e5e7eb 100%)`
+                              }}
+                            />
+                            <div
+                              className="absolute top-1/2 transform -translate-y-1/2 w-4 h-4 bg-gradient-to-r from-harx-500 to-harx-600 rounded-full shadow-md border-2 border-white pointer-events-none transition-all duration-200 group-hover:scale-110"
+                              style={{ left: `calc(${value * 100}% - 8px)` }}
+                            ></div>
+                          </div>
+
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Save Button */}
+                    {selectedGig && (
+                      <div className="flex justify-center">
+                        <button
+                          onClick={() => {
+                            console.log('🎯 BUTTON CLICKED - User manually clicked save button');
+                            saveWeightsForGig();
+                          }}
+                          disabled={loading}
+                          className={`group relative px-6 py-2 rounded-lg transition-all duration-200 flex items-center space-x-2 shadow-lg transform hover:-translate-y-0.5 hover:shadow-xl font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed ${hasUnsavedChanges
+                              ? 'bg-gradient-to-r from-harx-accent-500 to-harx-600 hover:from-harx-accent-600 hover:to-harx-700 text-white animate-pulse'
+                              : gigHasWeights
+                                ? 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white'
+                                : 'bg-gradient-to-r from-harx-500 to-harx-600 hover:from-harx-600 hover:to-harx-700 text-white'
+                            }`}
+                        >
+                          {/* Animated Background */}
+                          <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+
+                          {/* Icon */}
+                          {loading ? (
+                            <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+                          ) : (
+                            <svg className="w-4 h-4 group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                          )}
+
+                          {/* Text */}
+                          <span className="relative z-10">
+                            {loading ? 'Saving...' :
+                              hasUnsavedChanges ? `Save Changes` :
+                                gigHasWeights ? `Update Weights` :
+                                  `Save Weights`}
+                          </span>
+
+                          {/* Glow Effect */}
+                          <div className={`absolute inset-0 rounded-lg blur-lg opacity-20 group-hover:opacity-40 transition-opacity duration-200 ${hasUnsavedChanges
+                              ? 'bg-gradient-to-r from-harx-accent-500 to-harx-600'
+                              : gigHasWeights
+                                ? 'bg-gradient-to-r from-green-500 to-emerald-600'
+                                : 'bg-gradient-to-r from-harx-500 to-harx-600'
+                            }`}></div>
+                        </button>
+                      </div>
                     )}
                   </div>
-                  <p className="text-gray-600 text-sm mt-1">Customize how each factor influences the matching algorithm</p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-4">
-                <button
-                  onClick={resetWeights}
-                  disabled={loading}
-                  className="px-6 py-3 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-xl shadow-lg hover:from-gray-600 hover:to-gray-700 transition-all duration-200 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5 hover:shadow-xl"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                  <span className="font-semibold">Reset to Default</span>
-                </button>
-                {selectedGig && gigHasWeights && (
-                  <button
-                    onClick={async () => {
-                      if (!selectedGig) return;
-                      try {
-                        setLoading(true);
-                        await resetGigWeights(selectedGig._id || '');
-                        setGigHasWeights(false);
-                        resetWeights(); // Reset UI weights to default
-                        console.log('✅ Gig weights reset successfully');
-                      } catch (error) {
-                        console.error('❌ Error resetting gig weights:', error);
-                        setError('Failed to reset gig weights');
-                      } finally {
-                        setLoading(false);
-                      }
-                    }}
-                    disabled={loading}
-                    className="px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl shadow-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5 hover:shadow-xl"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                    <span className="font-semibold">Delete Saved Weights</span>
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Weights Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4 w-full overflow-hidden">
-              {Object.entries(weights).map(([key, value]) => (
-                <div key={`weight-${key}`} className="bg-white rounded-lg p-2 shadow-md border border-gray-200 hover:shadow-lg transition-all duration-200 group w-full max-w-full">
-                  <div className="flex justify-between items-center mb-2">
-                    <label className="text-xs font-bold text-gray-700 uppercase tracking-wider">
-                      {key}
-                    </label>
-                    <div                       className={`px-2 py-1 rounded text-xs font-bold ${
-                      Math.round(value * 100) >= 20 ? 'bg-gradient-to-r from-harx-500 to-harx-600 text-white' :
-                      Math.round(value * 100) >= 10 ? 'bg-harx-100 text-harx-800' :
-                      'bg-gray-100 text-gray-600'
-                    }`}>
-                      {Math.round(value * 100)}%
-                    </div>
-                  </div>
-                  
-                  {/* Custom Slider */}
-                  <div className="relative mb-2">
-                    <input
-                      type="range"
-                      min="0"
-                      max="1"
-                      step="0.05"
-                      value={value}
-                      onChange={(e) =>
-                        handleWeightChange(key, parseFloat(e.target.value))
-                      }
-                      className="w-full h-2 bg-gray-200 rounded-full appearance-none cursor-pointer slider"
-                      style={{
-                        background: `linear-gradient(to right, #6366f1 0%, #4338ca ${value * 100}%, #e5e7eb ${value * 100}%, #e5e7eb 100%)`
-                      }}
-                    />
-                    <div 
-                      className="absolute top-1/2 transform -translate-y-1/2 w-4 h-4 bg-gradient-to-r from-harx-500 to-harx-600 rounded-full shadow-md border-2 border-white pointer-events-none transition-all duration-200 group-hover:scale-110"
-                      style={{ left: `calc(${value * 100}% - 8px)` }}
-                    ></div>
-                  </div>
-                  
-                </div>
-              ))}
-            </div>
-
-            {/* Save Button */}
-            {selectedGig && (
-              <div className="flex justify-center">
-                <button
-                  onClick={() => {
-                    console.log('🎯 BUTTON CLICKED - User manually clicked save button');
-                    saveWeightsForGig();
-                  }}
-                  disabled={loading}
-                  className={`group relative px-6 py-2 rounded-lg transition-all duration-200 flex items-center space-x-2 shadow-lg transform hover:-translate-y-0.5 hover:shadow-xl font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed ${
-                    hasUnsavedChanges
-                      ? 'bg-gradient-to-r from-harx-accent-500 to-harx-600 hover:from-harx-accent-600 hover:to-harx-700 text-white animate-pulse'
-                      : gigHasWeights 
-                      ? 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white' 
-                      : 'bg-gradient-to-r from-harx-500 to-harx-600 hover:from-harx-600 hover:to-harx-700 text-white'
-                  }`}
-                >
-                  {/* Animated Background */}
-                  <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
-                  
-                  {/* Icon */}
-                  {loading ? (
-                    <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
-                  ) : (
-                    <svg className="w-4 h-4 group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                  )}
-                  
-                  {/* Text */}
-                  <span className="relative z-10">
-                    {loading ? 'Saving...' : 
-                     hasUnsavedChanges ? `Save Changes` :
-                     gigHasWeights ? `Update Weights` : 
-                     `Save Weights`}
-                  </span>
-                  
-                  {/* Glow Effect */}
-                  <div className={`absolute inset-0 rounded-lg blur-lg opacity-20 group-hover:opacity-40 transition-opacity duration-200 ${
-                    hasUnsavedChanges
-                      ? 'bg-gradient-to-r from-harx-accent-500 to-harx-600'
-                      : gigHasWeights 
-                      ? 'bg-gradient-to-r from-green-500 to-emerald-600' 
-                      : 'bg-gradient-to-r from-harx-500 to-harx-600'
-                  }`}></div>
-                </button>
-              </div>
-            )}
-          </div>
                 )}
 
                 {/* Search Input - Only show when a gig is selected */}
@@ -983,220 +978,217 @@ function RepMatchingPanel() {
                 {/* Two Column Layout: Gigs and Reps */}
                 <div className="resizable-container flex gap-4 w-full max-w-full overflow-hidden">
                   {/* Left Column: Gig Selection */}
-                <div 
-                  className="bg-white rounded-xl shadow-lg p-6 overflow-hidden transition-all duration-200 flex-shrink-0"
-                  style={{ width: `${leftColumnWidth}%`, minWidth: '280px', maxWidth: '50%' }}
-                >
-                  <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center space-x-2">
-                    <Briefcase size={20} className="text-harx-600" />
+                  <div
+                    className="bg-white rounded-xl shadow-lg p-6 overflow-hidden transition-all duration-200 flex-shrink-0"
+                    style={{ width: `${leftColumnWidth}%`, minWidth: '280px', maxWidth: '50%' }}
+                  >
+                    <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center space-x-2">
+                      <Briefcase size={20} className="text-harx-600" />
                       <span>Available Gigs</span>
-                  </h3>
-                  
+                    </h3>
+
                     <div className="space-y-3 max-h-96 overflow-y-auto">
-                    {gigs.map((gig) => {
-                      const isGigExpanded = expandedGigs.has(gig._id || '');
-                      
-                      return (
-                        <div key={gig._id} className={`bg-white rounded-lg border-2 transition-all duration-200 ${
-                          selectedGig?._id === gig._id
-                            ? "border-harx-400 shadow-lg bg-harx-50"
-                            : "border-gray-200 hover:border-harx-300 hover:shadow-md"
-                        }`}>
-                          {/* Gig Header - Clickable for selection */}
-                          <div
-                            className="cursor-pointer p-4"
-                            onClick={() => handleGigSelect(gig)}
-                          >
-                            <div className="flex items-center space-x-3 mb-3">
-                              <div className={`p-2 rounded-lg ${
-                                selectedGig?._id === gig._id ? "bg-harx-500" : "bg-gray-400"
-                              }`}>
-                                <Briefcase size={16} className="text-white" />
-                              </div>
-                                <div className="flex-1 min-w-0">
-                                  <h4 className={`font-bold text-sm ${
-                                  selectedGig?._id === gig._id ? "text-harx-900" : "text-gray-800"
-                                }`}>
-                                  {gig.title}
-                                </h4>
-                                  <p className="text-xs text-gray-600 truncate">{gig.companyName}</p>
-                              </div>
-          </div>
+                      {gigs.map((gig) => {
+                        const isGigExpanded = expandedGigs.has(gig._id || '');
 
-                          {selectedGig?._id === gig._id && (
-                            <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
-                              <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                              </svg>
-            </div>
-                          )}
-          </div>
-
-                          {/* View Details Button */}
-                          <div className="px-4 pb-4">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                toggleGigDetails(gig._id || '');
-                              }}
-                              className="w-full flex items-center justify-center space-x-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all duration-200 text-sm font-medium text-gray-700"
+                        return (
+                          <div key={gig._id} className={`bg-white rounded-lg border-2 transition-all duration-200 ${selectedGig?._id === gig._id
+                              ? "border-harx-400 shadow-lg bg-harx-50"
+                              : "border-gray-200 hover:border-harx-300 hover:shadow-md"
+                            }`}>
+                            {/* Gig Header - Clickable for selection */}
+                            <div
+                              className="cursor-pointer p-4"
+                              onClick={() => handleGigSelect(gig)}
                             >
-                              <span>View Details</span>
-                              <svg 
-                                className={`w-4 h-4 transform transition-transform duration-200 ${isGigExpanded ? 'rotate-180' : ''}`} 
-                                fill="none" 
-                                stroke="currentColor" 
-                                viewBox="0 0 24 24"
-                              >
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                              </svg>
-                            </button>
-            </div>
-
-                                                    {/* Expanded Details */}
-                          {isGigExpanded && (
-                            <div className="px-4 pb-4 border-t border-gray-200 bg-gray-50 overflow-hidden">
-                              <div className="pt-4 space-y-4 text-sm overflow-hidden">
-                                
-                                {/* 1. Industries */}
-                                {gig.industries && gig.industries.length > 0 && (
-                                  <div>
-                                    <p className="text-gray-700 font-medium mb-2">Industries:</p>
-                                    <div className="flex flex-wrap gap-1">
-                                      {gig.industries.map((industry: any, i: number) => {
-                                        const displayName = industry.name || 
-                                                           (typeof industry === 'string' && !industry.match(/^[0-9a-fA-F]{24}$/) ? industry : 'Industry');
-                                        return (
-                                          <span key={i} className="px-2 py-1 bg-orange-100 text-orange-800 rounded text-xs">
-                                            {displayName}
-                                          </span>
-                                        );
-                                      })}
-                                    </div>
-                                  </div>
-                                )}
-
-                                {/* 2. Activities */}
-                                {gig.activities && gig.activities.length > 0 && (
-                                  <div>
-                                    <p className="text-gray-700 font-medium mb-2">Activities:</p>
-                                    <div className="flex flex-wrap gap-1">
-                                      {gig.activities.map((activity: any, i: number) => {
-                                        const displayName = activity.name || 
-                                                           (typeof activity === 'string' && !activity.match(/^[0-9a-fA-F]{24}$/) ? activity : 'Activity');
-                                        return (
-                                          <span key={i} className="px-2 py-1 bg-teal-100 text-teal-800 rounded text-xs">
-                                            {displayName}
-                                          </span>
-                                        );
-                                      })}
-                                    </div>
-                                  </div>
-                                )}
-
-                                {/* 3. Experience */}
-                                <div className="flex items-center justify-between">
-                                  <span className="text-gray-600 font-medium">Experience:</span>
-                                  <span className="font-semibold">{gig.seniority?.yearsExperience || 'N/A'} years</span>
+                              <div className="flex items-center space-x-3 mb-3">
+                                <div className={`p-2 rounded-lg ${selectedGig?._id === gig._id ? "bg-harx-500" : "bg-gray-400"
+                                  }`}>
+                                  <Briefcase size={16} className="text-white" />
                                 </div>
-
-                                {/* 4. Languages */}
-                                {gig.skills?.languages && gig.skills.languages.length > 0 && (
-                                  <div>
-                                    <p className="text-gray-700 font-medium mb-2">Languages:</p>
-                                    <div className="flex flex-wrap gap-1">
-                                      {gig.skills.languages.map((lang: any, i: number) => (
-                                        <span key={i} className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs">
-                                          {getLanguageNameByCode(lang.language || lang.iso639_1 || lang)}
-                                          {lang.proficiency && <span className="ml-1 text-purple-600">({lang.proficiency})</span>}
-                                        </span>
-                                      ))}
-                                    </div>
-                                  </div>
-                                )}
-
-                                {/* 5. Availability */}
-                                {gig.availability && (
-                                  <div>
-                                    <span className="text-gray-600 font-medium">Availability:</span>
-                                    <p className="font-semibold">
-                                      {gig.availability.schedule ? `${gig.availability.schedule.length} days/week` : 
-                                       gig.availability.hoursPerWeek ? `${gig.availability.hoursPerWeek}h/week` :
-                                       gig.availability.workingHours ? gig.availability.workingHours :
-                                       'Flexible'}
-                                    </p>
-                                  </div>
-                                )}
-
-                                {/* 6. Skills - Professional */}
-                                {gig.skills?.professional && gig.skills.professional.length > 0 && (
-                                  <div>
-                                    <p className="text-gray-700 font-medium mb-2">Professional Skills:</p>
-                                    <div className="flex flex-wrap gap-1">
-                                      {gig.skills.professional.map((skillItem: any, i: number) => (
-                                        <span key={`prof-${i}`} className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
-                                          {getSkillNameById(skillItem.skill || skillItem, 'professional')}
-                                        </span>
-                                      ))}
-                                    </div>
-                                  </div>
-                                )}
-
-                                {/* 6. Skills - Technical */}
-                                {gig.skills?.technical && gig.skills.technical.length > 0 && (
-                                  <div>
-                                    <p className="text-gray-700 font-medium mb-2">Technical Skills:</p>
-                                    <div className="flex flex-wrap gap-1">
-                                      {gig.skills.technical.map((skillItem: any, i: number) => (
-                                        <span key={`tech-${i}`} className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">
-                                          {getSkillNameById(skillItem.skill || skillItem, 'technical')}
-                                        </span>
-                                      ))}
-                                    </div>
-                                  </div>
-                                )}
-
-                                {/* 6. Skills - Soft */}
-                                {gig.skills?.soft && gig.skills.soft.length > 0 && (
-                                  <div>
-                                    <p className="text-gray-700 font-medium mb-2">Soft Skills:</p>
-                                    <div className="flex flex-wrap gap-1">
-                                      {gig.skills.soft.map((skillItem: any, i: number) => (
-                                        <span key={`soft-${i}`} className="px-2 py-1 bg-pink-100 text-pink-800 rounded text-xs">
-                                          {getSkillNameById(skillItem.skill || skillItem, 'soft')}
-                                        </span>
-                                      ))}
-                                    </div>
-                                  </div>
-                                )}
-
-                                {/* Region & Timezone */}
-                                <div className="grid grid-cols-2 gap-4 text-sm">
-                                  {gig.region && (
-                                    <div>
-                                      <span className="text-gray-600 font-medium">Region:</span>
-                                      <p className="font-semibold">{gig.region}</p>
-                                    </div>
-                                  )}
-                                  {gig.timezone && (
-                                    <div>
-                                      <span className="text-gray-600 font-medium">Timezone:</span>
-                                      <p className="font-semibold">{gig.timezone}</p>
-                                    </div>
-                                  )}
+                                <div className="flex-1 min-w-0">
+                                  <h4 className={`font-bold text-sm ${selectedGig?._id === gig._id ? "text-harx-900" : "text-gray-800"
+                                    }`}>
+                                    {gig.title}
+                                  </h4>
+                                  <p className="text-xs text-gray-600 truncate">{gig.companyName}</p>
                                 </div>
-
                               </div>
+
+                              {selectedGig?._id === gig._id && (
+                                <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+                                  <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                                  </svg>
+                                </div>
+                              )}
                             </div>
-                          )}
-                        </div>
-                      );
-                    })}
-          </div>
-        </div>
+
+                            {/* View Details Button */}
+                            <div className="px-4 pb-4">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleGigDetails(gig._id || '');
+                                }}
+                                className="w-full flex items-center justify-center space-x-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all duration-200 text-sm font-medium text-gray-700"
+                              >
+                                <span>View Details</span>
+                                <svg
+                                  className={`w-4 h-4 transform transition-transform duration-200 ${isGigExpanded ? 'rotate-180' : ''}`}
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                              </button>
+                            </div>
+
+                            {/* Expanded Details */}
+                            {isGigExpanded && (
+                              <div className="px-4 pb-4 border-t border-gray-200 bg-gray-50 overflow-hidden">
+                                <div className="pt-4 space-y-4 text-sm overflow-hidden">
+
+                                  {/* 1. Industries */}
+                                  {gig.industries && gig.industries.length > 0 && (
+                                    <div>
+                                      <p className="text-gray-700 font-medium mb-2">Industries:</p>
+                                      <div className="flex flex-wrap gap-1">
+                                        {gig.industries.map((industry: any, i: number) => {
+                                          const displayName = industry.name ||
+                                            (typeof industry === 'string' && !industry.match(/^[0-9a-fA-F]{24}$/) ? industry : 'Industry');
+                                          return (
+                                            <span key={i} className="px-2 py-1 bg-orange-100 text-orange-800 rounded text-xs">
+                                              {displayName}
+                                            </span>
+                                          );
+                                        })}
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* 2. Activities */}
+                                  {gig.activities && gig.activities.length > 0 && (
+                                    <div>
+                                      <p className="text-gray-700 font-medium mb-2">Activities:</p>
+                                      <div className="flex flex-wrap gap-1">
+                                        {gig.activities.map((activity: any, i: number) => {
+                                          const displayName = activity.name ||
+                                            (typeof activity === 'string' && !activity.match(/^[0-9a-fA-F]{24}$/) ? activity : 'Activity');
+                                          return (
+                                            <span key={i} className="px-2 py-1 bg-teal-100 text-teal-800 rounded text-xs">
+                                              {displayName}
+                                            </span>
+                                          );
+                                        })}
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* 3. Experience */}
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-gray-600 font-medium">Experience:</span>
+                                    <span className="font-semibold">{gig.seniority?.yearsExperience || 'N/A'} years</span>
+                                  </div>
+
+                                  {/* 4. Languages */}
+                                  {gig.skills?.languages && gig.skills.languages.length > 0 && (
+                                    <div>
+                                      <p className="text-gray-700 font-medium mb-2">Languages:</p>
+                                      <div className="flex flex-wrap gap-1">
+                                        {gig.skills.languages.map((lang: any, i: number) => (
+                                          <span key={i} className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs">
+                                            {getLanguageNameByCode(lang.language || lang.iso639_1 || lang)}
+                                            {lang.proficiency && <span className="ml-1 text-purple-600">({lang.proficiency})</span>}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* 5. Availability */}
+                                  {gig.availability && (
+                                    <div>
+                                      <span className="text-gray-600 font-medium">Availability:</span>
+                                      <p className="font-semibold">
+                                        {gig.availability.schedule ? `${gig.availability.schedule.length} days/week` :
+                                          gig.availability.hoursPerWeek ? `${gig.availability.hoursPerWeek}h/week` :
+                                            gig.availability.workingHours ? gig.availability.workingHours :
+                                              'Flexible'}
+                                      </p>
+                                    </div>
+                                  )}
+
+                                  {/* 6. Skills - Professional */}
+                                  {gig.skills?.professional && gig.skills.professional.length > 0 && (
+                                    <div>
+                                      <p className="text-gray-700 font-medium mb-2">Professional Skills:</p>
+                                      <div className="flex flex-wrap gap-1">
+                                        {gig.skills.professional.map((skillItem: any, i: number) => (
+                                          <span key={`prof-${i}`} className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
+                                            {getSkillNameById(skillItem.skill || skillItem, 'professional')}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* 6. Skills - Technical */}
+                                  {gig.skills?.technical && gig.skills.technical.length > 0 && (
+                                    <div>
+                                      <p className="text-gray-700 font-medium mb-2">Technical Skills:</p>
+                                      <div className="flex flex-wrap gap-1">
+                                        {gig.skills.technical.map((skillItem: any, i: number) => (
+                                          <span key={`tech-${i}`} className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">
+                                            {getSkillNameById(skillItem.skill || skillItem, 'technical')}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* 6. Skills - Soft */}
+                                  {gig.skills?.soft && gig.skills.soft.length > 0 && (
+                                    <div>
+                                      <p className="text-gray-700 font-medium mb-2">Soft Skills:</p>
+                                      <div className="flex flex-wrap gap-1">
+                                        {gig.skills.soft.map((skillItem: any, i: number) => (
+                                          <span key={`soft-${i}`} className="px-2 py-1 bg-pink-100 text-pink-800 rounded text-xs">
+                                            {getSkillNameById(skillItem.skill || skillItem, 'soft')}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* Region & Timezone */}
+                                  <div className="grid grid-cols-2 gap-4 text-sm">
+                                    {gig.region && (
+                                      <div>
+                                        <span className="text-gray-600 font-medium">Region:</span>
+                                        <p className="font-semibold">{gig.region}</p>
+                                      </div>
+                                    )}
+                                    {gig.timezone && (
+                                      <div>
+                                        <span className="text-gray-600 font-medium">Timezone:</span>
+                                        <p className="font-semibold">{gig.timezone}</p>
+                                      </div>
+                                    )}
+                                  </div>
+
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
 
                   {/* Resize Handle */}
-                  <div 
+                  <div
                     className={`flex-shrink-0 w-1 bg-gray-200 hover:bg-harx-400 cursor-col-resize transition-colors duration-200 rounded-full flex items-center justify-center group ${isResizing ? 'bg-harx-500' : ''}`}
                     onMouseDown={handleMouseDown}
                     title="Drag to resize"
@@ -1205,21 +1197,21 @@ function RepMatchingPanel() {
                   </div>
 
                   {/* Right Column: Matching Results */}
-                  <div 
+                  <div
                     className="bg-white rounded-xl shadow-lg p-6 overflow-hidden transition-all duration-200 flex-1 min-w-0"
                   >
                     <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center space-x-2">
-                        <Users size={20} className="text-harx-600" />
+                      <Users size={20} className="text-harx-600" />
                       <span>{selectedGig ? `Matches for "${selectedGig.title}"` : 'Select a Gig to See Matches'}</span>
-                      </h3>
-                      
+                    </h3>
+
                     {!selectedGig ? (
                       <div className="text-center py-12">
                         <div className="bg-gray-50 rounded-xl p-8 max-w-md mx-auto">
                           <Briefcase size={48} className="text-gray-400 mx-auto mb-4" />
                           <p className="text-gray-600 text-lg mb-2">No gig selected</p>
                           <p className="text-sm text-gray-400">Choose a gig from the left to see matching reps</p>
-                    </div>
+                        </div>
                       </div>
                     ) : loading ? (
                       <div className="flex justify-center items-center py-12">
@@ -1237,24 +1229,24 @@ function RepMatchingPanel() {
                           const isAlreadyEnrolledInThisGig = activeAgentsList.some(
                             agent => agent.agentId._id === match.agentId && agent.gigId._id === selectedGig?._id
                           );
-                          
+
                           const isInvited = match.isInvited !== undefined ? match.isInvited : invitedAgents.has(match.agentId);
-                          const isEnrolled = isAlreadyEnrolledInThisGig || 
-                                           match.isEnrolled || 
-                                           match.status === 'accepted' || 
-                                           match.agentResponse === 'accepted' || 
-                                           match.enrollmentStatus === 'accepted' || 
-                                           match.agentInfo?.status === 'accepted';
-                          
+                          const isEnrolled = isAlreadyEnrolledInThisGig ||
+                            match.isEnrolled ||
+                            match.status === 'accepted' ||
+                            match.agentResponse === 'accepted' ||
+                            match.enrollmentStatus === 'accepted' ||
+                            match.agentInfo?.status === 'accepted';
+
 
 
                           const matchScore = Math.round((match.totalMatchingScore || 0) * 100);
                           const cardBgColor = matchScore >= 70 ? 'bg-green-50 border-green-200' :
-                                            matchScore >= 50 ? 'bg-yellow-50 border-yellow-200' :
-                                            'bg-red-50 border-red-200';
-                          
+                            matchScore >= 50 ? 'bg-yellow-50 border-yellow-200' :
+                              'bg-red-50 border-red-200';
+
                           const isExpanded = expandedReps.has(match.agentId);
-                          
+
                           return (
                             <div key={`match-${match.agentId}-${index}`} className={`rounded-xl p-6 border-2 hover:shadow-lg transition-all duration-300 ${cardBgColor}`}>
                               {/* Rep Header */}
@@ -1262,11 +1254,10 @@ function RepMatchingPanel() {
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center gap-3 mb-2">
                                     <h4 className="text-lg font-bold text-gray-900 truncate">{match.agentInfo?.name}</h4>
-                                    <div className={`px-4 py-2 rounded-full text-sm font-bold shadow-sm ${
-                                      matchScore >= 70 ? 'bg-green-500 text-white' :
-                                      matchScore >= 50 ? 'bg-yellow-500 text-white' :
-                                      'bg-red-500 text-white'
-                                    }`}>
+                                    <div className={`px-4 py-2 rounded-full text-sm font-bold shadow-sm ${matchScore >= 70 ? 'bg-green-500 text-white' :
+                                        matchScore >= 50 ? 'bg-yellow-500 text-white' :
+                                          'bg-red-500 text-white'
+                                      }`}>
                                       {matchScore}% Match
                                     </div>
                                   </div>
@@ -1305,7 +1296,7 @@ function RepMatchingPanel() {
                                     </div>
                                   )}
                                 </div>
-                                
+
                                 <div className="flex-shrink-0 ml-4">
                                   {isEnrolled ? (
                                     <span className="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
@@ -1335,17 +1326,22 @@ function RepMatchingPanel() {
                               {/* View Details Button */}
                               <div className="flex justify-center mt-4">
                                 <button
-                                  onClick={() => toggleRepDetails(match.agentId)}
-                                  className="flex items-center space-x-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all duration-200 text-sm font-medium text-gray-700"
+                                  onClick={() => {
+                                    // Navigation logic matching App.tsx router
+                                    const path = `/app12/agent-details/${match.agentId}`;
+                                    window.history.pushState({}, '', path);
+                                    window.dispatchEvent(new Event('navigate'));
+                                  }}
+                                  className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white rounded-lg transition-all duration-200 text-sm font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                                 >
-                                  <span>View Details</span>
-                                  <svg 
-                                    className={`w-4 h-4 transform transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} 
-                                    fill="none" 
-                                    stroke="currentColor" 
+                                  <span>View Full Profile</span>
+                                  <svg
+                                    className="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
                                     viewBox="0 0 24 24"
                                   >
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                                   </svg>
                                 </button>
                               </div>
@@ -1354,17 +1350,16 @@ function RepMatchingPanel() {
                               {isExpanded && (
                                 <div className="mt-6 pt-6 border-t border-gray-200 space-y-6 overflow-hidden">
                                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full max-w-full overflow-hidden">
-                                    
+
                                     {/* Skills Match */}
                                     {match.skillsMatch && (
                                       <div className="bg-white rounded-lg p-4 shadow-sm">
                                         <div className="flex items-center justify-between mb-2">
                                           <h5 className="font-semibold text-gray-800">Skills Match</h5>
-                                          <span className={`px-2 py-1 rounded text-xs font-bold ${
-                                            Math.round((match.skillsMatch.score || 0) * 100) >= 70 ? 'bg-green-100 text-green-800' :
-                                            Math.round((match.skillsMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
-                                            'bg-red-100 text-red-800'
-                                          }`}>
+                                          <span className={`px-2 py-1 rounded text-xs font-bold ${Math.round((match.skillsMatch.score || 0) * 100) >= 70 ? 'bg-green-100 text-green-800' :
+                                              Math.round((match.skillsMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
+                                                'bg-red-100 text-red-800'
+                                            }`}>
                                             {Math.round((match.skillsMatch.score || 0) * 100)}%
                                           </span>
                                         </div>
@@ -1411,11 +1406,10 @@ function RepMatchingPanel() {
                                       <div className="bg-white rounded-lg p-4 shadow-sm">
                                         <div className="flex items-center justify-between mb-2">
                                           <h5 className="font-semibold text-gray-800">Languages</h5>
-                                          <span className={`px-2 py-1 rounded text-xs font-bold ${
-                                            Math.round((match.languageMatch.score || 0) * 100) >= 70 ? 'bg-green-100 text-green-800' :
-                                            Math.round((match.languageMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
-                                            'bg-red-100 text-red-800'
-                                          }`}>
+                                          <span className={`px-2 py-1 rounded text-xs font-bold ${Math.round((match.languageMatch.score || 0) * 100) >= 70 ? 'bg-green-100 text-green-800' :
+                                              Math.round((match.languageMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
+                                                'bg-red-100 text-red-800'
+                                            }`}>
                                             {Math.round((match.languageMatch.score || 0) * 100)}%
                                           </span>
                                         </div>
@@ -1463,11 +1457,10 @@ function RepMatchingPanel() {
                                       <div className="bg-white rounded-lg p-4 shadow-sm">
                                         <div className="flex items-center justify-between mb-2">
                                           <h5 className="font-semibold text-gray-800">Industry</h5>
-                                          <span className={`px-2 py-1 rounded text-xs font-bold ${
-                                            Math.round((match.industryMatch.score || 0) * 100) >= 70 ? 'bg-green-100 text-green-800' :
-                                            Math.round((match.industryMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
-                                            'bg-red-100 text-red-800'
-                                          }`}>
+                                          <span className={`px-2 py-1 rounded text-xs font-bold ${Math.round((match.industryMatch.score || 0) * 100) >= 70 ? 'bg-green-100 text-green-800' :
+                                              Math.round((match.industryMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
+                                                'bg-red-100 text-red-800'
+                                            }`}>
                                             {Math.round((match.industryMatch.score || 0) * 100)}%
                                           </span>
                                         </div>
@@ -1514,11 +1507,10 @@ function RepMatchingPanel() {
                                       <div className="bg-white rounded-lg p-4 shadow-sm">
                                         <div className="flex items-center justify-between mb-2">
                                           <h5 className="font-semibold text-gray-800">Experience</h5>
-                                          <span className={`px-2 py-1 rounded text-xs font-bold ${
-                                            Math.round((match.experienceMatch.score || 0) * 100) >= 70 ? 'bg-green-100 text-green-800' :
-                                            Math.round((match.experienceMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
-                                            'bg-red-100 text-red-800'
-                                          }`}>
+                                          <span className={`px-2 py-1 rounded text-xs font-bold ${Math.round((match.experienceMatch.score || 0) * 100) >= 70 ? 'bg-green-100 text-green-800' :
+                                              Math.round((match.experienceMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
+                                                'bg-red-100 text-red-800'
+                                            }`}>
                                             {Math.round((match.experienceMatch.score || 0) * 100)}%
                                           </span>
                                         </div>
@@ -1533,17 +1525,16 @@ function RepMatchingPanel() {
 
                                   {/* Second Row */}
                                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full max-w-full overflow-hidden">
-                                    
+
                                     {/* Timezone Match */}
                                     {match.timezoneMatch && (
                                       <div className="bg-white rounded-lg p-4 shadow-sm">
                                         <div className="flex items-center justify-between mb-2">
                                           <h5 className="font-semibold text-gray-800">Timezone</h5>
-                                          <span className={`px-2 py-1 rounded text-xs font-bold ${
-                                            Math.round((match.timezoneMatch.score || 0) * 100) >= 70 ? 'bg-green-100 text-green-800' :
-                                            Math.round((match.timezoneMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
-                                            'bg-red-100 text-red-800'
-                                          }`}>
+                                          <span className={`px-2 py-1 rounded text-xs font-bold ${Math.round((match.timezoneMatch.score || 0) * 100) >= 70 ? 'bg-green-100 text-green-800' :
+                                              Math.round((match.timezoneMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
+                                                'bg-red-100 text-red-800'
+                                            }`}>
                                             {Math.round((match.timezoneMatch.score || 0) * 100)}%
                                           </span>
                                         </div>
@@ -1560,11 +1551,10 @@ function RepMatchingPanel() {
                                       <div className="bg-white rounded-lg p-4 shadow-sm">
                                         <div className="flex items-center justify-between mb-2">
                                           <h5 className="font-semibold text-gray-800">Region</h5>
-                                          <span className={`px-2 py-1 rounded text-xs font-bold ${
-                                            Math.round((match.regionMatch.score || 0) * 100) >= 70 ? 'bg-green-100 text-green-800' :
-                                            Math.round((match.regionMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
-                                            'bg-red-100 text-red-800'
-                                          }`}>
+                                          <span className={`px-2 py-1 rounded text-xs font-bold ${Math.round((match.regionMatch.score || 0) * 100) >= 70 ? 'bg-green-100 text-green-800' :
+                                              Math.round((match.regionMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
+                                                'bg-red-100 text-red-800'
+                                            }`}>
                                             {Math.round((match.regionMatch.score || 0) * 100)}%
                                           </span>
                                         </div>
@@ -1580,11 +1570,10 @@ function RepMatchingPanel() {
                                       <div className="bg-white rounded-lg p-4 shadow-sm">
                                         <div className="flex items-center justify-between mb-2">
                                           <h5 className="font-semibold text-gray-800">Availability</h5>
-                                          <span className={`px-2 py-1 rounded text-xs font-bold ${
-                                            Math.round((match.availabilityMatch.score || 0) * 100) >= 70 ? 'bg-green-100 text-green-800' :
-                                            Math.round((match.availabilityMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
-                                            'bg-red-100 text-red-800'
-                                          }`}>
+                                          <span className={`px-2 py-1 rounded text-xs font-bold ${Math.round((match.availabilityMatch.score || 0) * 100) >= 70 ? 'bg-green-100 text-green-800' :
+                                              Math.round((match.availabilityMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
+                                                'bg-red-100 text-red-800'
+                                            }`}>
                                             {Math.round((match.availabilityMatch.score || 0) * 100)}%
                                           </span>
                                         </div>
@@ -1599,11 +1588,10 @@ function RepMatchingPanel() {
                                       <div className="bg-white rounded-lg p-4 shadow-sm">
                                         <div className="flex items-center justify-between mb-2">
                                           <h5 className="font-semibold text-gray-800">Activities</h5>
-                                          <span className={`px-2 py-1 rounded text-xs font-bold ${
-                                            Math.round((match.activityMatch.score || 0) * 100) >= 70 ? 'bg-green-100 text-green-800' :
-                                            Math.round((match.activityMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
-                                            'bg-red-100 text-red-800'
-                                          }`}>
+                                          <span className={`px-2 py-1 rounded text-xs font-bold ${Math.round((match.activityMatch.score || 0) * 100) >= 70 ? 'bg-green-100 text-green-800' :
+                                              Math.round((match.activityMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
+                                                'bg-red-100 text-red-800'
+                                            }`}>
                                             {Math.round((match.activityMatch.score || 0) * 100)}%
                                           </span>
                                         </div>
@@ -1711,31 +1699,31 @@ function RepMatchingPanel() {
                     <div className="space-y-4">
                       {invitedAgentsList.map((agent, index) => {
                         console.log('🔍 Invited Agent Data:', agent);
-                        
+
                         return (
-                        <div key={`invited-${agent._id}-${index}`} className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                          <div className="flex items-center justify-between">
-                            <div className="flex-1">
-                              <h3 className="text-lg font-bold text-gray-900">{agent.personalInfo?.name}</h3>
-                              <p className="text-gray-600">{agent.personalInfo?.email}</p>
-                              <div className="mt-2 space-y-1">
-                                <p className="text-sm text-yellow-700">
-                                  Invited • Waiting for response
-                                </p>
-                                {(agent.gigId?.title || agent.gig?.title) && (
-                                  <p className="text-sm text-gray-600">
-                                    <span className="font-medium">Gig:</span> {agent.gigId?.title || agent.gig?.title}
+                          <div key={`invited-${agent._id}-${index}`} className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1">
+                                <h3 className="text-lg font-bold text-gray-900">{agent.personalInfo?.name}</h3>
+                                <p className="text-gray-600">{agent.personalInfo?.email}</p>
+                                <div className="mt-2 space-y-1">
+                                  <p className="text-sm text-yellow-700">
+                                    Invited • Waiting for response
                                   </p>
-                                )}
+                                  {(agent.gigId?.title || agent.gig?.title) && (
+                                    <p className="text-sm text-gray-600">
+                                      <span className="font-medium">Gig:</span> {agent.gigId?.title || agent.gig?.title}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <span className="inline-flex items-center px-3 py-2 bg-yellow-100 text-yellow-800 rounded-lg text-sm font-medium">
+                                  📧 Pending
+                                </span>
                               </div>
                             </div>
-                            <div className="flex items-center space-x-2">
-                              <span className="inline-flex items-center px-3 py-2 bg-yellow-100 text-yellow-800 rounded-lg text-sm font-medium">
-                                📧 Pending
-                              </span>
-                            </div>
                           </div>
-                        </div>
                         );
                       })}
                     </div>
@@ -1786,7 +1774,7 @@ function RepMatchingPanel() {
                               </div>
                             </div>
                             <div className="flex items-center space-x-2">
-                              <button 
+                              <button
                                 onClick={async () => {
                                   try {
                                     await acceptEnrollmentRequest(agent._id, "Welcome to the team! We are delighted to have you.");
@@ -1809,7 +1797,7 @@ function RepMatchingPanel() {
                               >
                                 ✅ Approve
                               </button>
-                              <button 
+                              <button
                                 onClick={async () => {
                                   try {
                                     await rejectEnrollmentRequest(agent._id, "Sorry, we cannot proceed with your application at this time.");
@@ -1872,7 +1860,7 @@ function RepMatchingPanel() {
                                 </span>
                               </div>
                               <p className="text-gray-600 mb-2">{agent.agentId?.personalInfo?.email}</p>
-                              
+
                               <div className="mt-3 space-y-2">
                                 {(agent.gigId?.title || agent.gig?.title) && (
                                   <div className="mb-2">
@@ -1889,7 +1877,7 @@ function RepMatchingPanel() {
                                     <span className="font-medium">Role:</span> {agent.agentId?.professionalSummary?.currentRole}
                                   </span>
                                 </div>
-                                
+
                                 <div className="flex flex-wrap gap-2">
                                   {agent.agentId?.professionalSummary?.keyExpertise?.slice(0, 5).map((skill, i) => (
                                     <span key={i} className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">
@@ -1902,7 +1890,7 @@ function RepMatchingPanel() {
                                     </span>
                                   )}
                                 </div>
-                                
+
                                 <div className="flex flex-wrap gap-4 text-sm text-gray-600">
                                   <div>
                                     <span className="font-medium">Availability:</span> {agent.agentId?.availability?.schedule?.length} days/week
@@ -1916,7 +1904,7 @@ function RepMatchingPanel() {
                                 </div>
                               </div>
                             </div>
-                            
+
                             <div className="flex flex-col items-end space-y-2">
                               <button className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-all duration-200 text-sm font-medium">
                                 Manage Profile
