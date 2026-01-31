@@ -1256,7 +1256,9 @@ function RepMatchingPanel() {
                                     <h4
                                       className="text-lg font-bold text-gray-900 truncate cursor-pointer hover:text-indigo-600 transition-colors"
                                       onClick={() => {
-                                        const path = `/app12/agent-details/${match.agentId}`;
+                                        // Include selected gig ID in the URL to persist context
+                                        const gigParam = selectedGig ? `?gigId=${selectedGig._id}` : '';
+                                        const path = `/app12/agent-details/${match.agentId}${gigParam}`;
                                         window.history.pushState({}, '', path);
                                         window.dispatchEvent(new Event('navigate'));
                                       }}
@@ -1337,7 +1339,8 @@ function RepMatchingPanel() {
                                 <button
                                   onClick={() => {
                                     // Navigation logic matching App.tsx router
-                                    const path = `/app12/agent-details/${match.agentId}`;
+                                    const gigParam = selectedGig ? `?gigId=${selectedGig._id}` : '';
+                                    const path = `/app12/agent-details/${match.agentId}${gigParam}`;
                                     window.history.pushState({}, '', path);
                                     window.dispatchEvent(new Event('navigate'));
                                   }}

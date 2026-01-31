@@ -164,124 +164,15 @@ export default function AgentDetailsPage({ agentId: propAgentId, onBack }: Agent
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                     <button
                         onClick={onBack}
-                        className="flex items-center text-slate-500 hover:text-indigo-600 transition-colors font-medium"
+                        onClick={() => setActiveTab(tab.id as any)}
+                        className={`group py-4 px-1 text-sm font-semibold border-b-2 transition-all flex items-center gap-2 ${activeTab === tab.id
+                            ? 'border-indigo-600 text-indigo-600'
+                            : 'border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-200'
+                            }`}
                     >
-                        <ArrowLeft className="w-5 h-5 mr-2" />
-                        Back to Search
+                        {/* {tab.icon} */}
+                        {tab.label}
                     </button>
-                    <div className="flex items-center gap-3">
-                        <span className={`px-3 py-1 text-xs font-semibold rounded-full border flex items-center transition-colors ${isAvailable
-                                ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
-                                : 'bg-slate-50 text-slate-500 border-slate-200'
-                            }`}>
-                            <div className={`w-1.5 h-1.5 rounded-full mr-2 ${isAvailable ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'
-                                }`}></div>
-                            {isAvailable ? 'Available Now' : 'Offline'}
-                        </span>
-                        <div className="h-6 w-px bg-slate-200 mx-1"></div>
-                        <button className="p-2 text-slate-400 hover:text-indigo-600 transition-colors">
-                            <Share2 className="w-5 h-5" />
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            {/* Header Profile Section */}
-            <div className="bg-white border-b border-gray-200">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                    <div className="flex flex-col md:flex-row gap-8 items-start">
-                        {/* Avatar */}
-                        <div className="relative group shrink-0">
-                            <div className="w-32 h-32 md:w-40 md:h-40 rounded-2xl overflow-hidden shadow-2xl ring-4 ring-white bg-slate-100">
-                                {info.photo?.url ? (
-                                    <img
-                                        src={info.photo.url}
-                                        alt={info.name}
-                                        className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
-                                    />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center bg-indigo-50 text-indigo-300">
-                                        <Shield className="w-12 h-12" />
-                                    </div>
-                                )}
-                            </div>
-                            {isVerified && (
-                                <div className="absolute -bottom-2 -right-2 bg-blue-600 text-white p-1.5 rounded-full ring-4 ring-white shadow-lg" title="Verified Agent">
-                                    <CheckCircle2 className="w-5 h-5" />
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Info */}
-                        <div className="flex-1 min-w-0">
-                            <div className="flex flex-col gap-1 mb-6">
-                                <div className="flex flex-wrap items-center gap-3">
-                                    <h1 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">
-                                        {info.name}
-                                    </h1>
-                                    {info.country && (
-                                        <span className="text-2xl opacity-80 hover:opacity-100 transition-opacity cursor-help" title={info.country}>
-                                            {info.country === 'France' ? '🇫🇷' : '🌍'}
-                                        </span>
-                                    )}
-                                </div>
-                                <p className="text-xl text-slate-500 font-medium leading-relaxed max-w-2xl">
-                                    {prof.currentRole || 'Professional Agent'}
-                                </p>
-                            </div>
-
-                            <div className="flex flex-wrap gap-3 text-sm">
-                                {prof.yearsOfExperience !== undefined && (
-                                    <div className="flex items-center bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200/60 text-slate-700">
-                                        <Briefcase className="w-4 h-4 mr-2 text-indigo-500" />
-                                        <span className="font-bold mr-1">{prof.yearsOfExperience}</span> Years Exp.
-                                    </div>
-                                )}
-                                {availability.timeZone && (
-                                    <div className="flex items-center bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200/60 text-slate-700">
-                                        <Globe className="w-4 h-4 mr-2 text-indigo-500" />
-                                        {availability.timeZone.zoneName}
-                                    </div>
-                                )}
-                                <div className="flex items-center bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200/60 text-slate-700">
-                                    <MapPin className="w-4 h-4 mr-2 text-indigo-500" />
-                                    Remote Only
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Actions */}
-                        <div className="flex flex-col gap-3 w-full md:w-auto mt-4 md:mt-0">
-                            <button className="flex items-center justify-center px-6 py-3 bg-[#0F172A] hover:bg-[#1E293B] text-white rounded-xl font-semibold shadow-lg shadow-slate-200 transition-all transform active:scale-95">
-                                <Mail className="w-4 h-4 mr-2" />
-                                Contact Agent
-                            </button>
-                            <button className="flex items-center justify-center px-6 py-3 bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 rounded-xl font-semibold transition-colors">
-                                <Download className="w-4 h-4 mr-2" />
-                                Download Resume
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Tab Navigation */}
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex gap-8 border-t border-gray-100">
-                    {[
-                        { id: 'overview', label: 'Overview', icon: <Video className="w-4 h-4" /> },
-                        { id: 'experience', label: 'Experience', icon: <Briefcase className="w-4 h-4" /> },
-                        { id: 'skills', label: 'Skills & Assessment', icon: <Award className="w-4 h-4" /> }
-                    ].map((tab) => (
-                        <button
-                            key={tab.id}
-                            onClick={() => setActiveTab(tab.id as any)}
-                            className={`group py-4 px-1 text-sm font-semibold border-b-2 transition-all flex items-center gap-2 ${activeTab === tab.id
-                                    ? 'border-indigo-600 text-indigo-600'
-                                    : 'border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-200'
-                                }`}
-                        >
-                            {/* {tab.icon} */}
-                            {tab.label}
-                        </button>
                     ))}
                 </div>
             </div>

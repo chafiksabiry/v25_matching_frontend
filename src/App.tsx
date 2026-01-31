@@ -6,21 +6,30 @@ import AgentDetailsPage from './components/AgentDetailsPage';
 export default function App() {
   const [currentRoute, setCurrentRoute] = React.useState('dashboard');
   const [selectedAgentId, setSelectedAgentId] = React.useState<string | null>(null);
+  const [selectedGigId, setSelectedGigId] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     const handleLocationChange = () => {
       const path = window.location.pathname;
-      console.log("[App12] handleLocationChange", path);
       // Check if path contains /agent-details/
       const match = path.match(/\/agent-details\/([a-zA-Z0-9]+)/);
       if (match) {
-        console.log("[App12] Going to Agent Detail:", match[1]);
         setSelectedAgentId(match[1]);
+
+        // Extract gigId from query params
+        const searchParams = new URLSearchParams(window.location.search);
+        const gigIdParam = searchParams.get('gigId');
+        if (gigIdParam) {
+          setSelectedGigId(gigIdParam);
+        } else {
+          setSelectedGigId(null);
+        }
+
         setCurrentRoute('details');
       } else {
-        console.log("[App12] Going to Dashboard");
         setCurrentRoute('dashboard');
         setSelectedAgentId(null);
+        setSelectedGigId(null);
       }
     };
 
@@ -54,10 +63,10 @@ export default function App() {
       ) : (
         <AgentDetailsPage
           agentId={selectedAgentId || ''}
+          gigId={selectedGigId || undefined}
           onBack={navigateToDashboard}
         />
       )}
     </div>
   );
-}
 
