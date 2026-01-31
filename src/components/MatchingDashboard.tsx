@@ -721,8 +721,8 @@ function RepMatchingPanel() {
                   key={section.id}
                   onClick={() => setActiveSection(section.id as any)}
                   className={`flex-1 px-4 py-4 text-left transition-all duration-200 border-b-2 ${activeSection === section.id
-                      ? 'border-harx-accent-300 bg-white/10'
-                      : 'border-transparent hover:bg-white/5'
+                    ? 'border-harx-accent-300 bg-white/10'
+                    : 'border-transparent hover:bg-white/5'
                     }`}
                 >
                   <div className="flex items-center space-x-3">
@@ -782,8 +782,8 @@ function RepMatchingPanel() {
                   <button
                     onClick={() => setShowWeights(!showWeights)}
                     className={`px-4 py-2 rounded-lg transition-all duration-200 flex items-center space-x-2 text-sm font-medium ${showWeights
-                        ? 'bg-harx-600 text-white'
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      ? 'bg-harx-600 text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                       }`}
                   >
                     <Settings size={16} className={showWeights ? 'rotate-180' : ''} />
@@ -863,8 +863,8 @@ function RepMatchingPanel() {
                               {key}
                             </label>
                             <div className={`px-2 py-1 rounded text-xs font-bold ${Math.round(value * 100) >= 20 ? 'bg-gradient-to-r from-harx-500 to-harx-600 text-white' :
-                                Math.round(value * 100) >= 10 ? 'bg-harx-100 text-harx-800' :
-                                  'bg-gray-100 text-gray-600'
+                              Math.round(value * 100) >= 10 ? 'bg-harx-100 text-harx-800' :
+                                'bg-gray-100 text-gray-600'
                               }`}>
                               {Math.round(value * 100)}%
                             </div>
@@ -906,10 +906,10 @@ function RepMatchingPanel() {
                           }}
                           disabled={loading}
                           className={`group relative px-6 py-2 rounded-lg transition-all duration-200 flex items-center space-x-2 shadow-lg transform hover:-translate-y-0.5 hover:shadow-xl font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed ${hasUnsavedChanges
-                              ? 'bg-gradient-to-r from-harx-accent-500 to-harx-600 hover:from-harx-accent-600 hover:to-harx-700 text-white animate-pulse'
-                              : gigHasWeights
-                                ? 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white'
-                                : 'bg-gradient-to-r from-harx-500 to-harx-600 hover:from-harx-600 hover:to-harx-700 text-white'
+                            ? 'bg-gradient-to-r from-harx-accent-500 to-harx-600 hover:from-harx-accent-600 hover:to-harx-700 text-white animate-pulse'
+                            : gigHasWeights
+                              ? 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white'
+                              : 'bg-gradient-to-r from-harx-500 to-harx-600 hover:from-harx-600 hover:to-harx-700 text-white'
                             }`}
                         >
                           {/* Animated Background */}
@@ -934,10 +934,10 @@ function RepMatchingPanel() {
 
                           {/* Glow Effect */}
                           <div className={`absolute inset-0 rounded-lg blur-lg opacity-20 group-hover:opacity-40 transition-opacity duration-200 ${hasUnsavedChanges
-                              ? 'bg-gradient-to-r from-harx-accent-500 to-harx-600'
-                              : gigHasWeights
-                                ? 'bg-gradient-to-r from-green-500 to-emerald-600'
-                                : 'bg-gradient-to-r from-harx-500 to-harx-600'
+                            ? 'bg-gradient-to-r from-harx-accent-500 to-harx-600'
+                            : gigHasWeights
+                              ? 'bg-gradient-to-r from-green-500 to-emerald-600'
+                              : 'bg-gradient-to-r from-harx-500 to-harx-600'
                             }`}></div>
                         </button>
                       </div>
@@ -993,8 +993,8 @@ function RepMatchingPanel() {
 
                         return (
                           <div key={gig._id} className={`bg-white rounded-lg border-2 transition-all duration-200 ${selectedGig?._id === gig._id
-                              ? "border-harx-400 shadow-lg bg-harx-50"
-                              : "border-gray-200 hover:border-harx-300 hover:shadow-md"
+                            ? "border-harx-400 shadow-lg bg-harx-50"
+                            : "border-gray-200 hover:border-harx-300 hover:shadow-md"
                             }`}>
                             {/* Gig Header - Clickable for selection */}
                             <div
@@ -1253,10 +1253,19 @@ function RepMatchingPanel() {
                               <div className="flex items-center justify-between mb-4">
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center gap-3 mb-2">
-                                    <h4 className="text-lg font-bold text-gray-900 truncate">{match.agentInfo?.name}</h4>
+                                    <h4
+                                      className="text-lg font-bold text-gray-900 truncate cursor-pointer hover:text-indigo-600 transition-colors"
+                                      onClick={() => {
+                                        const path = `/app12/agent-details/${match.agentId}`;
+                                        window.history.pushState({}, '', path);
+                                        window.dispatchEvent(new Event('navigate'));
+                                      }}
+                                    >
+                                      {match.agentInfo?.name}
+                                    </h4>
                                     <div className={`px-4 py-2 rounded-full text-sm font-bold shadow-sm ${matchScore >= 70 ? 'bg-green-500 text-white' :
-                                        matchScore >= 50 ? 'bg-yellow-500 text-white' :
-                                          'bg-red-500 text-white'
+                                      matchScore >= 50 ? 'bg-yellow-500 text-white' :
+                                        'bg-red-500 text-white'
                                       }`}>
                                       {matchScore}% Match
                                     </div>
@@ -1357,8 +1366,8 @@ function RepMatchingPanel() {
                                         <div className="flex items-center justify-between mb-2">
                                           <h5 className="font-semibold text-gray-800">Skills Match</h5>
                                           <span className={`px-2 py-1 rounded text-xs font-bold ${Math.round((match.skillsMatch.score || 0) * 100) >= 70 ? 'bg-green-100 text-green-800' :
-                                              Math.round((match.skillsMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
-                                                'bg-red-100 text-red-800'
+                                            Math.round((match.skillsMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
+                                              'bg-red-100 text-red-800'
                                             }`}>
                                             {Math.round((match.skillsMatch.score || 0) * 100)}%
                                           </span>
@@ -1407,8 +1416,8 @@ function RepMatchingPanel() {
                                         <div className="flex items-center justify-between mb-2">
                                           <h5 className="font-semibold text-gray-800">Languages</h5>
                                           <span className={`px-2 py-1 rounded text-xs font-bold ${Math.round((match.languageMatch.score || 0) * 100) >= 70 ? 'bg-green-100 text-green-800' :
-                                              Math.round((match.languageMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
-                                                'bg-red-100 text-red-800'
+                                            Math.round((match.languageMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
+                                              'bg-red-100 text-red-800'
                                             }`}>
                                             {Math.round((match.languageMatch.score || 0) * 100)}%
                                           </span>
@@ -1458,8 +1467,8 @@ function RepMatchingPanel() {
                                         <div className="flex items-center justify-between mb-2">
                                           <h5 className="font-semibold text-gray-800">Industry</h5>
                                           <span className={`px-2 py-1 rounded text-xs font-bold ${Math.round((match.industryMatch.score || 0) * 100) >= 70 ? 'bg-green-100 text-green-800' :
-                                              Math.round((match.industryMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
-                                                'bg-red-100 text-red-800'
+                                            Math.round((match.industryMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
+                                              'bg-red-100 text-red-800'
                                             }`}>
                                             {Math.round((match.industryMatch.score || 0) * 100)}%
                                           </span>
@@ -1508,8 +1517,8 @@ function RepMatchingPanel() {
                                         <div className="flex items-center justify-between mb-2">
                                           <h5 className="font-semibold text-gray-800">Experience</h5>
                                           <span className={`px-2 py-1 rounded text-xs font-bold ${Math.round((match.experienceMatch.score || 0) * 100) >= 70 ? 'bg-green-100 text-green-800' :
-                                              Math.round((match.experienceMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
-                                                'bg-red-100 text-red-800'
+                                            Math.round((match.experienceMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
+                                              'bg-red-100 text-red-800'
                                             }`}>
                                             {Math.round((match.experienceMatch.score || 0) * 100)}%
                                           </span>
@@ -1532,8 +1541,8 @@ function RepMatchingPanel() {
                                         <div className="flex items-center justify-between mb-2">
                                           <h5 className="font-semibold text-gray-800">Timezone</h5>
                                           <span className={`px-2 py-1 rounded text-xs font-bold ${Math.round((match.timezoneMatch.score || 0) * 100) >= 70 ? 'bg-green-100 text-green-800' :
-                                              Math.round((match.timezoneMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
-                                                'bg-red-100 text-red-800'
+                                            Math.round((match.timezoneMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
+                                              'bg-red-100 text-red-800'
                                             }`}>
                                             {Math.round((match.timezoneMatch.score || 0) * 100)}%
                                           </span>
@@ -1552,8 +1561,8 @@ function RepMatchingPanel() {
                                         <div className="flex items-center justify-between mb-2">
                                           <h5 className="font-semibold text-gray-800">Region</h5>
                                           <span className={`px-2 py-1 rounded text-xs font-bold ${Math.round((match.regionMatch.score || 0) * 100) >= 70 ? 'bg-green-100 text-green-800' :
-                                              Math.round((match.regionMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
-                                                'bg-red-100 text-red-800'
+                                            Math.round((match.regionMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
+                                              'bg-red-100 text-red-800'
                                             }`}>
                                             {Math.round((match.regionMatch.score || 0) * 100)}%
                                           </span>
@@ -1571,8 +1580,8 @@ function RepMatchingPanel() {
                                         <div className="flex items-center justify-between mb-2">
                                           <h5 className="font-semibold text-gray-800">Availability</h5>
                                           <span className={`px-2 py-1 rounded text-xs font-bold ${Math.round((match.availabilityMatch.score || 0) * 100) >= 70 ? 'bg-green-100 text-green-800' :
-                                              Math.round((match.availabilityMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
-                                                'bg-red-100 text-red-800'
+                                            Math.round((match.availabilityMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
+                                              'bg-red-100 text-red-800'
                                             }`}>
                                             {Math.round((match.availabilityMatch.score || 0) * 100)}%
                                           </span>
@@ -1589,8 +1598,8 @@ function RepMatchingPanel() {
                                         <div className="flex items-center justify-between mb-2">
                                           <h5 className="font-semibold text-gray-800">Activities</h5>
                                           <span className={`px-2 py-1 rounded text-xs font-bold ${Math.round((match.activityMatch.score || 0) * 100) >= 70 ? 'bg-green-100 text-green-800' :
-                                              Math.round((match.activityMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
-                                                'bg-red-100 text-red-800'
+                                            Math.round((match.activityMatch.score || 0) * 100) >= 50 ? 'bg-yellow-100 text-yellow-800' :
+                                              'bg-red-100 text-red-800'
                                             }`}>
                                             {Math.round((match.activityMatch.score || 0) * 100)}%
                                           </span>
