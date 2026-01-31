@@ -1,12 +1,10 @@
 import React from 'react';
 import './public-path';  // For proper Qiankun integration
-import { qiankunWindow } from 'vite-plugin-qiankun/dist/helper';
+import { renderWithQiankun, qiankunWindow } from 'vite-plugin-qiankun/dist/helper';
 
 import { createRoot } from 'react-dom/client';
 import App from './App';
 import './index.css';
-
-
 
 // Store the root instance for proper unmounting
 let root: ReturnType<typeof createRoot> | null = null;
@@ -24,49 +22,45 @@ function render(props: { container?: HTMLElement }) {
       root = createRoot(rootElement);
     }
     root.render(
-      // <React.StrictMode>
-      <App />
-      // </React.StrictMode>
+      <React.StrictMode>
+        <App />
+      </React.StrictMode>
     );
   } else {
     console.warn('[App12] Root element not found!');
   }
 }
 
-export async function bootstrap() {
-  console.time('[App12] bootstrap');
-  console.log('[App12] Bootstrapping...');
-  return Promise.resolve();
-}
+// Register lifecycle methods via renderWithQiankun
+// This is the correct way for Vite-based microfrontends
+renderWithQiankun({
+  bootstrap() {
+    console.log('[App12] Bootstrapping...');
+  },
+  mount(props) {
+    console.log('[App12] Mounting...', props);
+    render(props);
+  },
+  unmount(props: any) {
+    console.log('[App12] Unmounting...', props);
+    // Find the root element where we mounted
+    const { container } = props;
+    const rootElement = container
+      ? container.querySelector('#root')
+      : document.getElementById('root');
 
-export async function mount(props: any) {
-  console.log('[App12] Mounting...', props);
-  const { container } = props;
-  if (container) {
-    console.log('[App12] Found container for mounting:', container);
-  } else {
-    console.warn('[App12] No container found for mounting');
+    if (root && rootElement) {
+      console.log('[App12] Unmounting from container:', rootElement);
+      root.unmount();
+      root = null;  // Reset the root instance
+    } else {
+      console.warn('[App12] Root element not found for unmounting!');
+    }
+  },
+  update(props) {
+    console.log('[App12] Update', props);
   }
-  render(props);
-  return Promise.resolve();
-}
-
-export async function unmount(props: any) {
-  console.log('[App12] Unmounting...', props);
-  const { container } = props;
-  const rootElement = container
-    ? container.querySelector('#root')
-    : document.getElementById('root');
-
-  if (rootElement && root) {
-    console.log('[App12] Unmounting from container:', rootElement);
-    root.unmount();
-    root = null;  // Reset the root instance
-  } else {
-    console.warn('[App12] Root element not found for unmounting!');
-  }
-  return Promise.resolve();
-}
+});
 
 // Standalone mode: If the app is running outside Qiankun, it will use this code
 if (!qiankunWindow.__POWERED_BY_QIANKUN__) {
@@ -74,5 +68,4 @@ if (!qiankunWindow.__POWERED_BY_QIANKUN__) {
   render({});
 } else {
   console.log('[App12] Running inside Qiankun');
-  // Qiankun will control the lifecycle - do not render here
 }
