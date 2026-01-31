@@ -37,8 +37,15 @@ export default function AgentDetailsPage({ agentId: propAgentId, onBack }: Agent
     const [activeTab, setActiveTab] = useState<'overview' | 'experience' | 'skills'>('overview');
     const [isAvailable, setIsAvailable] = useState(false);
 
-    // Invite state
-    const [gigId, setGigId] = useState<string | null>(propAgentId ? null : (localStorage.getItem('selectedGigId') || null));
+    // Priority: Prop -> URL -> LocalStorage
+    const [gigId, setGigId] = useState<string | null>(() => {
+        if (propAgentId) return null;
+        const params = new URLSearchParams(window.location.search);
+        const urlGigId = params.get('gigId');
+        if (urlGigId) return urlGigId;
+        return localStorage.getItem('selectedGigId') || null;
+    });
+
     const [inviteStatus, setInviteStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
     const [inviteMessage, setInviteMessage] = useState<string | null>(null);
 
@@ -226,33 +233,8 @@ export default function AgentDetailsPage({ agentId: propAgentId, onBack }: Agent
                         <ArrowLeft className="w-5 h-5 mr-2" />
                         Back to Search
                     </button>
-                    {gigId ? (
-                        <button
-                            onClick={handleInviteToGig}
-                            disabled={inviteStatus === 'sending' || inviteStatus === 'success'}
-                            className={`flex items-center justify-center px-4 py-2 rounded-lg font-semibold shadow-sm transition-all transform active:scale-95 ${inviteStatus === 'success'
-                                ? 'bg-green-600 hover:bg-green-700 text-white'
-                                : 'bg-[#0F172A] hover:bg-[#1E293B] text-white'
-                                }`}
-                        >
-                            {inviteStatus === 'sending' ? (
-                                <>
-                                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white mr-2"></div>
-                                    Sending...
-                                </>
-                            ) : inviteStatus === 'success' ? (
-                                <>
-                                    <CheckCircle2 className="w-4 h-4 mr-2" />
-                                    Invite Sent
-                                </>
-                            ) : (
-                                <>
-                                    <Zap className="w-4 h-4 mr-2 text-yellow-400" />
-                                    Invite to Gig
-                                </>
-                            )}
-                        </button>
-                    ) : (
+                    <div className="flex items-center gap-4">
+                        {/* Status Indicator */}
                         <div className="flex items-center gap-3">
                             <span className={`px-3 py-1 text-xs font-semibold rounded-full border flex items-center transition-colors ${agent.status === 'available'
                                 ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
@@ -263,7 +245,36 @@ export default function AgentDetailsPage({ agentId: propAgentId, onBack }: Agent
                                 {agent.status === 'available' ? 'Available Now' : 'Offline'}
                             </span>
                         </div>
-                    )}
+
+                        {/* Invite Button */}
+                        {gigId && (
+                            <button
+                                onClick={handleInviteToGig}
+                                disabled={inviteStatus === 'sending' || inviteStatus === 'success'}
+                                className={`flex items-center justify-center px-4 py-2 rounded-lg font-semibold shadow-sm transition-all transform active:scale-95 ${inviteStatus === 'success'
+                                    ? 'bg-green-600 hover:bg-green-700 text-white'
+                                    : 'bg-[#0F172A] hover:bg-[#1E293B] text-white'
+                                    }`}
+                            >
+                                {inviteStatus === 'sending' ? (
+                                    <>
+                                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white mr-2"></div>
+                                        Sending...
+                                    </>
+                                ) : inviteStatus === 'success' ? (
+                                    <>
+                                        <CheckCircle2 className="w-4 h-4 mr-2" />
+                                        Invite Sent
+                                    </>
+                                ) : (
+                                    <>
+                                        <Zap className="w-4 h-4 mr-2 text-yellow-400" />
+                                        Invite to Gig
+                                    </>
+                                )}
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 {/* Tab Navigation */}
