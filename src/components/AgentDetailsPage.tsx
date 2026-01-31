@@ -21,7 +21,6 @@ import {
     Target,
     Video
 } from 'lucide-react';
-import { useParams } from 'react-router-dom';
 
 interface AgentDetailsPageProps {
     agentId?: string; // Optional prop if used directly
@@ -34,9 +33,24 @@ export default function AgentDetailsPage({ agentId: propAgentId, onBack }: Agent
     const [error, setError] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<'overview' | 'experience' | 'skills'>('overview');
 
-    // Use prop or URL param
-    const params = useParams<{ agentId: string }>();
-    const idToUse = propAgentId || params.agentId;
+    // Use prop or URL param (manual parsing as fallback)
+    const [idToUse, setIdToUse] = useState<string | undefined>(propAgentId);
+
+    useEffect(() => {
+        if (propAgentId) {
+            setIdToUse(propAgentId);
+        } else {
+            // Fallback: try to get ID from URL if not provided via prop
+            try {
+                const match = window.location.pathname.match(/\/agent-details\/([a-zA-Z0-9]+)/);
+                if (match && match[1]) {
+                    setIdToUse(match[1]);
+                }
+            } catch (e) {
+                console.warn("Could not parse agent ID from URL");
+            }
+        }
+    }, [propAgentId]);
 
     useEffect(() => {
         const fetchAgent = async () => {
