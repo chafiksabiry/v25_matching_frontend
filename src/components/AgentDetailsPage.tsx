@@ -164,15 +164,69 @@ export default function AgentDetailsPage({ agentId: propAgentId, onBack }: Agent
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                     <button
                         onClick={onBack}
-                        onClick={() => setActiveTab(tab.id as any)}
-                        className={`group py-4 px-1 text-sm font-semibold border-b-2 transition-all flex items-center gap-2 ${activeTab === tab.id
-                            ? 'border-indigo-600 text-indigo-600'
-                            : 'border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-200'
-                            }`}
+                        className="flex items-center text-slate-500 hover:text-indigo-600 transition-colors font-medium"
                     >
-                        {/* {tab.icon} */}
-                        {tab.label}
+                        <ArrowLeft className="w-5 h-5 mr-2" />
+                        Back to Search
                     </button>
+                    {gigId ? (
+                        <button
+                            onClick={handleInviteToGig}
+                            disabled={inviteStatus === 'sending' || inviteStatus === 'success'}
+                            className={`flex items-center justify-center px-4 py-2 rounded-lg font-semibold shadow-sm transition-all transform active:scale-95 ${inviteStatus === 'success'
+                                    ? 'bg-green-600 hover:bg-green-700 text-white'
+                                    : 'bg-[#0F172A] hover:bg-[#1E293B] text-white'
+                                }`}
+                        >
+                            {inviteStatus === 'sending' ? (
+                                <>
+                                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white mr-2"></div>
+                                    Sending...
+                                </>
+                            ) : inviteStatus === 'success' ? (
+                                <>
+                                    <CheckCircle2 className="w-4 h-4 mr-2" />
+                                    Invite Sent
+                                </>
+                            ) : (
+                                <>
+                                    <Zap className="w-4 h-4 mr-2 text-yellow-400" />
+                                    Invite to Gig
+                                </>
+                            )}
+                        </button>
+                    ) : (
+                        <div className="flex items-center gap-3">
+                            <span className={`px-3 py-1 text-xs font-semibold rounded-full border flex items-center transition-colors ${agent.status === 'available'
+                                ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                                : 'bg-slate-50 text-slate-500 border-slate-200'
+                                }`}>
+                                <div className={`w-1.5 h-1.5 rounded-full mr-2 ${agent.status === 'available' ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'
+                                    }`}></div>
+                                {agent.status === 'available' ? 'Available Now' : 'Offline'}
+                            </span>
+                        </div>
+                    )}
+                </div>
+
+                {/* Tab Navigation */}
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex gap-8 border-t border-gray-100">
+                    {[
+                        { id: 'overview', label: 'Overview', icon: <Video className="w-4 h-4" /> },
+                        { id: 'experience', label: 'Experience', icon: <Briefcase className="w-4 h-4" /> },
+                        { id: 'skills', label: 'Skills & Assessment', icon: <Award className="w-4 h-4" /> }
+                    ].map((tab) => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id as any)}
+                            className={`group py-4 px-1 text-sm font-semibold border-b-2 transition-all flex items-center gap-2 ${activeTab === tab.id
+                                ? 'border-indigo-600 text-indigo-600'
+                                : 'border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-200'
+                                }`}
+                        >
+                            {/* {tab.icon} */}
+                            {tab.label}
+                        </button>
                     ))}
                 </div>
             </div>
@@ -181,6 +235,70 @@ export default function AgentDetailsPage({ agentId: propAgentId, onBack }: Agent
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Main Content Column */}
                     <div className="lg:col-span-2 space-y-8">
+                        {/* Header Profile Section */}
+                        <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
+                            <div className="flex flex-col md:flex-row gap-8 items-start">
+                                {/* Avatar */}
+                                <div className="relative group shrink-0">
+                                    <div className="w-32 h-32 md:w-40 md:h-40 rounded-2xl overflow-hidden shadow-xl ring-4 ring-white bg-slate-100">
+                                        <img
+                                            src={info?.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(info?.name || 'User')}&background=random`}
+                                            alt={info?.name}
+                                            className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+                                        />
+                                    </div>
+                                    {isVerified && (
+                                        <div className="absolute -bottom-2 -right-2 bg-blue-600 text-white p-1.5 rounded-full ring-4 ring-white shadow-lg" title="Verified Agent">
+                                            <CheckCircle2 className="w-5 h-5" />
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Info */}
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex flex-col gap-1 mb-6">
+                                        <div className="flex flex-wrap items-center gap-3">
+                                            <h1 className="text-3xl md:text-3xl font-bold text-slate-900 tracking-tight">
+                                                {info?.name}
+                                            </h1>
+                                            {info?.country && (
+                                                <span className="text-2xl opacity-80 hover:opacity-100 transition-opacity cursor-help" title={info.country}>
+                                                    {info.country === 'France' ? '🇫🇷' : '🌍'}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <p className="text-lg text-slate-500 font-medium leading-relaxed max-w-2xl">
+                                            {prof?.headline || 'Sales Representative'}
+                                        </p>
+                                    </div>
+
+                                    <div className="flex flex-wrap gap-3 text-sm">
+                                        {prof?.yearsOfExperience !== undefined && (
+                                            <div className="flex items-center bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200/60 text-slate-700">
+                                                <Briefcase className="w-4 h-4 mr-2 text-indigo-500" />
+                                                <span className="font-bold mr-1">{prof.yearsOfExperience}</span> Years Exp.
+                                            </div>
+                                        )}
+                                        {availability?.timezone?.gmtDisplay && (
+                                            <div className="flex items-center bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200/60 text-slate-700">
+                                                <Globe className="w-4 h-4 mr-2 text-indigo-500" />
+                                                {availability.timezone.gmtDisplay} ({availability.timezone.timezoneName})
+                                            </div>
+                                        )}
+                                        <div className="flex items-center bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200/60 text-slate-700">
+                                            <MapPin className="w-4 h-4 mr-2 text-indigo-500" />
+                                            {info?.location || 'Remote'}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {inviteMessage && inviteStatus === 'error' && (
+                                <div className="mt-6 bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-lg text-sm">
+                                    {inviteMessage}
+                                </div>
+                            )}
+                        </div>
 
                         {/* About Section */}
                         {activeTab === 'overview' && (
@@ -188,7 +306,7 @@ export default function AgentDetailsPage({ agentId: propAgentId, onBack }: Agent
                                 <section className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
                                     <h2 className="text-xl font-bold text-slate-900 mb-4">About</h2>
                                     <p className="text-slate-600 leading-relaxed whitespace-pre-line">
-                                        {prof.profileDescription}
+                                        {prof.profileDescription || "No description provided."}
                                     </p>
 
                                     {/* Video Presentation */}
@@ -203,7 +321,6 @@ export default function AgentDetailsPage({ agentId: propAgentId, onBack }: Agent
                                                     src={info.presentationVideo.url}
                                                     controls
                                                     className="w-full h-full object-cover"
-                                                    poster={info.photo?.url}
                                                 />
                                             </div>
                                         </div>
@@ -254,7 +371,7 @@ export default function AgentDetailsPage({ agentId: propAgentId, onBack }: Agent
                                                     </div>
                                                 </div>
                                                 <p className="text-sm text-slate-400 mb-4 font-mono uppercase tracking-wide">
-                                                    {new Date(exp.startDate).getFullYear()} - {exp.endDate === 'present' ? 'Present' : new Date(exp.endDate).getFullYear()}
+                                                    {exp.startDate ? new Date(exp.startDate).getFullYear() : ''} - {exp.endDate === 'present' ? 'Present' : (exp.endDate ? new Date(exp.endDate).getFullYear() : '')}
                                                 </p>
                                                 <ul className="space-y-3">
                                                     {exp.responsibilities?.map((resp: string, j: number) => (
@@ -386,9 +503,9 @@ export default function AgentDetailsPage({ agentId: propAgentId, onBack }: Agent
                                 <button className="flex-1 py-2 bg-[#0077b5]/10 text-[#0077b5] rounded-lg hover:bg-[#0077b5]/20 flex justify-center transition-colors">
                                     <Linkedin className="w-5 h-5" />
                                 </button>
-                                <button className="flex-1 py-2 bg-[#1DA1F2]/10 text-[#1DA1F2] rounded-lg hover:bg-[#1DA1F2]/20 flex justify-center transition-colors">
+                                {/* <button className="flex-1 py-2 bg-[#1DA1F2]/10 text-[#1DA1F2] rounded-lg hover:bg-[#1DA1F2]/20 flex justify-center transition-colors">
                                     <Twitter className="w-5 h-5" />
-                                </button>
+                                </button> */}
                             </div>
                         </div>
 
