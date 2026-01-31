@@ -32,6 +32,7 @@ export default function AgentDetailsPage({ agentId: propAgentId, onBack }: Agent
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<'overview' | 'experience' | 'skills'>('overview');
+    const [isAvailable, setIsAvailable] = useState(false);
 
     // Use prop or URL param (manual parsing as fallback)
     const [idToUse, setIdToUse] = useState<string | undefined>(propAgentId);
@@ -61,6 +62,9 @@ export default function AgentDetailsPage({ agentId: propAgentId, onBack }: Agent
                 if (!response.ok) throw new Error('Failed to fetch agent details');
                 const data = await response.json();
                 setAgent(data);
+
+                // Calculate availability once data is loaded
+                checkAvailability(data);
             } catch (err) {
                 console.error("Error fetching agent:", err);
                 setError("Failed to load agent details. Please try again.");
@@ -71,6 +75,47 @@ export default function AgentDetailsPage({ agentId: propAgentId, onBack }: Agent
 
         fetchAgent();
     }, [idToUse]);
+
+    // Helper function to check availability
+    const checkAvailability = (agentData: any) => {
+        if (!agentData?.availability?.schedule || !agentData?.availability?.timeZone) {
+            setIsAvailable(false);
+            return;
+        }
+
+        try {
+            // Get current UTC time
+            const now = new Date();
+            const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+
+            // Adjust to agent's timezone
+            // gmtOffset is in seconds
+            const agentTime = new Date(utc + (agentData.availability.timeZone.gmtOffset * 1000));
+
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const currentDayName = days[agentTime.getDay()];
+
+            // Find schedule for today using the agent's local day
+            const todaySchedule = agentData.availability.schedule.find((s: any) => s.day === currentDayName);
+
+            if (todaySchedule?.hours) {
+                const currentMinutes = agentTime.getHours() * 60 + agentTime.getMinutes();
+
+                const [startH, startM] = todaySchedule.hours.start.split(':').map(Number);
+                const [endH, endM] = todaySchedule.hours.end.split(':').map(Number);
+
+                const startTotal = startH * 60 + startM;
+                const endTotal = endH * 60 + endM;
+
+                setIsAvailable(currentMinutes >= startTotal && currentMinutes < endTotal);
+            } else {
+                setIsAvailable(false);
+            }
+        } catch (e) {
+            console.error("Error calculating availability", e);
+            setIsAvailable(false);
+        }
+    };
 
     if (loading) {
         return (
@@ -125,9 +170,13 @@ export default function AgentDetailsPage({ agentId: propAgentId, onBack }: Agent
                         Back to Search
                     </button>
                     <div className="flex items-center gap-3">
-                        <span className="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-semibold rounded-full border border-emerald-100 flex items-center">
-                            <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-2 animate-pulse"></div>
-                            Available Now
+                        <span className={`px-3 py-1 text-xs font-semibold rounded-full border flex items-center transition-colors ${isAvailable
+                                ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                                : 'bg-slate-50 text-slate-500 border-slate-200'
+                            }`}>
+                            <div className={`w-1.5 h-1.5 rounded-full mr-2 ${isAvailable ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'
+                                }`}></div>
+                            {isAvailable ? 'Available Now' : 'Offline'}
                         </span>
                         <div className="h-6 w-px bg-slate-200 mx-1"></div>
                         <button className="p-2 text-slate-400 hover:text-indigo-600 transition-colors">
