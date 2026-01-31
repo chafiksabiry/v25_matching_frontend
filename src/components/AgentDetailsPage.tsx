@@ -30,7 +30,7 @@ interface AgentDetailsPageProps {
     gigId?: string;
 }
 
-export default function AgentDetailsPage({ agentId: propAgentId, onBack }: AgentDetailsPageProps) {
+export default function AgentDetailsPage({ agentId: propAgentId, onBack, gigId: propGigId }: AgentDetailsPageProps) {
     const [agent, setAgent] = useState<any | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -39,11 +39,15 @@ export default function AgentDetailsPage({ agentId: propAgentId, onBack }: Agent
 
     // Priority: Prop -> URL -> LocalStorage
     const [gigId, setGigId] = useState<string | null>(() => {
-        if (propAgentId) return null;
+        // Always check for gigId, regardless of how agentId (propAgentId) is provided
+        if (propGigId) return propGigId; // Check prop first if it exists in interface
+
         const params = new URLSearchParams(window.location.search);
         const urlGigId = params.get('gigId');
         if (urlGigId) return urlGigId;
-        return localStorage.getItem('selectedGigId') || null;
+
+        const stored = localStorage.getItem('selectedGigId');
+        return stored || null;
     });
 
     const [inviteStatus, setInviteStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
