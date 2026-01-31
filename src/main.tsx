@@ -25,7 +25,7 @@ function render(props: { container?: HTMLElement }) {
     }
     root.render(
       // <React.StrictMode>
-        <App />
+      <App />
       // </React.StrictMode>
     );
   } else {
@@ -74,6 +74,5 @@ if (!qiankunWindow.__POWERED_BY_QIANKUN__) {
   render({});
 } else {
   console.log('[App12] Running inside Qiankun');
-  // Qiankun will control the lifecycle
-  render({});
+  // Qiankun will control the lifecycle - do not render here
 }

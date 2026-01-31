@@ -10,12 +10,15 @@ export default function App() {
   React.useEffect(() => {
     const handleLocationChange = () => {
       const path = window.location.pathname;
+      console.log("[App12] handleLocationChange", path);
       // Check if path contains /agent-details/
       const match = path.match(/\/agent-details\/([a-zA-Z0-9]+)/);
       if (match) {
+        console.log("[App12] Going to Agent Detail:", match[1]);
         setSelectedAgentId(match[1]);
         setCurrentRoute('details');
       } else {
+        console.log("[App12] Going to Dashboard");
         setCurrentRoute('dashboard');
         setSelectedAgentId(null);
       }
