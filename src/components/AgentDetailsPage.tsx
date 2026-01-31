@@ -314,7 +314,7 @@ export default function AgentDetailsPage({ agentId: propAgentId, onBack, gigId: 
                                 <div className="relative group shrink-0">
                                     <div className="w-32 h-32 md:w-40 md:h-40 rounded-2xl overflow-hidden shadow-xl ring-4 ring-white bg-slate-100">
                                         <img
-                                            src={info?.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(info?.name || 'User')}&background=random`}
+                                            src={info?.photo?.url || info?.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(info?.name || 'User')}&background=random`}
                                             alt={info?.name}
                                             className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
                                         />
