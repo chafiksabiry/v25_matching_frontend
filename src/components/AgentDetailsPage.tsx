@@ -14,28 +14,36 @@ import {
     Share2,
     Linkedin,
     Twitter,
-    Instagram,
-    Download
+    Download,
+    Play,
+    Calendar,
+    Shield,
+    Target,
+    Video
 } from 'lucide-react';
-import { Match } from '../types/matching'; // Adjust path if needed
-import { getAgentById } from '../api/matching'; // Need to implement this in api/matching.ts
+import { useParams } from 'react-router-dom';
 
 interface AgentDetailsPageProps {
-    agentId: string;
-    onBack: () => void;
+    agentId?: string; // Optional prop if used directly
+    onBack?: () => void;
 }
 
-export default function AgentDetailsPage({ agentId, onBack }: AgentDetailsPageProps) {
+export default function AgentDetailsPage({ agentId: propAgentId, onBack }: AgentDetailsPageProps) {
     const [agent, setAgent] = useState<any | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [activeTab, setActiveTab] = useState<'overview' | 'experience' | 'skills'>('overview');
+
+    // Use prop or URL param
+    const params = useParams<{ agentId: string }>();
+    const idToUse = propAgentId || params.agentId;
 
     useEffect(() => {
         const fetchAgent = async () => {
+            if (!idToUse) return;
             try {
                 setLoading(true);
-                // We'll use a new API function or fetch directly if not available yet
-                const response = await fetch(`${import.meta.env.VITE_MATCHING_API_URL || 'http://localhost:5011/api'}/agents/${agentId}`);
+                const response = await fetch(`${import.meta.env.VITE_MATCHING_API_URL || 'http://localhost:5011/api'}/agents/${idToUse}`);
                 if (!response.ok) throw new Error('Failed to fetch agent details');
                 const data = await response.json();
                 setAgent(data);
@@ -47,15 +55,16 @@ export default function AgentDetailsPage({ agentId, onBack }: AgentDetailsPagePr
             }
         };
 
-        if (agentId) {
-            fetchAgent();
-        }
-    }, [agentId]);
+        fetchAgent();
+    }, [idToUse]);
 
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-indigo-600"></div>
+                <div className="relative">
+                    <div className="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+                    <div className="mt-4 text-center text-indigo-600 font-medium">Loading Profile...</div>
+                </div>
             </div>
         );
     }
@@ -63,281 +72,427 @@ export default function AgentDetailsPage({ agentId, onBack }: AgentDetailsPagePr
     if (error || !agent) {
         return (
             <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
-                <div className="bg-red-50 text-red-600 p-6 rounded-xl shadow-lg max-w-md w-full text-center">
-                    <h2 className="text-2xl font-bold mb-2">Error</h2>
-                    <p>{error || "Agent not found"}</p>
+                <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center border border-gray-100">
+                    <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Shield className="w-8 h-8 text-red-500" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Profile Unavailable</h2>
+                    <p className="text-gray-500 mb-6">{error || "We couldn't find the agent you're looking for."}</p>
                     <button
                         onClick={onBack}
-                        className="mt-6 px-6 py-2 bg-white border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-colors"
+                        className="px-6 py-3 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition-colors font-medium w-full"
                     >
-                        Go Back
+                        Return to Dashboard
                     </button>
                 </div>
             </div>
         );
     }
 
-    // Helper for safe access
+    // Helper data accessors
     const info = agent.personalInfo || {};
     const prof = agent.professionalSummary || {};
     const skills = agent.skills || {};
+    const availability = agent.availability || {};
+    const assessment = skills.contactCenter?.[0]?.assessmentResults;
+    // Check if phase 4 (subscription) is completed or explicitly verified
+    const isVerified = agent.onboardingProgress?.currentPhase === 4 || agent.status === 'completed';
 
     return (
-        <div className="min-h-screen bg-[#f8fafc]">
-            {/* Hero Section */}
-            <div className="bg-gradient-to-r from-[#1e293b] to-[#0f172a] text-white pt-12 pb-24 px-4 sm:px-6 lg:px-8 shadow-xl relative overflow-hidden">
-                {/* Background Patterns */}
-                <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-                <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
-
-                <div className="max-w-7xl mx-auto relative z-10">
+        <div className="min-h-screen bg-[#F8FAFC] font-sans text-slate-800">
+            {/* Top Navigation Bar */}
+            <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200/50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                     <button
                         onClick={onBack}
-                        className="group flex items-center text-indigo-300 hover:text-white mb-8 transition-colors duration-200"
+                        className="flex items-center text-slate-500 hover:text-indigo-600 transition-colors font-medium"
                     >
-                        <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" />
-                        Back to Dashboard
+                        <ArrowLeft className="w-5 h-5 mr-2" />
+                        Back to Search
                     </button>
-
-                    <div className="flex flex-col md:flex-row items-start gap-8">
-                        {/* Avatar */}
-                        <div className="relative">
-                            <div className="w-32 h-32 md:w-40 md:h-40 rounded-2xl bg-gradient-to-br from-indigo-400 to-purple-500 p-1 shadow-2xl">
-                                <div className="w-full h-full rounded-xl bg-white flex items-center justify-center overflow-hidden">
-                                    {info.avatar ? (
-                                        <img src={info.avatar} alt={info.name} className="w-full h-full object-cover" />
-                                    ) : (
-                                        <span className="text-4xl font-bold text-indigo-600">
-                                            {(info.name || agent.name || '?').charAt(0)}
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-                            <div className="absolute -bottom-3 -right-3 bg-green-500 text-white p-2 rounded-full shadow-lg border-4 border-[#0f172a]">
-                                <CheckCircle2 className="w-5 h-5" />
-                            </div>
-                        </div>
-
-                        {/* Basic Info */}
-                        <div className="flex-1">
-                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                <div>
-                                    <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-indigo-200 mb-2">
-                                        {info.name || agent.name}
-                                    </h1>
-                                    <p className="text-xl text-indigo-200 mb-4">{prof.currentRole || 'Professional Agent'}</p>
-                                </div>
-                                <div className="flex gap-3">
-                                    <button className="flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition-colors shadow-lg shadow-indigo-500/30 font-medium">
-                                        <Mail className="w-4 h-4 mr-2" />
-                                        Contact
-                                    </button>
-                                    <button className="p-2 bg-white/10 hover:bg-white/20 rounded-lg backdrop-blur-sm transition-colors text-white">
-                                        <Share2 className="w-5 h-5" />
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Status Pills */}
-                            <div className="flex flex-wrap gap-3 mt-4">
-                                {info.location || agent.location ? (
-                                    <div className="flex items-center px-3 py-1 bg-white/10 rounded-full text-sm backdrop-blur-sm border border-white/10">
-                                        <MapPin className="w-4 h-4 mr-1.5 text-indigo-400" />
-                                        {info.location || agent.location}
-                                    </div>
-                                ) : null}
-                                {prof.yearsOfExperience ? (
-                                    <div className="flex items-center px-3 py-1 bg-white/10 rounded-full text-sm backdrop-blur-sm border border-white/10">
-                                        <Briefcase className="w-4 h-4 mr-1.5 text-indigo-400" />
-                                        {prof.yearsOfExperience} Years Exp.
-                                    </div>
-                                ) : null}
-                                {agent.availability?.schedule?.length ? (
-                                    <div className="flex items-center px-3 py-1 bg-white/10 rounded-full text-sm backdrop-blur-sm border border-white/10">
-                                        <Clock className="w-4 h-4 mr-1.5 text-indigo-400" />
-                                        Available ({agent.availability.schedule.length} days/wk)
-                                    </div>
-                                ) : null}
-                            </div>
-                        </div>
+                    <div className="flex items-center gap-3">
+                        <span className="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-semibold rounded-full border border-emerald-100 flex items-center">
+                            <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-2 animate-pulse"></div>
+                            Available Now
+                        </span>
+                        <div className="h-6 w-px bg-slate-200 mx-1"></div>
+                        <button className="p-2 text-slate-400 hover:text-indigo-600 transition-colors">
+                            <Share2 className="w-5 h-5" />
+                        </button>
                     </div>
                 </div>
             </div>
 
-            {/* Main Content */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-20 pb-12">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-                    {/* Left Column */}
-                    <div className="space-y-8">
-
-                        {/* Contact Card */}
-                        <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
-                            <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                                <Globe className="w-5 h-5 mr-2 text-indigo-600" />
-                                Contact & Socials
-                            </h3>
-                            <div className="space-y-4">
-                                {info.email && (
-                                    <div className="flex items-center p-3 rounded-lg bg-gray-50 hover:bg-indigo-50 transition-colors group">
-                                        <div className="p-2 bg-white rounded-md shadow-sm text-gray-400 group-hover:text-indigo-600 mr-3">
-                                            <Mail className="w-5 h-5" />
-                                        </div>
-                                        <div className="truncate text-sm text-gray-600 font-medium">{info.email}</div>
+            {/* Header Profile Section */}
+            <div className="bg-white border-b border-gray-200">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                    <div className="flex flex-col md:flex-row gap-8 items-start">
+                        {/* Avatar */}
+                        <div className="relative group shrink-0">
+                            <div className="w-32 h-32 md:w-40 md:h-40 rounded-2xl overflow-hidden shadow-2xl ring-4 ring-white bg-slate-100">
+                                {info.photo?.url ? (
+                                    <img
+                                        src={info.photo.url}
+                                        alt={info.name}
+                                        className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+                                    />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center bg-indigo-50 text-indigo-300">
+                                        <Shield className="w-12 h-12" />
                                     </div>
                                 )}
-                                {info.phone && (
-                                    <div className="flex items-center p-3 rounded-lg bg-gray-50 hover:bg-indigo-50 transition-colors group">
-                                        <div className="p-2 bg-white rounded-md shadow-sm text-gray-400 group-hover:text-indigo-600 mr-3">
-                                            <Phone className="w-5 h-5" />
-                                        </div>
-                                        <div className="truncate text-sm text-gray-600 font-medium">{info.phone}</div>
-                                    </div>
-                                )}
-                                <div className="flex gap-2 pt-2">
-                                    {/* Social Placeholders */}
-                                    <button className="flex-1 py-2 bg-[#0077b5]/10 text-[#0077b5] rounded-lg hover:bg-[#0077b5]/20 flex justify-center">
-                                        <Linkedin className="w-5 h-5" />
-                                    </button>
-                                    <button className="flex-1 py-2 bg-[#1DA1F2]/10 text-[#1DA1F2] rounded-lg hover:bg-[#1DA1F2]/20 flex justify-center">
-                                        <Twitter className="w-5 h-5" />
-                                    </button>
-                                </div>
                             </div>
-                        </div>
-
-                        {/* Skills Card */}
-                        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-                            <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                                <Award className="w-5 h-5 mr-2 text-indigo-600" />
-                                Top Skills
-                            </h3>
-
-                            {skills.professional && (
-                                <div className="mb-4">
-                                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Professional</p>
-                                    <div className="flex flex-wrap gap-2">
-                                        {skills.professional.map((s: any, i: number) => (
-                                            <span key={i} className="px-3 py-1 bg-blue-50 text-blue-700 rounded-md text-sm font-medium border border-blue-100">
-                                                {s.name || s.skill?.name || 'Skill'}
-                                            </span>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            {skills.technical && (
-                                <div>
-                                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Technical</p>
-                                    <div className="flex flex-wrap gap-2">
-                                        {skills.technical.map((s: any, i: number) => (
-                                            <span key={i} className="px-3 py-1 bg-emerald-50 text-emerald-700 rounded-md text-sm font-medium border border-emerald-100">
-                                                {s.name || s.skill?.name || 'Tech'}
-                                            </span>
-                                        ))}
-                                    </div>
+                            {isVerified && (
+                                <div className="absolute -bottom-2 -right-2 bg-blue-600 text-white p-1.5 rounded-full ring-4 ring-white shadow-lg" title="Verified Agent">
+                                    <CheckCircle2 className="w-5 h-5" />
                                 </div>
                             )}
                         </div>
 
-                        {/* Languages */}
-                        {info.languages && info.languages.length > 0 && (
-                            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-                                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                                    <BookOpen className="w-5 h-5 mr-2 text-indigo-600" />
-                                    Languages
-                                </h3>
-                                <div className="space-y-3">
-                                    {info.languages.map((l: any, i: number) => (
-                                        <div key={i} className="flex justify-between items-center">
-                                            <span className="text-gray-700 font-medium">{l.languageName || l.language?.name || 'Language'}</span>
-                                            <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
-                                                {l.proficiency || 'Native'}
-                                            </span>
-                                        </div>
-                                    ))}
+                        {/* Info */}
+                        <div className="flex-1 min-w-0">
+                            <div className="flex flex-col gap-1 mb-6">
+                                <div className="flex flex-wrap items-center gap-3">
+                                    <h1 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">
+                                        {info.name}
+                                    </h1>
+                                    {info.country && (
+                                        <span className="text-2xl opacity-80 hover:opacity-100 transition-opacity cursor-help" title={info.country}>
+                                            {info.country === 'France' ? '🇫🇷' : '🌍'}
+                                        </span>
+                                    )}
                                 </div>
+                                <p className="text-xl text-slate-500 font-medium leading-relaxed max-w-2xl">
+                                    {prof.currentRole || 'Professional Agent'}
+                                </p>
                             </div>
-                        )}
-                    </div>
 
-                    {/* Right Column (Content) */}
-                    <div className="lg:col-span-2 space-y-8">
-
-                        {/* About / Summary */}
-                        <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-6">About</h2>
-                            <div className="prose prose-indigo max-w-none text-gray-600">
-                                <p>{prof.profileDescription || 'No description provided.'}</p>
+                            <div className="flex flex-wrap gap-3 text-sm">
+                                {prof.yearsOfExperience !== undefined && (
+                                    <div className="flex items-center bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200/60 text-slate-700">
+                                        <Briefcase className="w-4 h-4 mr-2 text-indigo-500" />
+                                        <span className="font-bold mr-1">{prof.yearsOfExperience}</span> Years Exp.
+                                    </div>
+                                )}
+                                {availability.timeZone && (
+                                    <div className="flex items-center bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200/60 text-slate-700">
+                                        <Globe className="w-4 h-4 mr-2 text-indigo-500" />
+                                        {availability.timeZone.zoneName}
+                                    </div>
+                                )}
+                                <div className="flex items-center bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200/60 text-slate-700">
+                                    <MapPin className="w-4 h-4 mr-2 text-indigo-500" />
+                                    Remote Only
+                                </div>
                             </div>
                         </div>
 
-                        {/* Experience Timeline */}
-                        {agent.experience && agent.experience.length > 0 && (
-                            <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-                                <h2 className="text-2xl font-bold text-gray-900 mb-6">Experience</h2>
-                                <div className="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent">
-                                    {agent.experience.map((exp: any, i: number) => (
-                                        <div key={i} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                                            {/* Icon */}
-                                            <div className="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-indigo-50 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
-                                                <Briefcase className="w-5 h-5 text-indigo-600" />
-                                            </div>
-
-                                            {/* Card */}
-                                            <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-4 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                                                <div className="flex items-center justify-between space-x-2 mb-1">
-                                                    <div className="font-bold text-slate-900">{exp.title}</div>
-                                                    <time className="font-caveat font-medium text-indigo-500 text-xs">
-                                                        {exp.startDate} - {exp.endDate || 'Present'}
-                                                    </time>
-                                                </div>
-                                                <div className="text-slate-500 text-sm font-medium mb-2">{exp.company}</div>
-                                                {exp.responsibilities && (
-                                                    <ul className="text-slate-500 text-sm list-disc pl-4 space-y-1">
-                                                        {exp.responsibilities.slice(0, 3).map((r: string, j: number) => (
-                                                            <li key={j}>{r}</li>
-                                                        ))}
-                                                    </ul>
-                                                )}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Industries */}
-                        {prof.industries && prof.industries.length > 0 && (
-                            <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-                                <h2 className="text-2xl font-bold text-gray-900 mb-6">Industry Expertise</h2>
-                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                    {prof.industries.map((ind: any, i: number) => (
-                                        <div key={i} className="flex items-center p-4 bg-gray-50 rounded-xl hover:bg-white hover:shadow-md transition-all border border-gray-100 group">
-                                            <div className="p-2 bg-white rounded-lg shadow-sm mr-3 group-hover:text-indigo-600 text-gray-400 transition-colors">
-                                                <Star className="w-5 h-5 " />
-                                            </div>
-                                            <span className="font-medium text-gray-700">{ind.name || ind}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* CV Download / Documents */}
-                        <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl shadow-lg p-8 text-white flex justify-between items-center">
-                            <div>
-                                <h3 className="text-xl font-bold mb-1">Download Resume</h3>
-                                <p className="text-indigo-100 text-sm">Get the full detailed profile and work history.</p>
-                            </div>
-                            <button className="flex items-center px-6 py-3 bg-white text-indigo-600 rounded-xl font-bold hover:bg-indigo-50 transition-colors shadow-lg">
-                                <Download className="w-5 h-5 mr-2" />
-                                Download PDF
+                        {/* Actions */}
+                        <div className="flex flex-col gap-3 w-full md:w-auto mt-4 md:mt-0">
+                            <button className="flex items-center justify-center px-6 py-3 bg-[#0F172A] hover:bg-[#1E293B] text-white rounded-xl font-semibold shadow-lg shadow-slate-200 transition-all transform active:scale-95">
+                                <Mail className="w-4 h-4 mr-2" />
+                                Contact Agent
+                            </button>
+                            <button className="flex items-center justify-center px-6 py-3 bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 rounded-xl font-semibold transition-colors">
+                                <Download className="w-4 h-4 mr-2" />
+                                Download Resume
                             </button>
                         </div>
                     </div>
                 </div>
+
+                {/* Tab Navigation */}
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex gap-8 border-t border-gray-100">
+                    {[
+                        { id: 'overview', label: 'Overview', icon: <Video className="w-4 h-4" /> },
+                        { id: 'experience', label: 'Experience', icon: <Briefcase className="w-4 h-4" /> },
+                        { id: 'skills', label: 'Skills & Assessment', icon: <Award className="w-4 h-4" /> }
+                    ].map((tab) => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id as any)}
+                            className={`group py-4 px-1 text-sm font-semibold border-b-2 transition-all flex items-center gap-2 ${activeTab === tab.id
+                                    ? 'border-indigo-600 text-indigo-600'
+                                    : 'border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-200'
+                                }`}
+                        >
+                            {/* {tab.icon} */}
+                            {tab.label}
+                        </button>
+                    ))}
+                </div>
             </div>
+
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    {/* Main Content Column */}
+                    <div className="lg:col-span-2 space-y-8">
+
+                        {/* About Section */}
+                        {activeTab === 'overview' && (
+                            <div className="space-y-8">
+                                <section className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
+                                    <h2 className="text-xl font-bold text-slate-900 mb-4">About</h2>
+                                    <p className="text-slate-600 leading-relaxed whitespace-pre-line">
+                                        {prof.profileDescription}
+                                    </p>
+
+                                    {/* Video Presentation */}
+                                    {info.presentationVideo?.url && (
+                                        <div className="mt-8">
+                                            <h3 className="text-xs font-bold text-slate-400 mb-3 uppercase tracking-wider flex items-center">
+                                                <Video className="w-4 h-4 mr-2" />
+                                                Video Introduction
+                                            </h3>
+                                            <div className="relative rounded-2xl overflow-hidden bg-slate-900 aspect-video group shadow-xl ring-1 ring-slate-900/5">
+                                                <video
+                                                    src={info.presentationVideo.url}
+                                                    controls
+                                                    className="w-full h-full object-cover"
+                                                    poster={info.photo?.url}
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+                                </section>
+
+                                {/* Key Expertise */}
+                                <section className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
+                                    <h2 className="text-xl font-bold text-slate-900 mb-6">Key Expertise</h2>
+                                    <div className="flex flex-wrap gap-2">
+                                        {prof.keyExpertise?.map((skill: string, i: number) => (
+                                            <span key={i} className="px-4 py-2 bg-slate-50 text-slate-700 rounded-lg text-sm font-medium border border-slate-100 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 transition-colors cursor-default">
+                                                {skill}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </section>
+
+                                {/* Notable Companies */}
+                                {prof.notableCompanies?.length > 0 && (
+                                    <section className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
+                                        <h2 className="text-xl font-bold text-slate-900 mb-6">Notable Experience</h2>
+                                        <div className="flex flex-wrap gap-4">
+                                            {prof.notableCompanies.map((company: string, i: number) => (
+                                                <div key={i} className="flex items-center px-5 py-3 bg-white rounded-xl text-slate-700 font-semibold border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                                                    <Briefcase className="w-4 h-4 mr-3 text-indigo-500" />
+                                                    {company}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </section>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Experience Tab */}
+                        {activeTab === 'experience' && (
+                            <div className="space-y-8">
+                                <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
+                                    <div className="space-y-12">
+                                        {agent.experience?.map((exp: any, i: number) => (
+                                            <div key={i} className="relative pl-8 border-l-2 border-slate-100 last:border-0 pb-12 last:pb-0">
+                                                <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-white border-4 border-indigo-600 shadow-sm"></div>
+                                                <div className="mb-2">
+                                                    <h3 className="text-lg font-bold text-slate-900">{exp.title}</h3>
+                                                    <div className="flex items-center text-indigo-600 font-medium mt-1">
+                                                        <span className="text-slate-500 mr-2 font-normal">at</span> {exp.company}
+                                                    </div>
+                                                </div>
+                                                <p className="text-sm text-slate-400 mb-4 font-mono uppercase tracking-wide">
+                                                    {new Date(exp.startDate).getFullYear()} - {exp.endDate === 'present' ? 'Present' : new Date(exp.endDate).getFullYear()}
+                                                </p>
+                                                <ul className="space-y-3">
+                                                    {exp.responsibilities?.map((resp: string, j: number) => (
+                                                        <li key={j} className="text-slate-600 text-sm leading-relaxed flex items-start group">
+                                                            <span className="mr-3 mt-1.5 w-1.5 h-1.5 bg-indigo-300 rounded-full shrink-0 group-hover:bg-indigo-600 transition-colors"></span>
+                                                            {resp}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Skills Tab */}
+                        {activeTab === 'skills' && (
+                            <div className="space-y-8">
+                                {/* Assessments */}
+                                {assessment && (
+                                    <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 overflow-hidden relative">
+                                        <div className="absolute top-0 right-0 p-4 opacity-[0.03] pointer-events-none">
+                                            <Award className="w-64 h-64" />
+                                        </div>
+                                        <h2 className="text-xl font-bold text-slate-900 mb-8 flex items-center">
+                                            <Shield className="w-6 h-6 mr-3 text-indigo-600" />
+                                            HARX Verification Assessment
+                                        </h2>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                                            {Object.entries(assessment.keyMetrics || {}).map(([key, value]: [string, any]) => (
+                                                <div key={key} className="bg-slate-50 rounded-2xl p-5 text-center border border-slate-100">
+                                                    <div className="text-3xl font-bold text-indigo-600 mb-2">{value}%</div>
+                                                    <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">{key}</div>
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        <div className="space-y-8">
+                                            <div>
+                                                <h4 className="font-semibold text-slate-900 mb-4 flex items-center">
+                                                    <CheckCircle2 className="w-5 h-5 mr-2 text-emerald-500" />
+                                                    Demonstrated Strengths
+                                                </h4>
+                                                <div className="grid gap-3">
+                                                    {assessment.strengths?.map((str: string, i: number) => (
+                                                        <div key={i} className="bg-emerald-50/50 text-emerald-800 text-sm px-5 py-3 rounded-xl border border-emerald-100/50">
+                                                            {str}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <h4 className="font-semibold text-slate-900 mb-4 flex items-center">
+                                                    <Target className="w-5 h-5 mr-2 text-orange-500" />
+                                                    Areas for Development
+                                                </h4>
+                                                <div className="grid gap-3">
+                                                    {assessment.improvements?.map((imp: string, i: number) => (
+                                                        <div key={i} className="bg-orange-50/50 text-orange-800 text-sm px-5 py-3 rounded-xl border border-orange-100/50">
+                                                            {imp}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Reviewer Feedback */}
+                                        <div className="mt-8 pt-8 border-t border-gray-100">
+                                            <h4 className="text-sm font-bold text-slate-900 mb-2">Evaluator's Note</h4>
+                                            <p className="text-slate-600 italic border-l-4 border-indigo-200 pl-4 py-1">
+                                                "{assessment.feedback}"
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Technical Skills */}
+                                <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
+                                    <h3 className="text-lg font-bold text-slate-900 mb-6">Technical Proficiency</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {skills.technical?.map((skill: any, i: number) => (
+                                            <div key={i} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
+                                                <span className="font-medium text-slate-700">{skill.skill?.name || 'Technical Skill'}</span>
+                                                <div className="flex gap-1">
+                                                    {[...Array(5)].map((_, stars) => (
+                                                        <div
+                                                            key={stars}
+                                                            className={`w-2 h-2 rounded-full ${stars < (skill.level || 0) ? 'bg-indigo-500' : 'bg-slate-200'}`}
+                                                        />
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Sidebar */}
+                    <div className="space-y-8">
+                        {/* Contact Card */}
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-6">Contact Information</h3>
+                            <div className="space-y-5">
+                                <div className="flex items-start">
+                                    <div className="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 mr-4 shrink-0">
+                                        <Mail className="w-5 h-5" />
+                                    </div>
+                                    <div className="overflow-hidden">
+                                        <div className="text-xs text-slate-500 mb-0.5">Email Address</div>
+                                        <div className="text-sm font-semibold text-slate-900 truncate" title={info.email}>{info.email}</div>
+                                    </div>
+                                </div>
+                                <div className="flex items-start">
+                                    <div className="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 mr-4 shrink-0">
+                                        <Phone className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <div className="text-xs text-slate-500 mb-0.5">Phone Number</div>
+                                        <div className="text-sm font-semibold text-slate-900">{info.phone}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="mt-6 pt-6 border-t border-gray-100 flex gap-3">
+                                <button className="flex-1 py-2 bg-[#0077b5]/10 text-[#0077b5] rounded-lg hover:bg-[#0077b5]/20 flex justify-center transition-colors">
+                                    <Linkedin className="w-5 h-5" />
+                                </button>
+                                <button className="flex-1 py-2 bg-[#1DA1F2]/10 text-[#1DA1F2] rounded-lg hover:bg-[#1DA1F2]/20 flex justify-center transition-colors">
+                                    <Twitter className="w-5 h-5" />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Languages */}
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-6">Languages</h3>
+                            <div className="space-y-4">
+                                {info.languages?.map((lang: any, i: number) => (
+                                    <div key={i} className="flex items-center justify-between group">
+                                        <div className="flex items-center">
+                                            <span className="w-8 h-8 flex items-center justify-center bg-slate-100 rounded-lg text-xs font-bold text-slate-600 mr-3 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
+                                                {lang.language?.code?.toUpperCase()}
+                                            </span>
+                                            <span className="font-medium text-slate-700">{lang.language?.name}</span>
+                                        </div>
+                                        <span className="text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
+                                            {lang.proficiency}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Availability */}
+                        <div className="bg-[#0F172A] rounded-2xl shadow-lg p-6 text-white relative overflow-hidden">
+                            <div className="absolute top-0 right-0 p-4 opacity-10">
+                                <Calendar className="w-32 h-32" />
+                            </div>
+                            <h3 className="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-6 flex items-center relative z-10">
+                                <Clock className="w-4 h-4 mr-2" />
+                                Weekly Schedule
+                            </h3>
+                            <div className="space-y-3 relative z-10">
+                                {availability.schedule?.map((slot: any, i: number) => (
+                                    <div key={i} className="flex justify-between items-center text-sm py-2.5 border-b border-white/10 last:border-0 hover:bg-white/5 px-2 rounded transition-colors -mx-2">
+                                        <span className="text-slate-300 font-medium">{slot.day}</span>
+                                        <span className="font-mono text-indigo-300 bg-indigo-500/20 px-2 py-1 rounded text-xs border border-indigo-500/30">
+                                            {slot.hours?.start} - {slot.hours?.end}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {availability.flexibility?.length > 0 && (
+                                <div className="mt-6 pt-4 border-t border-white/10 relative z-10">
+                                    <div className="flex flex-wrap gap-2">
+                                        {availability.flexibility.map((flex: string, i: number) => (
+                                            <span key={i} className="text-xs bg-white/10 px-2 py-1 rounded text-slate-300">
+                                                {flex}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </main>
         </div>
     );
 }
