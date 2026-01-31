@@ -48,13 +48,32 @@ export default function AgentDetailsPage({ agentId: propAgentId, onBack }: Agent
     useEffect(() => {
         if (propAgentId) {
             setIdToUse(propAgentId);
-            // If passed as prop, we might want to prioritize prop gigId if it existed, but here we use localStorage
         } else {
+            // Priority: URL Query Param -> URL Path -> LocalStorage
+            const searchParams = new URLSearchParams(window.location.search);
+            const urlGigId = searchParams.get('gigId');
+
+            if (urlGigId) {
+                console.log("Found gigId in URL:", urlGigId);
+                setGigId(urlGigId);
+            } else {
+                // Fallback to local storage if not in URL
+                if (!gigId) {
+                    const storedGigId = localStorage.getItem('selectedGigId');
+                    if (storedGigId) setGigId(storedGigId);
+                }
+            }
+
             // Fallback: try to get ID from URL if not provided via prop
             try {
+                // Handle /agent-details/:id
                 const match = window.location.pathname.match(/\/agent-details\/([a-zA-Z0-9]+)/);
                 if (match && match[1]) {
                     setIdToUse(match[1]);
+                } else {
+                    // Also handle query param ?agentId=... if needed
+                    const urlAgentId = searchParams.get('agentId');
+                    if (urlAgentId) setIdToUse(urlAgentId);
                 }
             } catch (e) {
                 console.warn("Could not parse agent ID from URL");
